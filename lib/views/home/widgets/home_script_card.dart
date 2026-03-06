@@ -8,6 +8,7 @@ import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/views/home/home_script_actions.dart';
 import 'package:oasx/views/home/widgets/home_constants.dart';
+import 'package:oasx/views/home/widgets/home_task_manager_dialog.dart';
 import 'package:oasx/views/home/widgets/home_task_summary.dart';
 
 class HomeScriptCard extends StatefulWidget {
@@ -186,6 +187,13 @@ class _HomeScriptCardState extends State<HomeScriptCard>
     }
   }
 
+  Future<void> _openTaskManager() async {
+    await HomeTaskManagerDialog.show(
+      context: context,
+      scriptName: widget.scriptModel.name,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -281,6 +289,10 @@ class _HomeScriptCardState extends State<HomeScriptCard>
                       },
                       icon: const Icon(Icons.power_settings_new_rounded),
                       isSelected: isRunning,
+                    ),
+                    IconButton(
+                      onPressed: _openTaskManager,
+                      icon: const Icon(Icons.playlist_add_check_rounded),
                     ),
                   ],
                 ),

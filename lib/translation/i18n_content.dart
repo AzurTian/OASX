@@ -79,6 +79,7 @@ class I18n {
   static const String delete = 'Delete';
   static const String cancel = 'Cancel';
   static const String confirm = 'Confirm';
+  static const String retry = 'Retry';
   static const String select_all = 'Select all';
   static const String clear = 'Clear';
   static const String selected_count = 'Selected count';
@@ -117,6 +118,11 @@ class I18n {
   static const String home_running_task = 'home_running_task';
   static const String home_pending_task = 'home_pending_task';
   static const String home_waiting_task = 'home_waiting_task';
+  static const String task_manage = 'task_manage';
+  static const String task_manage_title = 'task_manage_title';
+  static const String task_search_hint = 'task_search_hint';
+  static const String task_not_found = 'task_not_found';
+  static const String task_menu_load_failed = 'task_menu_load_failed';
   static const String login_error = 'Login error';
   static const String login_error_msg = 'The OAS connection fails, confirm that OAS is running';
   static const String success = 'Success';

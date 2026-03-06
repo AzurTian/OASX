@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/model/script_model.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/views/args/args_view.dart';
-import 'package:styled_widget/styled_widget.dart';
+import 'package:oasx/views/home/widgets/home_task_settings_dialog.dart';
 
 enum HomeTaskType {
   running,
@@ -228,35 +226,9 @@ class _TaskLine extends StatelessWidget {
   }
 
   void _openTaskSettings(BuildContext context) {
-    final maxWidth = min(750.0, Get.width * 0.9);
-    final maxHeight = Get.height * 0.7;
-    final argsController = Get.find<ArgsController>();
-    Get.defaultDialog(
-      title: '${task.taskName.tr}${I18n.setting.tr}',
-      content: FutureBuilder<void>(
-        future: argsController.loadGroups(
-          config: task.scriptName,
-          task: task.taskName,
-        ),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-          if (snapshot.hasError) {
-            return Text('${I18n.error.tr}: ${snapshot.error}');
-          }
-          return Args(
-            scriptName: task.scriptName,
-            taskName: task.taskName,
-            groupDraggable: false,
-          ).constrained(
-            minWidth: maxWidth,
-            minHeight: maxHeight,
-            maxWidth: maxWidth,
-            maxHeight: maxHeight,
-          );
-        },
-      ),
+    HomeTaskSettingsDialog.show(
+      scriptName: task.scriptName,
+      taskName: task.taskName,
     );
   }
 }

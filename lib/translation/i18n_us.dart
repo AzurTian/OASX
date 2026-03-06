@@ -22,6 +22,7 @@ final Map<String, String> _us_ui = {
   I18n.connecting: 'Connecting',
   I18n.cancel: 'Cancel',
   I18n.confirm: 'Confirm',
+  I18n.retry: 'Retry',
   I18n.select_all: 'Select all',
   I18n.clear: 'Clear',
   I18n.selected_count: 'Selected @count',
@@ -49,6 +50,11 @@ final Map<String, String> _us_ui = {
   I18n.home_running_task: 'Running task',
   I18n.home_pending_task: 'Pending task',
   I18n.home_waiting_task: 'Waiting task',
+  I18n.task_manage: 'Task Manager',
+  I18n.task_manage_title: 'Task Manager',
+  I18n.task_search_hint: 'Search tasks',
+  I18n.task_not_found: 'No matching tasks',
+  I18n.task_menu_load_failed: 'Failed to load task menu',
 };
 
 final Map<String, String> _us_script = {
