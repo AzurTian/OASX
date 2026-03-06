@@ -5,6 +5,7 @@ import 'package:oasx/model/script_model.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/views/home/widgets/home_constants.dart';
 import 'package:oasx/views/home/widgets/home_script_card.dart';
+import 'package:oasx/views/home/widgets/home_task_summary.dart';
 
 class HomeScriptGrid extends StatefulWidget {
   const HomeScriptGrid({
@@ -12,12 +13,25 @@ class HomeScriptGrid extends StatefulWidget {
     required this.scripts,
     required this.scriptService,
     required this.onOpenLog,
+    required this.isLinkModeEnabled,
+    required this.linkedScripts,
+    required this.onLinkedChanged,
+    required this.onToggleScriptPower,
+    required this.onSetTaskArgument,
+    required this.onOpenTaskSettings,
     this.bottomReservedSpace = 0,
   });
 
   final List<ScriptModel> scripts;
   final ScriptService scriptService;
   final ValueChanged<String> onOpenLog;
+  final bool isLinkModeEnabled;
+  final List<String> linkedScripts;
+  final void Function(String scriptName, bool linked) onLinkedChanged;
+  final Future<void> Function(String scriptName, bool enable)
+      onToggleScriptPower;
+  final HomeTaskArgumentSetter onSetTaskArgument;
+  final void Function(String scriptName, String taskName) onOpenTaskSettings;
   final double bottomReservedSpace;
 
   @override
@@ -100,6 +114,12 @@ class _HomeScriptGridState extends State<HomeScriptGrid> {
       onOpenLog: () => widget.onOpenLog(script.name),
       taskListHeight: taskListHeight,
       onTaskListTap: () => _toggleRow(rowIndex),
+      showLinkCheckbox: widget.isLinkModeEnabled,
+      isLinked: widget.linkedScripts.contains(script.name),
+      onLinkedChanged: (linked) => widget.onLinkedChanged(script.name, linked),
+      onTogglePower: (enable) => widget.onToggleScriptPower(script.name, enable),
+      onSetTaskArgument: widget.onSetTaskArgument,
+      onOpenTaskSettings: widget.onOpenTaskSettings,
     );
   }
 

@@ -10,11 +10,15 @@ class HomeOverviewHeader extends StatelessWidget {
     required this.scriptService,
     required this.loadingAddScript,
     required this.onAddScriptTap,
+    required this.isLinkModeEnabled,
+    required this.onToggleLinkMode,
   });
 
   final ScriptService scriptService;
   final bool loadingAddScript;
   final VoidCallback onAddScriptTap;
+  final bool isLinkModeEnabled;
+  final VoidCallback onToggleLinkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -41,26 +45,12 @@ class HomeOverviewHeader extends StatelessWidget {
           return LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 720;
-              return Wrap(
+              final metrics = Wrap(
                 alignment: WrapAlignment.start,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: compact ? 10 : 14,
                 runSpacing: 10,
                 children: [
-                  SizedBox(
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: loadingAddScript ? null : onAddScriptTap,
-                      icon: loadingAddScript
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.add_rounded, size: 20),
-                      label: Text(I18n.config_add.tr),
-                    ),
-                  ),
                   _CountMetric(
                     label: I18n.running.tr,
                     value: '$runningCount',
@@ -71,6 +61,68 @@ class HomeOverviewHeader extends StatelessWidget {
                     value: '$totalCount',
                     color: Theme.of(context).colorScheme.primary,
                   ),
+                ],
+              );
+
+              final actions = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: isLinkModeEnabled
+                        ? I18n.home_link_mode_disable.tr
+                        : I18n.home_link_mode_enable.tr,
+                    onPressed: onToggleLinkMode,
+                    style: IconButton.styleFrom(
+                      backgroundColor: isLinkModeEnabled
+                          ? colorScheme.primaryContainer
+                          : colorScheme.surfaceContainerHighest,
+                      foregroundColor: isLinkModeEnabled
+                          ? colorScheme.onPrimaryContainer
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                    icon: const Icon(Icons.link_rounded),
+                  ),
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: I18n.config_add.tr,
+                    child: ElevatedButton(
+                      onPressed: loadingAddScript ? null : onAddScriptTap,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: loadingAddScript
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.add_rounded, size: 20),
+                    ),
+                  ),
+                ],
+              );
+
+              if (compact) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [actions],
+                    ),
+                    const SizedBox(height: 10),
+                    metrics,
+                  ],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: metrics),
+                  const SizedBox(width: 12),
+                  actions,
                 ],
               );
             },

@@ -19,6 +19,12 @@ class HomeScriptCard extends StatefulWidget {
     required this.onOpenLog,
     required this.taskListHeight,
     required this.onTaskListTap,
+    required this.showLinkCheckbox,
+    required this.isLinked,
+    required this.onLinkedChanged,
+    required this.onTogglePower,
+    required this.onSetTaskArgument,
+    required this.onOpenTaskSettings,
   });
 
   final ScriptModel scriptModel;
@@ -26,6 +32,12 @@ class HomeScriptCard extends StatefulWidget {
   final VoidCallback onOpenLog;
   final double taskListHeight;
   final VoidCallback onTaskListTap;
+  final bool showLinkCheckbox;
+  final bool isLinked;
+  final ValueChanged<bool> onLinkedChanged;
+  final Future<void> Function(bool enable) onTogglePower;
+  final HomeTaskArgumentSetter onSetTaskArgument;
+  final void Function(String scriptName, String taskName) onOpenTaskSettings;
 
   @override
   State<HomeScriptCard> createState() => _HomeScriptCardState();
@@ -191,6 +203,19 @@ class _HomeScriptCardState extends State<HomeScriptCard>
     await HomeTaskManagerDialog.show(
       context: context,
       scriptName: widget.scriptModel.name,
+      setArgumentOverride: (config, task, group, argument, type, value) {
+        if (config == null || task == null) {
+          return;
+        }
+        unawaited(widget.onSetTaskArgument(
+          config,
+          task,
+          group,
+          argument,
+          type,
+          value,
+        ));
+      },
     );
   }
 
@@ -210,6 +235,14 @@ class _HomeScriptCardState extends State<HomeScriptCard>
               children: [
                 Row(
                   children: [
+                    if (widget.showLinkCheckbox)
+                      Checkbox(
+                        value: widget.isLinked,
+                        visualDensity: VisualDensity.compact,
+                        onChanged: (value) {
+                          widget.onLinkedChanged(value ?? false);
+                        },
+                      ).paddingOnly(right: 2),
                     IconButton(
                       tooltip: I18n.log.tr,
                       onPressed: widget.onOpenLog,
@@ -279,13 +312,7 @@ class _HomeScriptCardState extends State<HomeScriptCard>
                     IconButton(
                       tooltip: isRunning ? I18n.stopped.tr : I18n.running.tr,
                       onPressed: () async {
-                        if (isRunning) {
-                          await widget.scriptService
-                              .stopScript(widget.scriptModel.name);
-                        } else {
-                          await widget.scriptService
-                              .startScript(widget.scriptModel.name);
-                        }
+                        await widget.onTogglePower(!isRunning);
                       },
                       icon: const Icon(Icons.power_settings_new_rounded),
                       isSelected: isRunning,
@@ -302,6 +329,8 @@ class _HomeScriptCardState extends State<HomeScriptCard>
                   child: HomeTaskSummary(
                     scriptModel: widget.scriptModel,
                     onTapList: widget.onTaskListTap,
+                    onSetTaskArgument: widget.onSetTaskArgument,
+                    onOpenTaskSettings: widget.onOpenTaskSettings,
                   ),
                 ),
               ],

@@ -23,13 +23,21 @@ part './group_view.dart';
 part './date_time_picker.dart';
 part '../../controller/args/args_controller.dart';
 
+typedef SetArgumentCallback = void Function(String? config, String? task,
+    String group, String argument, String type, dynamic value);
+
 class Args extends StatelessWidget {
   const Args(
-      {Key? key, this.scriptName, this.taskName, this.groupDraggable = true})
+      {Key? key,
+      this.scriptName,
+      this.taskName,
+      this.groupDraggable = true,
+      this.setArgumentOverride})
       : super(key: key);
   final String? scriptName;
   final String? taskName;
   final bool groupDraggable;
+  final SetArgumentCallback? setArgumentOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -81,13 +89,14 @@ class Args extends StatelessWidget {
 
   List<Widget> _children(String groupName) {
     ArgsController controller = Get.find();
+    final setArgument = setArgumentOverride ?? controller.setArgument;
     GroupsModel groupsModel = controller.groupsData.value[groupName]!;
     List<Widget> result = [const Divider()];
     for (int i = 0; i < groupsModel.members.length; i++) {
       result.add(ArgumentView(
         scriptName: scriptName,
         taskName: taskName,
-        setArgument: controller.setArgument,
+        setArgument: setArgument,
         getGroupName: groupsModel.getGroupName,
         index: i,
       ));
@@ -122,8 +131,7 @@ class Args extends StatelessWidget {
 }
 
 class ArgumentView extends StatefulWidget {
-  final void Function(String? config, String? task, String group,
-      String argument, String type, dynamic value) setArgument;
+  final SetArgumentCallback setArgument;
   final String Function() getGroupName;
   final int index;
   final String? scriptName;

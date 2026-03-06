@@ -5,6 +5,15 @@ import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/views/args/args_view.dart';
 import 'package:oasx/views/home/widgets/home_task_settings_dialog.dart';
 
+typedef HomeTaskArgumentSetter = Future<bool> Function(
+  String scriptName,
+  String taskName,
+  String group,
+  String argument,
+  String type,
+  dynamic value,
+);
+
 enum HomeTaskType {
   running,
   pending,
@@ -30,10 +39,14 @@ class HomeTaskSummary extends StatelessWidget {
     super.key,
     required this.scriptModel,
     this.onTapList,
+    this.onSetTaskArgument,
+    this.onOpenTaskSettings,
   });
 
   final ScriptModel scriptModel;
   final VoidCallback? onTapList;
+  final HomeTaskArgumentSetter? onSetTaskArgument;
+  final void Function(String scriptName, String taskName)? onOpenTaskSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +73,8 @@ class HomeTaskSummary extends StatelessWidget {
           itemBuilder: (context, index) => _TaskLine(
             task: tasks[index],
             scriptState: scriptModel.state.value,
+            onSetTaskArgument: onSetTaskArgument,
+            onOpenTaskSettings: onOpenTaskSettings,
           ),
         ),
       );
@@ -118,6 +133,8 @@ class _TaskLine extends StatelessWidget {
   const _TaskLine({
     required this.task,
     required this.scriptState,
+    this.onSetTaskArgument,
+    this.onOpenTaskSettings,
   });
 
   static const _rowHeight = 50.0;
@@ -125,6 +142,8 @@ class _TaskLine extends StatelessWidget {
 
   final HomeTaskData task;
   final ScriptState scriptState;
+  final HomeTaskArgumentSetter? onSetTaskArgument;
+  final void Function(String scriptName, String taskName)? onOpenTaskSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -187,9 +206,18 @@ class _TaskLine extends StatelessWidget {
                       hoverStyle: labelMedium,
                       notHoverStyle: labelMedium,
                       onChange: (nv) async {
-                        final ret = await Get.find<ArgsController>()
-                            .updateScriptTaskNextRun(
-                                task.scriptName, task.taskName, nv);
+                        final ret = onSetTaskArgument == null
+                            ? await Get.find<ArgsController>()
+                                .updateScriptTaskNextRun(
+                                    task.scriptName, task.taskName, nv)
+                            : await onSetTaskArgument!(
+                                task.scriptName,
+                                task.taskName,
+                                ArgsController.schedulerGroup,
+                                ArgsController.nextRunArg,
+                                'next_run',
+                                nv,
+                              );
                         if (ret) {
                           Get.snackbar(I18n.setting_saved.tr, nv,
                               duration: const Duration(seconds: 1));
@@ -226,6 +254,10 @@ class _TaskLine extends StatelessWidget {
   }
 
   void _openTaskSettings(BuildContext context) {
+    if (onOpenTaskSettings != null) {
+      onOpenTaskSettings!(task.scriptName, task.taskName);
+      return;
+    }
     HomeTaskSettingsDialog.show(
       scriptName: task.scriptName,
       taskName: task.taskName,

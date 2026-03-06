@@ -113,6 +113,8 @@ class I18n {
   static const String home_running_count = 'home_running_count';
   static const String home_total_scripts = 'home_total_scripts';
   static const String home_control_script_count = 'home_control_script_count';
+  static const String home_link_mode_enable = 'home_link_mode_enable';
+  static const String home_link_mode_disable = 'home_link_mode_disable';
   static const String home_no_task = 'home_no_task';
   static const String home_unconfigured_task = 'home_unconfigured_task';
   static const String home_running_task = 'home_running_task';

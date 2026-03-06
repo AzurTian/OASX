@@ -45,6 +45,8 @@ final Map<String, String> _us_ui = {
   I18n.home_running_count: 'Running: @running / @total',
   I18n.home_total_scripts: 'Total scripts',
   I18n.home_control_script_count: 'Control scripts: @count',
+  I18n.home_link_mode_enable: 'Enable linked edit',
+  I18n.home_link_mode_disable: 'Disable linked edit',
   I18n.home_no_task: 'No tasks',
   I18n.home_unconfigured_task: 'Unconfigured task',
   I18n.home_running_task: 'Running task',

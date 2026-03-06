@@ -25,6 +25,7 @@ Recommended toolchain: Flutter `3.27.1` / Dart `3.6.0` (see `README.md`).
 - `flutter analyze`: Static analysis (lints from `analysis_options.yaml`)
 - `dart format .`: Format Dart code (prefer formatting before PRs)
 - Windows packaging (if needed): `dart run msix:create` (see `pubspec.yaml` `msix_config`)
+- Permission note: You may freely run `dart analyze`, `flutter analyze`, and `dart format`; if any of these commands times out, run it only once and do not retry.
 
 ## Coding Style & Naming
 

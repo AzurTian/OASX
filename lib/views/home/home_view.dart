@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/controller/home/home_dashboard_controller.dart';
@@ -8,6 +10,7 @@ import 'package:oasx/views/common/add_config_dialog.dart';
 import 'package:oasx/views/home/widgets/home_constants.dart';
 import 'package:oasx/views/home/widgets/home_overview_header.dart';
 import 'package:oasx/views/home/widgets/home_script_grid.dart';
+import 'package:oasx/views/home/widgets/home_task_settings_dialog.dart';
 import 'package:oasx/views/layout/appbar.dart';
 
 class HomeView extends StatefulWidget {
@@ -79,11 +82,13 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildDashboardBody() {
     return Column(
       children: [
-        HomeOverviewHeader(
-          scriptService: scriptService,
-          loadingAddScript: _isAddingScript,
-          onAddScriptTap: _onAddScriptCardTap,
-        ),
+        Obx(() => HomeOverviewHeader(
+              scriptService: scriptService,
+              loadingAddScript: _isAddingScript,
+              onAddScriptTap: _onAddScriptCardTap,
+              isLinkModeEnabled: controller.isLinkModeEnabled.value,
+              onToggleLinkMode: controller.toggleLinkMode,
+            )),
         Expanded(
           child: Obx(() {
             final scripts = _orderedScripts();
@@ -91,6 +96,12 @@ class _HomeViewState extends State<HomeView> {
               scripts: scripts,
               scriptService: scriptService,
               onOpenLog: _openLogPage,
+              isLinkModeEnabled: controller.isLinkModeEnabled.value,
+              linkedScripts: controller.validLinkedScripts,
+              onLinkedChanged: controller.setScriptLinked,
+              onToggleScriptPower: _toggleScriptPower,
+              onSetTaskArgument: _setTaskArgument,
+              onOpenTaskSettings: _openTaskSettings,
               bottomReservedSpace:
                   widget.standalone ? kHomeSettingsFabReservedSpace : 0,
             );
@@ -136,5 +147,47 @@ class _HomeViewState extends State<HomeView> {
 
   void _openLogPage(String scriptName) {
     Get.toNamed('/overview', parameters: {'script': scriptName});
+  }
+
+  Future<void> _toggleScriptPower(String scriptName, bool enable) async {
+    await controller.applyLinkedPowerToggle(
+      sourceScript: scriptName,
+      enable: enable,
+    );
+  }
+
+  Future<bool> _setTaskArgument(
+    String scriptName,
+    String taskName,
+    String group,
+    String argument,
+    String type,
+    dynamic value,
+  ) async {
+    return controller.applyLinkedSetArgument(
+      config: scriptName,
+      task: taskName,
+      group: group,
+      argument: argument,
+      type: type,
+      value: value,
+    );
+  }
+
+  void _openTaskSettings(String scriptName, String taskName) {
+    HomeTaskSettingsDialog.show(
+      scriptName: scriptName,
+      taskName: taskName,
+      setArgumentOverride: (config, task, group, argument, type, value) {
+        unawaited(controller.applyLinkedSetArgument(
+          config: config,
+          task: task,
+          group: group,
+          argument: argument,
+          type: type,
+          value: value,
+        ));
+      },
+    );
   }
 }

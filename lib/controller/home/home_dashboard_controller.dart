@@ -8,6 +8,7 @@ import 'package:oasx/model/const/storage_key.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/platform_utils.dart';
+import 'package:oasx/views/args/args_view.dart';
 import 'package:oasx/views/server/server_view.dart';
 
 class HomeDashboardController extends GetxController {
@@ -16,6 +17,8 @@ class HomeDashboardController extends GetxController {
   final controlScriptList = <String>[].obs;
   final isBatchSwitching = false.obs;
   final isStartupAutoDeploying = false.obs;
+  final isLinkModeEnabled = false.obs;
+  final linkedScriptList = <String>[].obs;
 
   ScriptService get _scriptService => Get.find<ScriptService>();
 
@@ -95,6 +98,107 @@ class HomeDashboardController extends GetxController {
       .toList();
 
   int get validControlScriptCount => validControlScripts.length;
+
+  void toggleLinkMode() {
+    final next = !isLinkModeEnabled.value;
+    isLinkModeEnabled.value = next;
+    if (!next) {
+      linkedScriptList.clear();
+    }
+  }
+
+  void setScriptLinked(String scriptName, bool linked) {
+    if (!isLinkModeEnabled.value) {
+      return;
+    }
+    final name = scriptName.trim();
+    if (name.isEmpty) {
+      return;
+    }
+    final updated = linkedScriptList.toSet();
+    if (linked) {
+      updated.add(name);
+    } else {
+      updated.remove(name);
+    }
+    linkedScriptList.value = updated.toList()..sort();
+  }
+
+  bool isScriptLinked(String scriptName) {
+    return linkedScriptList.contains(scriptName.trim());
+  }
+
+  List<String> get validLinkedScripts => linkedScriptList
+      .where((name) => _scriptService.scriptModelMap.containsKey(name))
+      .toSet()
+      .toList()
+    ..sort();
+
+  bool shouldCascadeFrom(String sourceScript) {
+    final source = sourceScript.trim();
+    if (!isLinkModeEnabled.value || source.isEmpty) {
+      return false;
+    }
+    return validLinkedScripts.contains(source);
+  }
+
+  Future<void> applyLinkedPowerToggle({
+    required String sourceScript,
+    required bool enable,
+  }) async {
+    final targets = _collectCascadeTargets(sourceScript);
+    for (final name in targets) {
+      if (enable) {
+        await _scriptService.startScript(name);
+      } else {
+        await _scriptService.stopScript(name);
+      }
+    }
+  }
+
+  Future<bool> applyLinkedSetArgument({
+    required String? config,
+    required String? task,
+    required String group,
+    required String argument,
+    required String type,
+    required dynamic value,
+  }) async {
+    final source = (config ?? '').trim();
+    if (source.isEmpty) {
+      return false;
+    }
+    final argsController = Get.find<ArgsController>();
+    var allSuccess = true;
+    final targets = _collectCascadeTargets(source);
+    for (final target in targets) {
+      final ret = await argsController.setArgument(
+        target,
+        task,
+        group,
+        argument,
+        type,
+        value,
+      );
+      allSuccess = ret && allSuccess;
+    }
+    return allSuccess;
+  }
+
+  List<String> _collectCascadeTargets(String sourceScript) {
+    final source = sourceScript.trim();
+    if (source.isEmpty) {
+      return const [];
+    }
+    if (!shouldCascadeFrom(source)) {
+      return [source];
+    }
+    final targets = validLinkedScripts.toSet();
+    if (!targets.contains(source)) {
+      return [source];
+    }
+    return targets.toList()..sort();
+  }
 
   Future<void> checkStartupConnection() async {
     if (_hasCheckedStartupConnection) {

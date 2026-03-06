@@ -10,17 +10,26 @@ class HomeTaskManagerDialog extends StatefulWidget {
   const HomeTaskManagerDialog({
     super.key,
     required this.scriptName,
+    this.setArgumentOverride,
   });
 
   final String scriptName;
+  final void Function(String? config, String? task, String group,
+      String argument, String type, dynamic value)? setArgumentOverride;
 
   static Future<void> show({
     required BuildContext context,
     required String scriptName,
+    void Function(String? config, String? task, String group, String argument,
+            String type, dynamic value)?
+        setArgumentOverride,
   }) async {
     await showDialog<void>(
       context: context,
-      builder: (dialogContext) => HomeTaskManagerDialog(scriptName: scriptName),
+      builder: (dialogContext) => HomeTaskManagerDialog(
+        scriptName: scriptName,
+        setArgumentOverride: setArgumentOverride,
+      ),
     );
   }
 
@@ -96,6 +105,7 @@ class _HomeTaskManagerDialogState extends State<HomeTaskManagerDialog> {
                         section: section,
                         scriptName: widget.scriptName,
                         forceExpanded: searching,
+                        setArgumentOverride: widget.setArgumentOverride,
                       );
                     },
                   );
@@ -162,11 +172,14 @@ class _TaskMenuSection extends StatelessWidget {
     required this.section,
     required this.scriptName,
     required this.forceExpanded,
+    this.setArgumentOverride,
   });
 
   final _TaskSection section;
   final String scriptName;
   final bool forceExpanded;
+  final void Function(String? config, String? task, String group,
+      String argument, String type, dynamic value)? setArgumentOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +250,7 @@ class _TaskMenuSection extends StatelessWidget {
         onPressed: () => HomeTaskSettingsDialog.show(
           scriptName: scriptName,
           taskName: taskName,
+          setArgumentOverride: setArgumentOverride,
         ),
         icon: const Icon(Icons.settings_rounded, size: 18),
         label: Text(I18n.setting.tr),

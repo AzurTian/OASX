@@ -11,10 +11,12 @@ class HomeTaskSettingsDialog {
   static void show({
     required String scriptName,
     required String taskName,
+    SetArgumentCallback? setArgumentOverride,
   }) {
     final maxWidth = min(750.0, Get.width * 0.9);
     final maxHeight = Get.height * 0.7;
     final argsController = Get.find<ArgsController>();
+    final setArgument = setArgumentOverride ?? argsController.setArgument;
     Get.defaultDialog(
       title: '${taskName.tr}${I18n.setting.tr}',
       content: FutureBuilder<void>(
@@ -40,6 +42,7 @@ class HomeTaskSettingsDialog {
               scriptName: scriptName,
               taskName: taskName,
               groupDraggable: false,
+              setArgumentOverride: setArgument,
             ),
           );
         },
