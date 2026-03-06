@@ -21,6 +21,7 @@ Recommended toolchain: Flutter `3.27.1` / Dart `3.6.0` (see `README.md`).
 - `flutter pub get`: Install dependencies
 - `flutter run -d windows` (or `macos`/`linux`/`chrome`): Run locally
 - `flutter test`: Run all tests (or `flutter test test/<file>_test.dart`)
+- `dart analyze`: Run Dart analyzer first
 - `flutter analyze`: Static analysis (lints from `analysis_options.yaml`)
 - `dart format .`: Format Dart code (prefer formatting before PRs)
 - Windows packaging (if needed): `dart run msix:create` (see `pubspec.yaml` `msix_config`)
@@ -52,4 +53,3 @@ Recommended toolchain: Flutter `3.27.1` / Dart `3.6.0` (see `README.md`).
 - Answer and think in Chinese before writing code.
 - All places in the code that use text must be internationalized and translated into Chinese and English .
 - Use the I18n constant to replace all Chinese in the code, while placing the Chinese and English translations under the 'translation/' directory
-

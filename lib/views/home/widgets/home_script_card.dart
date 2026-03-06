@@ -19,93 +19,104 @@ class HomeScriptCard extends StatelessWidget {
     required this.scriptService,
     required this.onOpenOverview,
     required this.onMenuSelected,
+    required this.taskListHeight,
+    required this.onTaskListTap,
   });
 
   final ScriptModel scriptModel;
   final ScriptService scriptService;
   final VoidCallback onOpenOverview;
   final ValueChanged<HomeScriptMenuAction> onMenuSelected;
+  final double taskListHeight;
+  final VoidCallback onTaskListTap;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: kHomeScriptCardHeight,
+      height: homeScriptCardHeight(taskListHeight),
       child: Card(
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onOpenOverview,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Obx(() {
-              final state = scriptModel.state.value;
-              final isRunning = state == ScriptState.running;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Obx(() {
+            final state = scriptModel.state.value;
+            final isRunning = state == ScriptState.running;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: onOpenOverview,
+                        borderRadius: BorderRadius.circular(8),
                         child: Text(
                           scriptModel.name,
                           style: Theme.of(context).textTheme.titleLarge,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                        ),
+                        ).paddingSymmetric(vertical: 3, horizontal: 4),
                       ),
-                      _ScriptStateIndicator(state: state),
-                      IconButton(
-                        tooltip: isRunning ? I18n.stopped.tr : I18n.running.tr,
-                        onPressed: () async {
-                          if (isRunning) {
-                            await scriptService.stopScript(scriptModel.name);
-                          } else {
-                            await scriptService.startScript(scriptModel.name);
-                          }
-                        },
-                        icon: const Icon(Icons.power_settings_new_rounded),
-                        isSelected: isRunning,
-                      ),
-                      PopupMenuButton<HomeScriptMenuAction>(
-                        tooltip: I18n.setting.tr,
-                        onSelected: onMenuSelected,
-                        itemBuilder: (context) => [
-                          PopupMenuItem<HomeScriptMenuAction>(
-                            value: HomeScriptMenuAction.rename,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.edit, size: 18),
-                                const SizedBox(width: 4),
-                                Text(I18n.rename.tr),
-                              ],
-                            ),
+                    ),
+                    _ScriptStateIndicator(state: state),
+                    IconButton(
+                      tooltip: isRunning ? I18n.stopped.tr : I18n.running.tr,
+                      onPressed: () async {
+                        if (isRunning) {
+                          await scriptService.stopScript(scriptModel.name);
+                        } else {
+                          await scriptService.startScript(scriptModel.name);
+                        }
+                      },
+                      icon: const Icon(Icons.power_settings_new_rounded),
+                      isSelected: isRunning,
+                    ),
+                    PopupMenuButton<HomeScriptMenuAction>(
+                      tooltip: I18n.setting.tr,
+                      onSelected: onMenuSelected,
+                      itemBuilder: (context) => [
+                        PopupMenuItem<HomeScriptMenuAction>(
+                          value: HomeScriptMenuAction.rename,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.edit, size: 18),
+                              const SizedBox(width: 4),
+                              Text(I18n.rename.tr),
+                            ],
                           ),
-                          PopupMenuItem<HomeScriptMenuAction>(
-                            value: HomeScriptMenuAction.delete,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.delete,
-                                    size: 18, color: Colors.red),
-                                const SizedBox(width: 4),
-                                Text(I18n.delete.tr),
-                              ],
-                            ),
-                          ),
-                        ],
-                        child: const Padding(
-                          padding: EdgeInsets.all(6),
-                          child: Icon(Icons.settings_rounded, size: 18),
                         ),
+                        PopupMenuItem<HomeScriptMenuAction>(
+                          value: HomeScriptMenuAction.delete,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.delete,
+                                  size: 18, color: Colors.red),
+                              const SizedBox(width: 4),
+                              Text(I18n.delete.tr),
+                            ],
+                          ),
+                        ),
+                      ],
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Icon(Icons.settings_rounded, size: 18),
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+                const Divider(height: 14),
+                SizedBox(
+                  height: taskListHeight,
+                  child: HomeTaskSummary(
+                    scriptModel: scriptModel,
+                    onTapList: onTaskListTap,
                   ),
-                  const Divider(height: 14),
-                  HomeTaskSummary(scriptModel: scriptModel),
-                ],
-              );
-            }),
-          ),
+                ),
+              ],
+            );
+          }),
         ),
       ),
     );
