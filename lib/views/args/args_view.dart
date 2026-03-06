@@ -9,7 +9,6 @@ import 'package:flutter_pickers/style/default_style.dart';
 import 'package:get/get.dart';
 import 'package:oasx/service/theme_service.dart';
 import 'package:oasx/service/websocket_service.dart';
-import 'package:oasx/views/nav/view_nav.dart';
 import 'package:oasx/views/overview/overview_view.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'dart:convert';
@@ -35,9 +34,9 @@ class Args extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetX<ArgsController>(builder: (controller) {
-      final navController = Get.find<NavCtrl>();
-      final selectedScript = navController.selectedScript.value;
-      final selectedTask = navController.selectedMenu.value;
+      final selectedScript =
+          (scriptName ?? Get.parameters['script'] ?? '').trim();
+      final selectedTask = (taskName ?? Get.parameters['task'] ?? '').trim();
       return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
               child: ExpansionTileGroup(

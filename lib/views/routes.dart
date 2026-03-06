@@ -1,29 +1,32 @@
 import 'package:get/get.dart';
 
-import 'package:oasx/views/layout/layout.dart';
-import 'package:oasx/views/layout/binding.dart';
-import 'package:oasx/views/login/login_view.dart';
+import 'package:oasx/views/args/args_view.dart';
+import 'package:oasx/views/home/home_binding.dart';
+import 'package:oasx/views/home/home_view.dart';
+import 'package:oasx/views/overview/overview_view.dart';
 import 'package:oasx/views/settings/settings_view.dart';
 import 'package:oasx/views/server/server_view.dart';
 
 class Routes {
   /// when the app is opened, this page will be the first to be shown
-  static const initial = '/login';
+  static const initial = '/home';
 
   static final routes = [
     GetPage(
-      name: '/login',
-      page: () => LoginView(),
-      binding: LoginBinding(),
+      name: '/home',
+      page: () => const HomeView(),
+      binding: HomeBinding(),
     ),
     GetPage(
-      name: '/main',
-      page: () => const LayoutView(),
-      binding: LayoutBinding(),
+      name: '/overview',
+      page: () => const OverviewRouteView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ArgsController>(() => ArgsController(), fenix: true);
+      }),
     ),
     GetPage(
       name: '/settings',
-      page: () => SettingsView(),
+      page: () => const SettingsView(),
     ),
     GetPage(
       name: '/server',

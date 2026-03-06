@@ -61,9 +61,7 @@ class ArgsController extends GetxController {
   Future<bool> setArgument(String? config, String? task, String group,
       String argument, String type, var value) async {
     if (config == null || task == null || config.isEmpty || task.isEmpty) {
-      NavCtrl navCtrl = Get.find<NavCtrl>();
-      config = navCtrl.selectedScript.value;
-      task = navCtrl.selectedMenu.value;
+      return false;
     }
     final ret = await ApiClient()
         .putScriptArg(config, task, group, argument, type, value);

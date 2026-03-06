@@ -19,24 +19,22 @@ class ServerController extends GetxController with LogMixin {
         _storage.read(StorageKey.autoLoginAfterDeploy.name) ?? false;
     shell = getShell;
     shellController.stream.listen(
-        (event) => addLog(!event.contains('INFO') ? 'INFO: $event' : event));
+      (event) => addLog(!event.contains('INFO') ? 'INFO: $event' : event),
+    );
     rootPathAuthenticated.value = authenticatePath(rootPathServer.value);
-    if (rootPathAuthenticated.value) readDeploy();
+    if (rootPathAuthenticated.value) {
+      readDeploy();
+    }
     super.onInit();
   }
 
   void updateRootPathServer(String value) {
-    if (authenticatePath(value)) {
-      rootPathAuthenticated.value = true;
-    } else {
-      rootPathAuthenticated.value = false;
-    }
-    // value = value.replaceAll('\\', '\\\\');
+    rootPathAuthenticated.value = authenticatePath(value);
     rootPathServer.value = value;
     shell = getShell;
     Get.find<SettingsController>()
         .storage
-        .write('rootPathServer', rootPathServer.value);
+        .write(StorageKey.rootPathServer.name, rootPathServer.value);
     if (rootPathAuthenticated.value) {
       readDeploy();
     }
@@ -45,28 +43,23 @@ class ServerController extends GetxController with LogMixin {
   bool authenticatePath(String root) {
     root.replaceAll('\\', '/');
     try {
-      // 先是判断根目录
-      Directory rootDir = Directory(root);
+      final rootDir = Directory(root);
       if (!rootDir.existsSync()) {
         return false;
       }
-      // 然后是判断python是否存在
-      File python = File('${rootDir.path}/toolkit/python.exe');
+      final python = File('${rootDir.path}/toolkit/python.exe');
       if (!python.existsSync()) {
         return false;
       }
-      // 然后判断git是否存在
-      File git = File('${rootDir.path}/toolkit/Git/cmd/git.exe');
+      final git = File('${rootDir.path}/toolkit/Git/cmd/git.exe');
       if (!git.existsSync()) {
         return false;
       }
-      // 然后判断安装器是否存在
-      File installer = File('${rootDir.path}/deploy/installer.py');
+      final installer = File('${rootDir.path}/deploy/installer.py');
       if (!installer.existsSync()) {
         return false;
       }
-      // 然后判断deploy是否存在
-      File deploy = File('${rootDir.path}/config/deploy.yaml');
+      final deploy = File('${rootDir.path}/config/deploy.yaml');
       if (!deploy.existsSync()) {
         return false;
       }
@@ -74,7 +67,6 @@ class ServerController extends GetxController with LogMixin {
       printError(info: e.toString());
       return false;
     }
-
     return true;
   }
 
@@ -87,6 +79,7 @@ class ServerController extends GetxController with LogMixin {
         'PATH':
             '${rootPathServer.value},$pathGit,$pathPython,$pathAdb,$pathScripts'
       };
+
   Shell get getShell => Shell(
         workingDirectory: rootPathServer.value,
         runInShell: true,
@@ -113,61 +106,71 @@ class ServerController extends GetxController with LogMixin {
     shell!.kill();
     await runShell('echo OAS working directory: ');
     await runShell('pwd');
-    printInfo(info: 'kill pythonw');
     await runShell('taskkill /f /t /im pythonw.exe');
-    printInfo(info: 'kill pythonw finished');
-    printInfo(info: 'start deploy');
     await runShell('python -m deploy.installer');
-    printInfo(info: 'start deploy finished');
     await runShell('echo Start OAS');
-    printInfo(info: 'start server');
-    // 非阻塞启动web服务
-    runShell(".\\toolkit\\pythonw.exe  server.py");
+    runShell('.\\toolkit\\pythonw.exe  server.py');
     if (!autoLoginAfterDeploy.value) {
       isDeployLoading.value = false;
       return;
     }
-    // 部署后自动登录
-    final address = _storage.read(StorageKey.address.name) ?? "";
-    if (address == '') return;
+
+    final address = _storage.read(StorageKey.address.name) ?? '';
+    if (address == '') {
+      isDeployLoading.value = false;
+      return;
+    }
     Future.delayed(const Duration(seconds: 1, milliseconds: 500), () async {
-      await Get.find<LoginController>().login(address, retries: 10);
+      await _tryConnect(address, retries: 10);
       isDeployLoading.value = false;
     });
   }
 
+  Future<bool> _tryConnect(String rawAddress, {int retries = 1}) async {
+    final address =
+        rawAddress.startsWith('http://') || rawAddress.startsWith('https://')
+            ? rawAddress
+            : 'http://$rawAddress';
+    ApiClient().setAddress(address);
+
+    for (int i = 0; i < retries; i++) {
+      final connected = await ApiClient().testAddress();
+      if (connected) {
+        await Get.find<LocaleService>().refreshTransFromRemote();
+        Get.offAllNamed('/home');
+        return true;
+      }
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    return false;
+  }
+
   void readDeploy() {
-    String filePath = '${rootPathServer.value}\\config\\deploy.yaml';
+    final filePath = '${rootPathServer.value}\\config\\deploy.yaml';
     try {
-      File file = File(filePath);
+      final file = File(filePath);
       if (file.existsSync()) {
         deployContent.value = file.readAsStringSync();
-        return;
       } else {
         deployContent.value = 'File not found';
-        return;
       }
     } catch (e) {
       deployContent.value = 'Error reading file: $e';
-      return;
     }
   }
 
   void writeDeploy(String value) {
-    String filePath = '${rootPathServer.value}\\config\\deploy.yaml';
+    final filePath = '${rootPathServer.value}\\config\\deploy.yaml';
     deployContent.value = value;
     try {
-      File file = File(filePath);
+      final file = File(filePath);
       if (file.existsSync()) {
         file.writeAsStringSync(deployContent.value);
-        return;
       } else {
         deployContent.value = 'File not found';
-        return;
       }
     } catch (e) {
       deployContent.value = 'Error writing file: $e';
-      return;
     }
   }
 }
