@@ -310,7 +310,7 @@ class _HomeScriptCardState extends State<HomeScriptCard>
                     ),
                     _ScriptStateIndicator(state: state),
                     IconButton(
-                      tooltip: isRunning ? I18n.stopped.tr : I18n.running.tr,
+                      tooltip: isRunning ? I18n.stop.tr : I18n.run.tr,
                       onPressed: () async {
                         await widget.onTogglePower(!isRunning);
                       },

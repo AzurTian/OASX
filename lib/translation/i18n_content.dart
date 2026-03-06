@@ -25,10 +25,10 @@ class I18n {
   static const String network_not_found = 'Network Not Found';
   static const String network_server_error = 'OAS internal server error';
   static const String scheduler = 'scheduler';
-  static const String running = 'Running';
+  static const String run = 'Run';
   static const String pending = 'Pendings';
   static const String waiting = 'Waitings';
-  static const String stopped = 'Stopped';
+  static const String stop = 'Stop';
   static const String warning = 'Warning';
   static const String connecting = 'Connecting';
   static const String task_setting = 'Task Setting';

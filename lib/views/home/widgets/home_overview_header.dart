@@ -44,25 +44,43 @@ class HomeOverviewHeader extends StatelessWidget {
 
           return LayoutBuilder(
             builder: (context, constraints) {
-              final compact = constraints.maxWidth < 720;
-              final metrics = Wrap(
-                alignment: WrapAlignment.start,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: compact ? 10 : 14,
-                runSpacing: 10,
-                children: [
-                  _CountMetric(
-                    label: I18n.running.tr,
-                    value: '$runningCount',
-                    color: Colors.green,
-                  ),
-                  _CountMetric(
-                    label: I18n.home_total_scripts.tr,
-                    value: '$totalCount',
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ],
-              );
+              const metricsSpacing = 14.0;
+              const sectionSpacing = 12.0;
+              const sideLayoutReserve = 120.0;
+              const actionsMinWidth = 96.0;
+              const metricMinWidth = 140.0;
+              const metricCount = 2;
+              final minSingleRowWidth =
+                  metricMinWidth * metricCount + metricsSpacing;
+              final useSideLayout = constraints.maxWidth >=
+                  minSingleRowWidth +
+                      sectionSpacing +
+                      actionsMinWidth +
+                      sideLayoutReserve;
+
+              Wrap buildMetrics({required bool centered}) {
+                return Wrap(
+                  alignment:
+                      centered ? WrapAlignment.center : WrapAlignment.start,
+                  runAlignment:
+                      centered ? WrapAlignment.center : WrapAlignment.start,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: metricsSpacing,
+                  runSpacing: 10,
+                  children: [
+                    _CountMetric(
+                      label: I18n.run.tr,
+                      value: '$runningCount',
+                      color: Colors.green,
+                    ),
+                    _CountMetric(
+                      label: I18n.home_total_scripts.tr,
+                      value: '$totalCount',
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                );
+              }
 
               final actions = Row(
                 mainAxisSize: MainAxisSize.min,
@@ -103,25 +121,29 @@ class HomeOverviewHeader extends StatelessWidget {
                 ],
               );
 
-              if (compact) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              if (useSideLayout) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [actions],
-                    ),
-                    const SizedBox(height: 10),
-                    metrics,
+                    Expanded(child: buildMetrics(centered: false)),
+                    const SizedBox(width: sectionSpacing),
+                    actions,
                   ],
                 );
               }
 
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              return Wrap(
+                alignment: WrapAlignment.center,
+                runAlignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: sectionSpacing,
+                runSpacing: 10,
                 children: [
-                  Expanded(child: metrics),
-                  const SizedBox(width: 12),
+                  ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxWidth: constraints.maxWidth),
+                    child: buildMetrics(centered: true),
+                  ),
                   actions,
                 ],
               );
