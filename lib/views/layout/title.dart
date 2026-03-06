@@ -6,15 +6,23 @@ import 'package:styled_widget/styled_widget.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/platform_utils.dart';
 
-Widget getTitle() {
-  final routePath = Get.currentRoute;
+Widget getTitle(BuildContext context) {
+  final routePath = _resolveRoutePath(context);
   return switch (routePath) {
     '/home' => const HomeTitleBar(),
     '/overview' => const OverviewTitle(),
     '/settings' => const SettingTitle(),
     '/server' => const ServerTitle(),
-    _ => const SettingTitle(),
+    _ => const HomeTitleBar(),
   };
+}
+
+String _resolveRoutePath(BuildContext context) {
+  final routeName = ModalRoute.of(context)?.settings.name;
+  if (routeName != null && routeName.isNotEmpty) {
+    return routeName;
+  }
+  return Get.currentRoute;
 }
 
 class HomeTitleBar extends StatelessWidget {

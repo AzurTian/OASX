@@ -2,31 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'package:oasx/views/layout/title.dart';
 import 'package:oasx/utils/platform_utils.dart';
+import 'package:oasx/views/layout/title.dart';
 
-/// 统一入口：根据平台返回合适的 AppBar
-PreferredSizeWidget buildPlatformAppBar(BuildContext context, {
+/// Unified entry: build app bar by platform.
+PreferredSizeWidget buildPlatformAppBar(
+  BuildContext context, {
   bool isCollapsed = false,
   VoidCallback? onMenuPressed,
 }) {
   final platform = PlatformUtils.platfrom();
   return switch (platform) {
     PlatformType.windows => _windowAppbar(
-      context,
-      onMenuPressed: isCollapsed ? onMenuPressed : null,
-    ),
-    PlatformType.linux => _desktopAppbar(),
-    PlatformType.macOS => _desktopAppbar(),
-    PlatformType.android => _mobileTabletAppbar(),
-    PlatformType.iOS => _mobileTabletAppbar(),
-    PlatformType.web => _webAppbar(),
-    _ => _webAppbar(),
+        context,
+        onMenuPressed: isCollapsed ? onMenuPressed : null,
+      ),
+    PlatformType.linux => _desktopAppbar(context),
+    PlatformType.macOS => _desktopAppbar(context),
+    PlatformType.android => _mobileTabletAppbar(context),
+    PlatformType.iOS => _mobileTabletAppbar(context),
+    PlatformType.web => _webAppbar(context),
+    _ => _webAppbar(context),
   };
 }
 
-/// Windows 特殊标题栏
-PreferredSizeWidget _windowAppbar(BuildContext context, {VoidCallback? onMenuPressed}) {
+/// Windows specific title bar.
+PreferredSizeWidget _windowAppbar(
+  BuildContext context, {
+  VoidCallback? onMenuPressed,
+}) {
   return PreferredSize(
     preferredSize: const Size.fromHeight(50),
     child: WindowCaption(
@@ -39,31 +43,27 @@ PreferredSizeWidget _windowAppbar(BuildContext context, {VoidCallback? onMenuPre
               icon: const Icon(Icons.menu),
               onPressed: onMenuPressed,
             ),
-          getTitle(),
+          getTitle(context),
         ],
       ),
     ),
   );
 }
 
-/// 桌面 (Linux / macOS)
-PreferredSizeWidget _desktopAppbar() {
-  return AppBar(
-    title: getTitle()
-  );
+/// Desktop (Linux / macOS)
+PreferredSizeWidget _desktopAppbar(BuildContext context) {
+  return AppBar(title: getTitle(context));
 }
 
 /// Web
-PreferredSizeWidget _webAppbar() {
+PreferredSizeWidget _webAppbar(BuildContext context) {
   return PreferredSize(
     preferredSize: const Size.fromHeight(90),
-    child: getTitle().padding(left: 16, top: 10, bottom: 10),
+    child: getTitle(context).padding(left: 16, top: 10, bottom: 10),
   );
 }
 
-/// 移动端 (Android / iOS)
-PreferredSizeWidget _mobileTabletAppbar() {
-  return AppBar(
-    title: getTitle()
-  );
+/// Mobile (Android / iOS)
+PreferredSizeWidget _mobileTabletAppbar(BuildContext context) {
+  return AppBar(title: getTitle(context));
 }
