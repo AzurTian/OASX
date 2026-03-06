@@ -12,14 +12,13 @@ class HomeScriptGrid extends StatefulWidget {
     required this.scripts,
     required this.scriptService,
     required this.onOpenLog,
-    required this.onScriptMenuSelected,
+    this.bottomReservedSpace = 0,
   });
 
   final List<ScriptModel> scripts;
   final ScriptService scriptService;
   final ValueChanged<String> onOpenLog;
-  final void Function(HomeScriptMenuAction action, String scriptName)
-      onScriptMenuSelected;
+  final double bottomReservedSpace;
 
   @override
   State<HomeScriptGrid> createState() => _HomeScriptGridState();
@@ -44,7 +43,12 @@ class _HomeScriptGridState extends State<HomeScriptGrid> {
         final rowCount = (totalCount / crossAxisCount).ceil();
 
         return ListView.separated(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.fromLTRB(
+            12,
+            12,
+            12,
+            12 + widget.bottomReservedSpace,
+          ),
           itemCount: rowCount,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, rowIndex) {
@@ -94,8 +98,6 @@ class _HomeScriptGridState extends State<HomeScriptGrid> {
       scriptModel: script,
       scriptService: widget.scriptService,
       onOpenLog: () => widget.onOpenLog(script.name),
-      onMenuSelected: (action) =>
-          widget.onScriptMenuSelected(action, script.name),
       taskListHeight: taskListHeight,
       onTaskListTap: () => _toggleRow(rowIndex),
     );

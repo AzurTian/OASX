@@ -76,7 +76,8 @@ class OverviewTitle extends StatelessWidget {
   }
 
   void _backHomeOrPop() {
-    if (Get.previousRoute.isNotEmpty) {
+    final canPop = Get.key.currentState?.canPop() ?? false;
+    if (canPop || Get.previousRoute.isNotEmpty) {
       Get.back();
       return;
     }
@@ -97,7 +98,7 @@ class SettingTitle extends StatelessWidget {
       _ => true,
     };
     return <Widget>[
-      if (backButton) BackButton(onPressed: () => Get.offAllNamed('/home')),
+      if (backButton) BackButton(onPressed: _backHomeOrPop),
       Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
       const SizedBox(width: 6),
       Text('OASX / ${I18n.setting.tr}',
@@ -110,6 +111,15 @@ class SettingTitle extends StatelessWidget {
             separator: const SizedBox(width: 8),
             mainAxisAlignment: MainAxisAlignment.start)
         .padding(left: 5);
+  }
+
+  void _backHomeOrPop() {
+    final canPop = Get.key.currentState?.canPop() ?? false;
+    if (canPop || Get.previousRoute.isNotEmpty) {
+      Get.back();
+      return;
+    }
+    Get.offAllNamed('/home');
   }
 }
 

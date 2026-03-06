@@ -5,9 +5,8 @@ import 'package:oasx/model/script_model.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/utils/check_version.dart';
 import 'package:oasx/views/common/add_config_dialog.dart';
-import 'package:oasx/views/home/home_script_actions.dart';
+import 'package:oasx/views/home/widgets/home_constants.dart';
 import 'package:oasx/views/home/widgets/home_overview_header.dart';
-import 'package:oasx/views/home/widgets/home_script_card.dart';
 import 'package:oasx/views/home/widgets/home_script_grid.dart';
 import 'package:oasx/views/layout/appbar.dart';
 
@@ -92,7 +91,8 @@ class _HomeViewState extends State<HomeView> {
               scripts: scripts,
               scriptService: scriptService,
               onOpenLog: _openLogPage,
-              onScriptMenuSelected: _onScriptMenuSelected,
+              bottomReservedSpace:
+                  widget.standalone ? kHomeSettingsFabReservedSpace : 0,
             );
           }),
         ),
@@ -136,14 +136,5 @@ class _HomeViewState extends State<HomeView> {
 
   void _openLogPage(String scriptName) {
     Get.toNamed('/overview', parameters: {'script': scriptName});
-  }
-
-  Future<void> _onScriptMenuSelected(
-      HomeScriptMenuAction action, String scriptName) async {
-    await HomeScriptActions.onMenuSelected(
-      action: action,
-      scriptName: scriptName,
-      scriptService: scriptService,
-    );
   }
 }

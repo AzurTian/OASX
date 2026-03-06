@@ -2,31 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
-import 'package:oasx/views/home/widgets/home_script_card.dart';
 
 class HomeScriptActions {
   const HomeScriptActions._();
 
-  static Future<void> onMenuSelected({
-    required HomeScriptMenuAction action,
-    required String scriptName,
+  static String? validateRenameName({
+    required String oldName,
+    required String newName,
     required ScriptService scriptService,
-  }) async {
-    switch (action) {
-      case HomeScriptMenuAction.rename:
-        await _showRenameDialog(scriptService, scriptName);
-        break;
-      case HomeScriptMenuAction.delete:
-        await _showDeleteDialog(scriptService, scriptName);
-        break;
+  }) {
+    if (newName.isEmpty) {
+      return I18n.name_cannot_empty.tr;
     }
+    if (['Home', 'home'].contains(newName)) {
+      return I18n.name_invalid.tr;
+    }
+    if (oldName == newName || scriptService.scriptOrderList.contains(newName)) {
+      return I18n.name_duplicate.tr;
+    }
+    return null;
   }
 
-  static Future<void> _showRenameDialog(
-      ScriptService scriptService, String oldName) async {
+  static Future<bool> renameScript({
+    required ScriptService scriptService,
+    required String oldName,
+    required String newName,
+  }) async {
     final canRename = await scriptService.tryCloseScriptWithReason(oldName);
-    if (!canRename) return;
+    if (!canRename) return false;
 
+    final success = await scriptService.renameConfig(oldName, newName);
+    if (!success) {
+      Get.snackbar(I18n.error.tr, '');
+    }
+    return success;
+  }
+
+  static Future<void> showRenameDialog({
+    required ScriptService scriptService,
+    required String oldName,
+  }) async {
     var newName = oldName;
     final formKey = GlobalKey<FormState>();
     Get.defaultDialog(
@@ -41,17 +56,12 @@ class HomeScriptActions {
             labelText: I18n.new_name.tr,
           ),
           validator: (String? value) {
-            if (value == null || value.isEmpty) {
-              return I18n.name_cannot_empty.tr;
-            }
-            if (['Home', 'home'].contains(value)) {
-              return I18n.name_invalid.tr;
-            }
-            if (oldName == value ||
-                scriptService.scriptOrderList.contains(value)) {
-              return I18n.name_duplicate.tr;
-            }
-            return null;
+            final input = value?.trim() ?? '';
+            return validateRenameName(
+              oldName: oldName,
+              newName: input,
+              scriptService: scriptService,
+            );
           },
           onChanged: (v) => newName = v.trim(),
         ),
@@ -61,21 +71,24 @@ class HomeScriptActions {
           return;
         }
         Get.back();
-        final success = await scriptService.renameConfig(oldName, newName);
-        if (!success) {
-          Get.snackbar(I18n.error.tr, '');
-        }
+        await renameScript(
+          scriptService: scriptService,
+          oldName: oldName,
+          newName: newName,
+        );
       },
       onCancel: () {},
     );
   }
 
-  static Future<void> _showDeleteDialog(
-      ScriptService scriptService, String name) async {
+  static Future<void> showDeleteDialog({
+    required ScriptService scriptService,
+    required String name,
+  }) async {
     final canDelete = await scriptService.tryCloseScriptWithReason(name);
     if (!canDelete) return;
 
-    Get.defaultDialog(
+    await Get.defaultDialog(
       title: I18n.delete.tr,
       textConfirm: I18n.confirm.tr,
       textCancel: I18n.cancel.tr,
