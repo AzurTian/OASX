@@ -54,8 +54,8 @@ class OverviewTitle extends StatelessWidget {
     };
     final scriptName = Get.parameters['script']?.trim() ?? '';
     final suffix = scriptName.isEmpty
-        ? I18n.overview.tr
-        : '${scriptName.toUpperCase()} / ${I18n.overview.tr}';
+        ? I18n.log.tr
+        : '${scriptName.toUpperCase()} / ${I18n.log.tr}';
 
     return <Widget>[
       if (showBackButton)

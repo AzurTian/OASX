@@ -17,7 +17,7 @@ class HomeScriptCard extends StatelessWidget {
     super.key,
     required this.scriptModel,
     required this.scriptService,
-    required this.onOpenOverview,
+    required this.onOpenLog,
     required this.onMenuSelected,
     required this.taskListHeight,
     required this.onTaskListTap,
@@ -25,7 +25,7 @@ class HomeScriptCard extends StatelessWidget {
 
   final ScriptModel scriptModel;
   final ScriptService scriptService;
-  final VoidCallback onOpenOverview;
+  final VoidCallback onOpenLog;
   final ValueChanged<HomeScriptMenuAction> onMenuSelected;
   final double taskListHeight;
   final VoidCallback onTaskListTap;
@@ -37,7 +37,7 @@ class HomeScriptCard extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Obx(() {
             final state = scriptModel.state.value;
             final isRunning = state == ScriptState.running;
@@ -46,17 +46,18 @@ class HomeScriptCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    IconButton(
+                      tooltip: I18n.log.tr,
+                      onPressed: onOpenLog,
+                      icon: const Icon(Icons.article_outlined),
+                    ),
                     Expanded(
-                      child: InkWell(
-                        onTap: onOpenOverview,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Text(
-                          scriptModel.name,
-                          style: Theme.of(context).textTheme.titleLarge,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ).paddingSymmetric(vertical: 3, horizontal: 4),
-                      ),
+                      child: Text(
+                        scriptModel.name,
+                        style: Theme.of(context).textTheme.titleLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ).paddingSymmetric(vertical: 3, horizontal: 4),
                     ),
                     _ScriptStateIndicator(state: state),
                     IconButton(
@@ -101,7 +102,7 @@ class HomeScriptCard extends StatelessWidget {
                       ],
                       child: const Padding(
                         padding: EdgeInsets.all(6),
-                        child: Icon(Icons.settings_rounded, size: 18),
+                        child: Icon(Icons.settings_rounded, size: 20),
                       ),
                     ),
                   ],

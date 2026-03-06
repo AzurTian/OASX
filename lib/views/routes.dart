@@ -21,7 +21,9 @@ class Routes {
       name: '/overview',
       page: () => const OverviewRouteView(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<ArgsController>(() => ArgsController(), fenix: true);
+        if (!Get.isRegistered<ArgsController>()) {
+          Get.lazyPut<ArgsController>(() => ArgsController(), fenix: true);
+        }
       }),
     ),
     GetPage(

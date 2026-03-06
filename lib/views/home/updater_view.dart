@@ -4,7 +4,6 @@ import 'package:styled_widget/styled_widget.dart';
 
 import 'package:oasx/api/update_info_model.dart';
 import 'package:oasx/api/api_client.dart';
-import 'package:oasx/config/global.dart';
 
 import 'package:oasx/translation/i18n_content.dart';
 

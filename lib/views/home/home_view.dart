@@ -80,16 +80,18 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildDashboardBody() {
     return Column(
       children: [
-        HomeOverviewHeader(scriptService: scriptService),
+        HomeOverviewHeader(
+          scriptService: scriptService,
+          loadingAddScript: _isAddingScript,
+          onAddScriptTap: _onAddScriptCardTap,
+        ),
         Expanded(
           child: Obx(() {
             final scripts = _orderedScripts();
             return HomeScriptGrid(
               scripts: scripts,
               scriptService: scriptService,
-              loadingAddScript: _isAddingScript,
-              onAddScriptTap: _onAddScriptCardTap,
-              onOpenOverview: _openOverview,
+              onOpenLog: _openLogPage,
               onScriptMenuSelected: _onScriptMenuSelected,
             );
           }),
@@ -132,7 +134,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  void _openOverview(String scriptName) {
+  void _openLogPage(String scriptName) {
     Get.toNamed('/overview', parameters: {'script': scriptName});
   }
 

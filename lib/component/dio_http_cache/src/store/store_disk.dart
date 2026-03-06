@@ -181,7 +181,7 @@ class DiskCacheStore extends ICacheStore {
   Future<List<int>?> _decryptCacheStr(List<int>? bytes) async {
     if (null == bytes) return null;
     if (null != _decrypt) {
-      bytes = await _decrypt!(bytes);
+      bytes = await _decrypt(bytes);
     }
     return bytes;
   }
@@ -189,7 +189,7 @@ class DiskCacheStore extends ICacheStore {
   Future<List<int>?> _encryptCacheStr(List<int>? bytes) async {
     if (null == bytes) return null;
     if (null != _encrypt) {
-      bytes = await _encrypt!(bytes);
+      bytes = await _encrypt(bytes);
     }
     return bytes;
   }

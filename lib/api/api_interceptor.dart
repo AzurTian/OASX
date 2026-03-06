@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_nb_net/flutter_net.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:oasx/translation/i18n_content.dart';

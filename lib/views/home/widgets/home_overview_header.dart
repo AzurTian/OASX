@@ -8,9 +8,13 @@ class HomeOverviewHeader extends StatelessWidget {
   const HomeOverviewHeader({
     super.key,
     required this.scriptService,
+    required this.loadingAddScript,
+    required this.onAddScriptTap,
   });
 
   final ScriptService scriptService;
+  final bool loadingAddScript;
+  final VoidCallback onAddScriptTap;
 
   @override
   Widget build(BuildContext context) {
@@ -34,36 +38,42 @@ class HomeOverviewHeader extends StatelessWidget {
               scripts.where((e) => e.state.value == ScriptState.running).length;
           final totalCount = scripts.length;
 
-          return Column(
-            children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 900),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final compact = constraints.maxWidth < 720;
-                      return Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: compact ? 12 : 20,
-                        runSpacing: 12,
-                        children: [
-                          _CountMetric(
-                            label: I18n.running.tr,
-                            value: '$runningCount',
-                            color: Colors.green,
-                          ),
-                          _CountMetric(
-                            label: I18n.home_total_scripts.tr,
-                            value: '$totalCount',
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      );
-                    },
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 720;
+              return Wrap(
+                alignment: WrapAlignment.start,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: compact ? 10 : 14,
+                runSpacing: 10,
+                children: [
+                  SizedBox(
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: loadingAddScript ? null : onAddScriptTap,
+                      icon: loadingAddScript
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.add_rounded, size: 20),
+                      label: Text(I18n.config_add.tr),
+                    ),
                   ),
-                ),
-              ),
-            ],
+                  _CountMetric(
+                    label: I18n.running.tr,
+                    value: '$runningCount',
+                    color: Colors.green,
+                  ),
+                  _CountMetric(
+                    label: I18n.home_total_scripts.tr,
+                    value: '$totalCount',
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              );
+            },
           );
         }),
       ),

@@ -11,17 +11,13 @@ class HomeScriptGrid extends StatefulWidget {
     super.key,
     required this.scripts,
     required this.scriptService,
-    required this.loadingAddScript,
-    required this.onAddScriptTap,
-    required this.onOpenOverview,
+    required this.onOpenLog,
     required this.onScriptMenuSelected,
   });
 
   final List<ScriptModel> scripts;
   final ScriptService scriptService;
-  final bool loadingAddScript;
-  final VoidCallback onAddScriptTap;
-  final ValueChanged<String> onOpenOverview;
+  final ValueChanged<String> onOpenLog;
   final void Function(HomeScriptMenuAction action, String scriptName)
       onScriptMenuSelected;
 
@@ -44,7 +40,7 @@ class _HomeScriptGridState extends State<HomeScriptGrid> {
           _expandedRows.clear();
           _lastCrossAxisCount = crossAxisCount;
         }
-        final totalCount = widget.scripts.length + 1;
+        final totalCount = widget.scripts.length;
         final rowCount = (totalCount / crossAxisCount).ceil();
 
         return ListView.separated(
@@ -90,20 +86,14 @@ class _HomeScriptGridState extends State<HomeScriptGrid> {
     required int rowIndex,
     required double taskListHeight,
   }) {
-    if (index > widget.scripts.length) {
+    if (index >= widget.scripts.length) {
       return const SizedBox.shrink();
-    }
-    if (index == widget.scripts.length) {
-      return _AddScriptCard(
-        loading: widget.loadingAddScript,
-        onTap: widget.onAddScriptTap,
-      );
     }
     final script = widget.scripts[index];
     return HomeScriptCard(
       scriptModel: script,
       scriptService: widget.scriptService,
-      onOpenOverview: () => widget.onOpenOverview(script.name),
+      onOpenLog: () => widget.onOpenLog(script.name),
       onMenuSelected: (action) =>
           widget.onScriptMenuSelected(action, script.name),
       taskListHeight: taskListHeight,
@@ -115,37 +105,5 @@ class _HomeScriptGridState extends State<HomeScriptGrid> {
     setState(() {
       _expandedRows[rowIndex] = !(_expandedRows[rowIndex] ?? false);
     });
-  }
-}
-
-class _AddScriptCard extends StatelessWidget {
-  const _AddScriptCard({
-    required this.loading,
-    required this.onTap,
-  });
-
-  final bool loading;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: loading ? null : onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Center(
-            child: loading
-                ? const SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  )
-                : const Icon(Icons.add_rounded, size: 36),
-          ),
-        ),
-      ),
-    );
   }
 }

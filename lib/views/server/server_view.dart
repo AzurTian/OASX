@@ -100,7 +100,7 @@ class ServerView extends StatelessWidget {
       isHasTopBorder: false,
       isHasBottomBorder: false,
       collapsedBackgroundColor:
-          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.24),
+          Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.24),
       borderRadius: const BorderRadius.all(Radius.circular(10)),
       title: pass,
       children: [
@@ -116,7 +116,7 @@ class ServerView extends StatelessWidget {
       isHasTopBorder: false,
       isHasBottomBorder: false,
       collapsedBackgroundColor:
-          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.24),
+          Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.24),
       borderRadius: const BorderRadius.all(Radius.circular(10)),
       title: Text(I18n.setup_deploy.tr,
           style: Theme.of(context).textTheme.titleMedium),

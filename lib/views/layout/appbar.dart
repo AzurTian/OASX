@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'package:window_manager/window_manager.dart';
 

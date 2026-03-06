@@ -58,7 +58,7 @@ class HomeTaskSummary extends StatelessWidget {
           primary: false,
           padding: EdgeInsets.zero,
           itemCount: tasks.length,
-          separatorBuilder: (context, _) => const SizedBox(height: 4),
+          separatorBuilder: (context, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) => _TaskLine(
             task: tasks[index],
             scriptState: scriptModel.state.value,
@@ -122,65 +122,108 @@ class _TaskLine extends StatelessWidget {
     required this.scriptState,
   });
 
+  static const _rowHeight = 50.0;
+  static const _buttonVerticalGap = 4.0;
+
   final HomeTaskData task;
   final ScriptState scriptState;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final labelMedium = Theme.of(context).textTheme.labelMedium;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _TaskTypeIndicator(type: task.type, scriptState: scriptState),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                task.taskName.tr,
-                style: Theme.of(context).textTheme.labelLarge,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    final rowBackground = switch (task.type) {
+      HomeTaskType.running =>
+        colorScheme.tertiaryContainer.withValues(alpha: 0.24),
+      HomeTaskType.pending =>
+        colorScheme.secondaryContainer.withValues(alpha: 0.2),
+      HomeTaskType.waiting => colorScheme.surfaceContainerHigh,
+    };
+    final rowBorder = switch (task.type) {
+      HomeTaskType.running => Colors.green.withValues(alpha: 0.28),
+      HomeTaskType.pending => Colors.orange.withValues(alpha: 0.3),
+      HomeTaskType.waiting => colorScheme.outlineVariant.withValues(alpha: 0.7),
+    };
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: rowBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: rowBorder, width: 1),
+      ),
+      child: SizedBox(
+        height: _rowHeight,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: _rowHeight,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Align(
+                    alignment: Alignment.center,
+                    child: _TaskTypeIndicator(
+                      type: task.type,
+                      scriptState: scriptState,
+                      size: constraints.maxHeight - 15,
+                    ),
+                  );
+                },
               ),
-              if (task.type != HomeTaskType.running)
-                DateTimePicker(
-                  value: task.nextRun,
-                  hoverStyle: labelMedium,
-                  notHoverStyle: labelMedium,
-                  onChange: (nv) async {
-                    final ret = await Get.find<ArgsController>()
-                        .updateScriptTaskNextRun(
-                            task.scriptName, task.taskName, nv);
-                    if (ret) {
-                      Get.snackbar(I18n.setting_saved.tr, nv,
-                          duration: const Duration(seconds: 1));
-                    }
-                  },
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    task.taskName.tr,
+                    style: Theme.of(context).textTheme.labelLarge,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (task.type != HomeTaskType.running)
+                    DateTimePicker(
+                      value: task.nextRun,
+                      hoverStyle: labelMedium,
+                      notHoverStyle: labelMedium,
+                      onChange: (nv) async {
+                        final ret = await Get.find<ArgsController>()
+                            .updateScriptTaskNextRun(
+                                task.scriptName, task.taskName, nv);
+                        if (ret) {
+                          Get.snackbar(I18n.setting_saved.tr, nv,
+                              duration: const Duration(seconds: 1));
+                        }
+                      },
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 60,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-            ],
-          ).paddingOnly(bottom: 3),
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 78,
-          height: 30,
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.all(0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                onPressed: () => _openTaskSettings(context),
+                child: Center(
+                  child: Text(
+                    I18n.setting.tr,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
               ),
-            ),
-            onPressed: () => _openTaskSettings(context),
-            child: Text(
-              I18n.setting.tr,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-        ),
-      ],
+            ).paddingSymmetric(vertical: _buttonVerticalGap),
+          ],
+        ).paddingSymmetric(horizontal: 5),
+      ),
     );
   }
 
@@ -222,28 +265,48 @@ class _TaskTypeIndicator extends StatelessWidget {
   const _TaskTypeIndicator({
     required this.type,
     required this.scriptState,
+    required this.size,
   });
 
   final HomeTaskType type;
   final ScriptState scriptState;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return switch (type) {
       HomeTaskType.running => switch (scriptState) {
-          ScriptState.running =>
-            const Icon(Icons.bolt_rounded, color: Colors.green, size: 20),
-          ScriptState.warning =>
-            const Icon(Icons.error_rounded, color: Colors.orange, size: 20),
-          ScriptState.inactive =>
-            const Icon(Icons.bolt_outlined, color: Colors.grey, size: 20),
-          ScriptState.updating =>
-            const Icon(Icons.bolt_outlined, color: Colors.blueGrey, size: 20),
+          ScriptState.running => Icon(
+              Icons.bolt_rounded,
+              color: Colors.green,
+              size: size,
+            ),
+          ScriptState.warning => Icon(
+              Icons.error_rounded,
+              color: Colors.orange,
+              size: size,
+            ),
+          ScriptState.inactive => Icon(
+              Icons.bolt_outlined,
+              color: Colors.grey,
+              size: size,
+            ),
+          ScriptState.updating => Icon(
+              Icons.bolt_outlined,
+              color: Colors.blueGrey,
+              size: size,
+            ),
         },
-      HomeTaskType.pending =>
-        const Icon(Icons.layers_rounded, color: Colors.orange, size: 20),
-      HomeTaskType.waiting =>
-        const Icon(Icons.schedule_rounded, color: Colors.blueGrey, size: 20),
+      HomeTaskType.pending => Icon(
+          Icons.layers_rounded,
+          color: Colors.orange,
+          size: size,
+        ),
+      HomeTaskType.waiting => Icon(
+          Icons.schedule_rounded,
+          color: Colors.blueGrey,
+          size: size,
+        ),
     };
   }
 }

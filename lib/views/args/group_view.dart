@@ -20,7 +20,7 @@ class GroupView extends StatelessWidget {
         itemBuilder: _argBuilder,
       )
     ].toColumn().card(
-        color: Theme.of(context).colorScheme.background,
+        color: Theme.of(context).colorScheme.surface,
         margin: const EdgeInsets.all(10));
   }
 
