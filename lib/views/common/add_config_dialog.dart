@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
-import 'package:styled_widget/styled_widget.dart';
 
 Future<bool> showAddConfigDialog(
   BuildContext context, {
@@ -12,11 +11,16 @@ Future<bool> showAddConfigDialog(
 }) async {
   String newName = await ApiClient().getNewConfigName();
   final fetchedConfigAll = await ApiClient().getConfigAll();
-  final configAll = fetchedConfigAll.isEmpty ? <String>['template'] : fetchedConfigAll;
-  final defaultTemplate =
-      configAll.contains('template') ? 'template' : (configAll.isNotEmpty ? configAll.first : 'template');
+  final configAll =
+      fetchedConfigAll.isEmpty ? <String>['template'] : fetchedConfigAll;
+  final defaultTemplate = configAll.contains('template')
+      ? 'template'
+      : (configAll.isNotEmpty ? configAll.first : 'template');
   final selectedTemplate = defaultTemplate.obs;
   final isSubmitting = false.obs;
+  if (!context.mounted) {
+    return false;
+  }
 
   final result = await showDialog<bool>(
     context: context,
@@ -24,39 +28,52 @@ Future<bool> showAddConfigDialog(
       return AlertDialog(
         title: Text(I18n.config_add.tr),
         content: Obx(() {
-          return SizedBox(
-            width: 300,
-            child: <Widget>[
-              Text(I18n.new_name.tr),
-              TextFormField(
-                initialValue: newName,
-                enabled: !isSubmitting.value,
-                onChanged: (value) {
-                  newName = value;
-                },
-              ).constrained(width: 280),
-              const SizedBox(height: 12),
-              Text(I18n.config_copy_from_exist.tr),
-              DropdownButton<String>(
-                value: selectedTemplate.value,
-                menuMaxHeight: 300,
-                isExpanded: true,
-                items: configAll
-                    .map<DropdownMenuItem<String>>(
-                      (e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(e),
-                      ),
-                    )
-                    .toList(),
-                onChanged: isSubmitting.value
-                    ? null
-                    : (value) {
-                        if (value == null) return;
-                        selectedTemplate.value = value;
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: (MediaQuery.sizeOf(dialogContext).height * 0.45)
+                  .clamp(220.0, 420.0)
+                  .toDouble(),
+            ),
+            child: SizedBox(
+              width: 300,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(I18n.new_name.tr),
+                    TextFormField(
+                      initialValue: newName,
+                      enabled: !isSubmitting.value,
+                      onChanged: (value) {
+                        newName = value;
                       },
+                    ),
+                    const SizedBox(height: 12),
+                    Text(I18n.config_copy_from_exist.tr),
+                    DropdownButton<String>(
+                      value: selectedTemplate.value,
+                      menuMaxHeight: 300,
+                      isExpanded: true,
+                      items: configAll
+                          .map<DropdownMenuItem<String>>(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: isSubmitting.value
+                          ? null
+                          : (value) {
+                              if (value == null) return;
+                              selectedTemplate.value = value;
+                            },
+                    ),
+                  ],
+                ),
               ),
-            ].toColumn(crossAxisAlignment: CrossAxisAlignment.start),
+            ),
           );
         }),
         actions: [
@@ -75,8 +92,8 @@ Future<bool> showAddConfigDialog(
                       isSubmitting.value = true;
                       onSubmitting?.call();
                       try {
-                        final navList =
-                            await ApiClient().configCopy(newName, selectedTemplate.value);
+                        final navList = await ApiClient()
+                            .configCopy(newName, selectedTemplate.value);
                         final scripts = navList.where((e) => e != 'Home');
                         Get.find<ScriptService>().syncScriptOrder(scripts);
                         if (dialogContext.mounted) {

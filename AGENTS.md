@@ -31,7 +31,7 @@ Recommended toolchain: Flutter `3.27.1` / Dart `3.6.0` (see `README.md`).
 - Dart formatting: 2-space indentation; use `dart format`.
 - Filenames: `snake_case.dart`; types: `PascalCase`; members: `lowerCamelCase`.
 - Prefer small, focused widgets; keep state in GetX controllers/services.
-- Use styled_widget frameworks to reduce code nesting .
+- Write code in styled_widget style and reduce code nesting levels.
 
 ## Testing Guidelines
 
