@@ -1,9 +1,8 @@
-import 'package:chinese_font_library/chinese_font_library.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/config/theme.dart';
-import 'package:oasx/model/const/storage_key.dart';
+import 'package:oasx/modules/common/models/storage_key.dart';
 
 class ThemeService extends GetxService {
   final _storage = GetStorage();
@@ -28,3 +27,4 @@ class ThemeService extends GetxService {
     Get.changeThemeMode(themeMode);
   }
 }
+

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_nb_net/flutter_net.dart';
 import 'package:get/get.dart';
@@ -29,7 +29,7 @@ class GithubVersionModel extends BaseNetModel {
   String? body;
 }
 
-// 对版本进行对比，如果last > current 则返回true
+// 瀵圭増鏈繘琛屽姣旓紝濡傛灉last > current 鍒欒繑鍥瀟rue
 bool compareVersion(String current, String last) {
   if (current.contains('v')) {
     current = current.substring(1);
@@ -74,18 +74,19 @@ Future<void> checkUpdate({bool showTip = false}) async {
   String githubUpdateInfo = githubVersionModel.body ?? 'Something wrong';
   Widget goOasxRelease = TextButton(
       onPressed: () async => {await launchUrl(Uri.parse(oasxRelease))},
-      child: Text(I18n.go_oasx_release.tr));
+      child: Text(I18n.goOasxRelease.tr));
   if (compareVersion(currentVersion, githubVersion)) {
     Widget dialog = SingleChildScrollView(
             child: <Widget>[
-      Text('${I18n.latest_version.tr}: $githubVersion'),
-      Text('${I18n.current_version.tr}: $currentVersion'),
+      Text('${I18n.latestVersion.tr}: $githubVersion'),
+      Text('${I18n.currentVersion.tr}: $currentVersion'),
       goOasxRelease,
       MarkdownBody(data: githubUpdateInfo),
     ].toColumn(crossAxisAlignment: CrossAxisAlignment.start))
         .constrained(height: 300, width: 300);
-    Get.defaultDialog(title: I18n.find_new_version.tr, content: dialog);
+    Get.defaultDialog(title: I18n.findNewVersion.tr, content: dialog);
     return;
   }
-  if (showTip) Get.snackbar(I18n.tip.tr, I18n.no_new_version.tr);
+  if (showTip) Get.snackbar(I18n.tip.tr, I18n.noNewVersion.tr);
 }
+

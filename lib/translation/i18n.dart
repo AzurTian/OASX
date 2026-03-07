@@ -1,3 +1,4 @@
+﻿// ignore_for_file: non_constant_identifier_names
 library i18n;
 
 import 'package:get/get.dart';
@@ -6,7 +7,62 @@ import 'package:oasx/utils/extension_utils.dart';
 
 import 'i18n_content.dart';
 part 'i18n_us.dart';
-part 'i18n_cn.dart';
+part 'cn_parts/cn_ui.dart';
+part 'cn_parts/cn_menu.dart';
+part 'cn_parts/cn_script.dart';
+part 'cn_parts/cn_restart.dart';
+part 'cn_parts/cn_global_game.dart';
+part 'cn_parts/cn_raid_config.dart';
+part 'cn_parts/cn_invite_config.dart';
+part 'cn_parts/cn_general_battle_config.dart';
+part 'cn_parts/cn_switch_soul.dart';
+part 'cn_parts/cn_orochi_config.dart';
+part 'cn_parts/cn_sougenbi_config.dart';
+part 'cn_parts/cn_fallen_sun_config.dart';
+part 'cn_parts/cn_eternity_sea_config.dart';
+part 'cn_parts/cn_dragon_spine_config.dart';
+part 'cn_parts/cn_area_boss_config.dart';
+part 'cn_parts/cn_gold_youkai_config.dart';
+part 'cn_parts/cn_nian_config.dart';
+part 'cn_parts/cn_talisman_config.dart';
+part 'cn_parts/cn_pets_config.dart';
+part 'cn_parts/cn_simple_tidy_config.dart';
+part 'cn_parts/cn_delegation_config.dart';
+part 'cn_parts/cn_wanted_quests_config.dart';
+part 'cn_parts/cn_tako_config.dart';
+part 'cn_parts/cn_bondling_config.dart';
+part 'cn_parts/cn_evo_zone_config.dart';
+part 'cn_parts/cn_goryou_config.dart';
+part 'cn_parts/cn_exploration_config.dart';
+part 'cn_parts/cn_utilize_config.dart';
+part 'cn_parts/cn_activation_config.dart';
+part 'cn_parts/cn_realm_raid_config.dart';
+part 'cn_parts/cn_missions_config.dart';
+part 'cn_parts/cn_hunt_config.dart';
+part 'cn_parts/cn_true_orochi_config.dart';
+part 'cn_parts/cn_rich_man_config.dart';
+part 'cn_parts/cn_secret_config.dart';
+part 'cn_parts/cn_trifles_config.dart';
+part 'cn_parts/cn_shop_config.dart';
+part 'cn_parts/cn_duel_config.dart';
+part 'cn_parts/cn_general_climb_config.dart';
+part 'cn_parts/cn_meta_demon_config.dart';
+part 'cn_parts/cn_hyakkiyakou_config.dart';
+part 'cn_parts/cn_kokan_config.dart';
+part 'cn_parts/cn_six_realms_config.dart';
+part 'cn_parts/cn_frog_boss_config.dart';
+part 'cn_parts/cn_float_parade_config.dart';
+part 'cn_parts/cn_quiz_config.dart';
+part 'cn_parts/cn_herotest_config.dart';
+part 'cn_parts/cn_abyss_shadows_config.dart';
+part 'cn_parts/cn_find_jade_config.dart';
+part 'cn_parts/cn_guild_banquet_config.dart';
+part 'cn_parts/cn_kitty_shop_config.dart';
+part 'cn_parts/cn_experience_youkai_config.dart';
+part 'cn_parts/cn_demon_encounter_config.dart';
+part 'cn_parts/cn_memory_scrolls_config.dart';
+part 'cn_parts/cn_demon_retreat_config.dart';
+part 'cn_parts/cn_dye_trials_config.dart';
 
 class Messages extends Translations {
   @override

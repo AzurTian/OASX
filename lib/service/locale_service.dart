@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
-import 'package:oasx/model/const/storage_key.dart';
+import 'package:oasx/modules/common/models/storage_key.dart';
 
 class LocaleService extends GetxService {
   final _storage = GetStorage();
@@ -46,3 +46,4 @@ class LocaleService extends GetxService {
     _updateLocale(language.value);
   }
 }
+

@@ -1,4 +1,4 @@
-import 'package:oasx/model/script_model.dart';
+﻿import 'package:oasx/modules/home/models/script_model.dart';
 
 import '../service/websocket_service.dart';
 
@@ -53,3 +53,4 @@ extension WsStatusX on WsStatus {
     }
   }
 }
+
