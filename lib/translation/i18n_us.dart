@@ -50,7 +50,7 @@ final Map<String, String> _us_ui = {
   I18n.turnOnTheLinker: 'Turn on the linker',
   I18n.closeTheLinker: 'Close the linker',
   I18n.homeNoTask: 'No tasks',
-  I18n.homeUnconfiguredTask: 'Unconfigured task',
+  I18n.homeUnconfiguredTask: 'No tasks, please configure the script first',
   I18n.homeRunningTask: 'Running task',
   I18n.homePendingTask: 'Pending task',
   I18n.homeWaitingTask: 'Waiting task',

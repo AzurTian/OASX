@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
@@ -42,8 +43,13 @@ class SettingsController extends GetxController {
   }
 
   void initTemporaryDirectory() {
-    temporaryDirectory = storage.read(StorageKey.temporaryDirectory.name) ??
-        Directory.systemTemp.path;
+    final cachedDirectory = storage.read(StorageKey.temporaryDirectory.name);
+    if (cachedDirectory is String && cachedDirectory.isNotEmpty) {
+      temporaryDirectory = cachedDirectory;
+      return;
+    }
+
+    temporaryDirectory = kIsWeb ? 'web_cache' : Directory.systemTemp.path;
     storage.write(StorageKey.temporaryDirectory.name, temporaryDirectory);
   }
 
