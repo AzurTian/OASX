@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -110,34 +111,32 @@ class SettingsController extends GetxController {
     ApiClient().setAddress(normalized);
   }
 
-  Future<void> killServer({
+  Future<bool> killServer({
     bool showTip = true,
     bool resetDashboardToDisconnected = true,
   }) async {
     final success = await ApiClient().killServer();
     if (success) {
       if (resetDashboardToDisconnected) {
-        if (Get.isRegistered<ScriptService>()) {
-          await Get.find<ScriptService>().resetDashboardState();
-        }
-        if (Get.isRegistered<HomeDashboardController>()) {
-          Get.find<HomeDashboardController>().markConnectionFailedFromKillServer();
-        }
+        unawaited(_resetDashboardAfterKillServer());
       }
-      if (showTip) {
-        Get.snackbar(I18n.killServerSuccess.tr, '');
-      }
-      await resetClient();
     } else if (showTip) {
       Get.snackbar(
           I18n.killServerFailure.tr, I18n.killServerFailureMsg.tr);
     }
+    return success;
   }
 
-  Future<void> resetClient() async {
-    return;
+  Future<void> _resetDashboardAfterKillServer() async {
+    if (Get.isRegistered<HomeDashboardController>()) {
+      Get.find<HomeDashboardController>().markConnectionFailedFromKillServer();
+    }
+    if (Get.isRegistered<ScriptService>()) {
+      try {
+        await Get.find<ScriptService>()
+            .resetDashboardState()
+            .timeout(const Duration(seconds: 5));
+      } catch (_) {}
+    }
   }
 }
-
-
-
