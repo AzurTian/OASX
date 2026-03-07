@@ -101,6 +101,7 @@ class I18n {
   static const String exit = 'Exit';
   static const String empty = 'Empty';
   static const String system_setting = 'System setting';
+  static const String user_setting = 'User setting';
   static const String no_new_version = 'No new version';
   static const String auto_run_script_list = 'Auto run script list';
   static const String auto_run_script = 'Auto run script';
@@ -113,8 +114,8 @@ class I18n {
   static const String home_running_count = 'home_running_count';
   static const String home_total_scripts = 'home_total_scripts';
   static const String home_control_script_count = 'home_control_script_count';
-  static const String home_link_mode_enable = 'home_link_mode_enable';
-  static const String home_link_mode_disable = 'home_link_mode_disable';
+  static const String turn_on_the_linker = 'turn_on_the_linker';
+  static const String close_the_linker = 'close_the_linker';
   static const String home_no_task = 'home_no_task';
   static const String home_unconfigured_task = 'home_unconfigured_task';
   static const String home_running_task = 'home_running_task';

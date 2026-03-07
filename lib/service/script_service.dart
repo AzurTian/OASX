@@ -198,6 +198,20 @@ class ScriptService extends GetxService {
     await Future.wait(scriptList.map((name) => connectScript(name)));
   }
 
+  Future<void> resetDashboardState() async {
+    await wsService.closeAll();
+    final names = scriptModelMap.keys.toList();
+    for (final name in names) {
+      if (Get.isRegistered<OverviewController>(tag: name)) {
+        try {
+          Get.delete<OverviewController>(tag: name, force: true);
+        } catch (_) {}
+      }
+    }
+    scriptModelMap.clear();
+    scriptOrderList.clear();
+  }
+
   Future<bool> renameConfig(String oldName, String newName) async {
     final ret = await ApiClient().renameConfig(oldName, newName);
     if (!ret) {

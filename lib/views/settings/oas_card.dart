@@ -30,18 +30,6 @@ class OasSettingsCard extends StatelessWidget {
             right: const LoginAfterDeploySwitcher(),
           ),
         SettingItem(
-          left: Text(I18n.login_address.tr),
-          right: const _LoginInputField(type: _LoginFieldType.address),
-        ),
-        SettingItem(
-          left: Text(I18n.username.tr),
-          right: const _LoginInputField(type: _LoginFieldType.username),
-        ),
-        SettingItem(
-          left: Text(I18n.password.tr),
-          right: const _LoginInputField(type: _LoginFieldType.password),
-        ),
-        SettingItem(
           left: Text(I18n.auto_run_script.tr),
           right: const AutoScriptButton(),
         ),

@@ -1,11 +1,13 @@
 library settings;
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:oasx/config/global.dart';
+import 'package:oasx/controller/home/home_dashboard_controller.dart';
 import 'package:oasx/controller/settings.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/script_service.dart';
@@ -24,6 +26,7 @@ import 'package:oasx/utils/platform_utils.dart';
 
 part 'oas_card.dart';
 part 'system_card.dart';
+part 'user_card.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({Key? key}) : super(key: key);
@@ -43,19 +46,25 @@ class _SettingsViewState extends State<SettingsView> {
   late final List<_SettingsSection> _sections = [
     _SettingsSection(
       key: GlobalKey(),
-      navTitleBuilder: () => 'OAS${I18n.setting.tr}',
-      cardBuilder: () => const OasSettingsCard(),
+      navTitleBuilder: () => I18n.user_setting.tr,
+      cardBuilder: () => const UserSettingsCard(),
     ),
     _SettingsSection(
       key: GlobalKey(),
       navTitleBuilder: () => I18n.system_setting.tr,
       cardBuilder: () => const SystemSettingsCard(),
     ),
+    _SettingsSection(
+      key: GlobalKey(),
+      navTitleBuilder: () => 'OAS${I18n.setting.tr}',
+      cardBuilder: () => const OasSettingsCard(),
+    ),
   ];
 
   int? _selectedSectionIndex;
   bool _isAutoScrolling = false;
   bool _lockSelectionToClickedNav = false;
+  bool _hasHandledLeave = false;
 
   @override
   void initState() {
@@ -69,9 +78,30 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   void dispose() {
+    _handleLeaveSettings();
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _handleLeaveSettings() {
+    if (_hasHandledLeave) {
+      return;
+    }
+    _hasHandledLeave = true;
+    if (!Get.isRegistered<SettingsController>()) {
+      return;
+    }
+    final settingsController = Get.find<SettingsController>();
+    if (!settingsController.consumeLoginConfigChanged()) {
+      return;
+    }
+    if (!Get.isRegistered<HomeDashboardController>()) {
+      return;
+    }
+    unawaited(
+      Get.find<HomeDashboardController>().refreshAfterSettingsChanged(),
+    );
   }
 
   void _handleScroll() {

@@ -87,8 +87,8 @@ class HomeOverviewHeader extends StatelessWidget {
                 children: [
                   IconButton(
                     tooltip: isLinkModeEnabled
-                        ? I18n.home_link_mode_disable.tr
-                        : I18n.home_link_mode_enable.tr,
+                        ? I18n.close_the_linker.tr
+                        : I18n.turn_on_the_linker.tr,
                     onPressed: onToggleLinkMode,
                     style: IconButton.styleFrom(
                       backgroundColor: isLinkModeEnabled

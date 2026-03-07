@@ -7,8 +7,9 @@ final Map<String, String> cnUiExtra = {
   I18n.task_search_hint: '\u641c\u7d22\u4efb\u52a1',
   I18n.task_not_found: '\u672a\u627e\u5230\u5339\u914d\u4efb\u52a1',
   I18n.task_menu_load_failed: '\u4efb\u52a1\u83dc\u5355\u52a0\u8f7d\u5931\u8d25',
-  I18n.home_link_mode_enable: '\u5f00\u542f\u94fe\u63a5\u8054\u52a8',
-  I18n.home_link_mode_disable: '\u5173\u95ed\u94fe\u63a5\u8054\u52a8',
+  I18n.user_setting: '\u7528\u6237\u8bbe\u7f6e',
+  I18n.turn_on_the_linker: '开启链接器',
+  I18n.close_the_linker: '关闭链接器',
   I18n.home_connection_retry_hint:
       '\u8bf7\u786e\u8ba4\u540e\u7aef\u670d\u52a1\u662f\u5426\u5df2\u6210\u529f\u542f\u52a8\uff0c\u8bbe\u7f6e\u4e2d\u7528\u6237\u914d\u7f6e\u662f\u5426\u6b63\u786e',
   I18n.home_connection_retry_action: '\u5237\u65b0',

@@ -15,6 +15,7 @@ class SettingsController extends GetxController {
   late String temporaryDirectory;
   final autoLoginAfterDeploy = false.obs;
   final autoDeploy = false.obs;
+  bool _loginConfigChanged = false;
 
   final address = ''.obs;
   final username = ''.obs;
@@ -55,19 +56,39 @@ class SettingsController extends GetxController {
   }
 
   void updateAddress(String value) {
-    address.value = value.trim();
+    final next = value.trim();
+    if (address.value == next) {
+      return;
+    }
+    address.value = next;
     storage.write(StorageKey.address.name, address.value);
     _syncApiAddress();
+    _loginConfigChanged = true;
   }
 
   void updateUsername(String value) {
-    username.value = value.trim();
+    final next = value.trim();
+    if (username.value == next) {
+      return;
+    }
+    username.value = next;
     storage.write(StorageKey.username.name, username.value);
+    _loginConfigChanged = true;
   }
 
   void updatePassword(String value) {
+    if (password.value == value) {
+      return;
+    }
     password.value = value;
     storage.write(StorageKey.password.name, password.value);
+    _loginConfigChanged = true;
+  }
+
+  bool consumeLoginConfigChanged() {
+    final changed = _loginConfigChanged;
+    _loginConfigChanged = false;
+    return changed;
   }
 
   void _syncApiAddress() {

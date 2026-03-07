@@ -211,6 +211,11 @@ class HomeDashboardController extends GetxController {
     await _runStartupConnectionCheck(enableAutoDeploy: true, showFailureSnack: true);
   }
 
+  Future<void> refreshAfterSettingsChanged() async {
+    await _scriptService.resetDashboardState();
+    await _runStartupConnectionCheck(enableAutoDeploy: true, showFailureSnack: true);
+  }
+
   Future<void> retryStartupConnection() async {
     await _runStartupConnectionCheck(enableAutoDeploy: false, showFailureSnack: false);
   }
@@ -224,7 +229,7 @@ class HomeDashboardController extends GetxController {
     }
     isStartupChecking.value = true;
     isStartupConnectionFailed.value = false;
-    startupLoadingMessage.value = '';
+    startupLoadingMessage.value = I18n.home_loading_auto_login;
     try {
       final connected = await ApiClient().testAddress();
       if (connected) {
