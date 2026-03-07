@@ -28,7 +28,7 @@ class HomeTaskSummary extends StatelessWidget {
       final tasks = _pickTasks();
       if (tasks.isEmpty) {
         return Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.center,
           child: Text(
             I18n.homeUnconfiguredTask.tr,
             style: Theme.of(context).textTheme.bodyLarge,
