@@ -38,7 +38,7 @@ class Overview extends StatelessWidget {
       return content;
     }
     return Scaffold(
-      appBar: buildPlatformAppBar(context),
+      appBar: buildPlatformAppBar(context, routePath: '/overview'),
       body: SafeArea(child: content),
     );
   }

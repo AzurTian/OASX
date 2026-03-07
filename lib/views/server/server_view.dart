@@ -28,7 +28,7 @@ class ServerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildPlatformAppBar(context),
+      appBar: buildPlatformAppBar(context, routePath: '/server'),
       floatingActionButton: startServerButton(),
       body: _body(),
     );

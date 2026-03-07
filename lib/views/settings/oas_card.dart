@@ -15,6 +15,12 @@ class OasSettingsCard extends StatelessWidget {
         ),
         if (PlatformUtils.isDesktop)
           SettingItem(
+            left: Text(I18n.setup_deploy.tr),
+            right: const Icon(Icons.input_rounded),
+            onTap: openDeploySetting,
+          ),
+        if (PlatformUtils.isDesktop)
+          SettingItem(
             left: Text(I18n.auto_deploy.tr),
             right: const DeploySwitcher(),
           ),
@@ -59,6 +65,10 @@ void notifyTest() {
     title: I18n.notify_test.tr,
     content: const NotifyTest(),
   );
+}
+
+void openDeploySetting() {
+  Get.toNamed('/server');
 }
 
 class DeploySwitcher extends StatelessWidget {

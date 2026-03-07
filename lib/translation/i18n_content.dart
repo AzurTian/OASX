@@ -120,6 +120,14 @@ class I18n {
   static const String home_running_task = 'home_running_task';
   static const String home_pending_task = 'home_pending_task';
   static const String home_waiting_task = 'home_waiting_task';
+  static const String home_connection_retry_hint = 'home_connection_retry_hint';
+  static const String home_connection_retry_action =
+      'home_connection_retry_action';
+  static const String home_empty_script_hint = 'home_empty_script_hint';
+  static const String home_loading_auto_deploying =
+      'home_loading_auto_deploying';
+  static const String home_loading_auto_login = 'home_loading_auto_login';
+  static const String home_loading_config_detail = 'home_loading_config_detail';
   static const String task_manage = 'task_manage';
   static const String task_manage_title = 'task_manage_title';
   static const String task_search_hint = 'task_search_hint';

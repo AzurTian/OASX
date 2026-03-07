@@ -52,6 +52,15 @@ final Map<String, String> _us_ui = {
   I18n.home_running_task: 'Running task',
   I18n.home_pending_task: 'Pending task',
   I18n.home_waiting_task: 'Waiting task',
+  I18n.home_connection_retry_hint:
+      'Please confirm the backend service has started and user settings are correct',
+  I18n.home_connection_retry_action: 'Refresh',
+  I18n.home_empty_script_hint: 'No scripts yet, please add a script first',
+  I18n.home_loading_auto_deploying:
+      'Auto deployment in progress, please wait',
+  I18n.home_loading_auto_login: 'Logging into OAS, please wait',
+  I18n.home_loading_config_detail:
+      'Loading config details, please wait',
   I18n.task_manage: 'Task Manager',
   I18n.task_manage_title: 'Task Manager',
   I18n.task_search_hint: 'Search tasks',

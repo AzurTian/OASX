@@ -71,7 +71,7 @@ final Map<String, String> _cn_ui = {
   I18n.install_oas_failure: '安装OAS失败',
   I18n.install_oas_from_github: '从GitHub安装OAS',
   I18n.install_oas_help: '这将会从Github上下载并解压，请保持网络稳定，同时将会清空该目录',
-  I18n.setup_deploy: '服务启动配置',
+  I18n.setup_deploy: '部署OAS',
   I18n.setup_log: '服务启动日志',
   I18n.execute_update: '手动更新',
   I18n.go_oasx_release: '点击下载',

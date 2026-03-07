@@ -10,19 +10,21 @@ PreferredSizeWidget buildPlatformAppBar(
   BuildContext context, {
   bool isCollapsed = false,
   VoidCallback? onMenuPressed,
+  String? routePath,
 }) {
   final platform = PlatformUtils.platfrom();
   return switch (platform) {
     PlatformType.windows => _windowAppbar(
         context,
         onMenuPressed: isCollapsed ? onMenuPressed : null,
+        routePath: routePath,
       ),
-    PlatformType.linux => _desktopAppbar(context),
-    PlatformType.macOS => _desktopAppbar(context),
-    PlatformType.android => _mobileTabletAppbar(context),
-    PlatformType.iOS => _mobileTabletAppbar(context),
-    PlatformType.web => _webAppbar(context),
-    _ => _webAppbar(context),
+    PlatformType.linux => _desktopAppbar(context, routePath: routePath),
+    PlatformType.macOS => _desktopAppbar(context, routePath: routePath),
+    PlatformType.android => _mobileTabletAppbar(context, routePath: routePath),
+    PlatformType.iOS => _mobileTabletAppbar(context, routePath: routePath),
+    PlatformType.web => _webAppbar(context, routePath: routePath),
+    _ => _webAppbar(context, routePath: routePath),
   };
 }
 
@@ -30,6 +32,7 @@ PreferredSizeWidget buildPlatformAppBar(
 PreferredSizeWidget _windowAppbar(
   BuildContext context, {
   VoidCallback? onMenuPressed,
+  String? routePath,
 }) {
   return PreferredSize(
     preferredSize: const Size.fromHeight(50),
@@ -43,7 +46,7 @@ PreferredSizeWidget _windowAppbar(
               icon: const Icon(Icons.menu),
               onPressed: onMenuPressed,
             ),
-          getTitle(context),
+          getTitle(context, routePath: routePath),
         ],
       ),
     ),
@@ -51,19 +54,23 @@ PreferredSizeWidget _windowAppbar(
 }
 
 /// Desktop (Linux / macOS)
-PreferredSizeWidget _desktopAppbar(BuildContext context) {
-  return AppBar(title: getTitle(context));
+PreferredSizeWidget _desktopAppbar(BuildContext context, {String? routePath}) {
+  return AppBar(title: getTitle(context, routePath: routePath));
 }
 
 /// Web
-PreferredSizeWidget _webAppbar(BuildContext context) {
+PreferredSizeWidget _webAppbar(BuildContext context, {String? routePath}) {
   return PreferredSize(
     preferredSize: const Size.fromHeight(90),
-    child: getTitle(context).padding(left: 16, top: 10, bottom: 10),
+    child: getTitle(context, routePath: routePath)
+        .padding(left: 16, top: 10, bottom: 10),
   );
 }
 
 /// Mobile (Android / iOS)
-PreferredSizeWidget _mobileTabletAppbar(BuildContext context) {
-  return AppBar(title: getTitle(context));
+PreferredSizeWidget _mobileTabletAppbar(
+  BuildContext context, {
+  String? routePath,
+}) {
+  return AppBar(title: getTitle(context, routePath: routePath));
 }

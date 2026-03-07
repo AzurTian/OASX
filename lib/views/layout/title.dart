@@ -6,9 +6,10 @@ import 'package:styled_widget/styled_widget.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/platform_utils.dart';
 
-Widget getTitle(BuildContext context) {
-  final routePath = _resolveRoutePath(context);
-  return switch (routePath) {
+Widget getTitle(BuildContext context, {String? routePath}) {
+  final resolvedRoutePath =
+      _resolveRoutePath(context, routePath: routePath);
+  return switch (resolvedRoutePath) {
     '/home' => const HomeTitleBar(),
     '/overview' => const OverviewTitle(),
     '/settings' => const SettingTitle(),
@@ -17,7 +18,17 @@ Widget getTitle(BuildContext context) {
   };
 }
 
-String _resolveRoutePath(BuildContext context) {
+String _resolveRoutePath(BuildContext context, {String? routePath}) {
+  final explicitRoute = routePath?.trim() ?? '';
+  if (explicitRoute.isNotEmpty) {
+    return explicitRoute;
+  }
+
+  final routingCurrent = Get.routing.current;
+  if (routingCurrent.isNotEmpty) {
+    return routingCurrent;
+  }
+
   final routeName = ModalRoute.of(context)?.settings.name;
   if (routeName != null && routeName.isNotEmpty) {
     return routeName;
@@ -55,21 +66,13 @@ class OverviewTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showBackButton = switch (Theme.of(context).platform) {
-      TargetPlatform.android => false,
-      TargetPlatform.iOS => false,
-      _ => true,
-    };
     final scriptName = Get.parameters['script']?.trim() ?? '';
-    final suffix = scriptName.isEmpty
-        ? I18n.log.tr
-        : '${scriptName.toUpperCase()} / ${I18n.log.tr}';
+    final suffix = scriptName.isEmpty ? I18n.log.tr : '$scriptName / ${I18n.log.tr}';
 
     return <Widget>[
-      if (showBackButton)
-        BackButton(
-          onPressed: _backHomeOrPop,
-        ),
+      BackButton(
+        onPressed: _backHomeOrPop,
+      ),
       Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
       const SizedBox(width: 6),
       Text('OASX / $suffix', style: Theme.of(context).textTheme.titleMedium),

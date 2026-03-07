@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:oasx/controller/home/home_dashboard_controller.dart';
 import 'package:oasx/model/script_model.dart';
 import 'package:oasx/service/script_service.dart';
+import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/check_version.dart';
 import 'package:oasx/views/common/add_config_dialog.dart';
 import 'package:oasx/views/home/widgets/home_constants.dart';
@@ -45,17 +46,29 @@ class _HomeViewState extends State<HomeView> {
         children: [
           _buildDashboardBody(),
           Obx(() {
-            if (!controller.isStartupAutoDeploying.value) {
+            final message = controller.startupLoadingMessage.value;
+            if (message.isEmpty) {
               return const SizedBox.shrink();
             }
             return Positioned.fill(
               child: ColoredBox(
                 color: Colors.black.withValues(alpha: 0.25),
-                child: const Center(
-                  child: SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: CircularProgressIndicator(),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: CircularProgressIndicator(),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        message.tr,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -70,7 +83,7 @@ class _HomeViewState extends State<HomeView> {
     }
 
     return Scaffold(
-      appBar: buildPlatformAppBar(context),
+      appBar: buildPlatformAppBar(context, routePath: '/home'),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.toNamed('/settings'),
         child: const Icon(Icons.settings_rounded),
@@ -91,7 +104,16 @@ class _HomeViewState extends State<HomeView> {
             )),
         Expanded(
           child: Obx(() {
+            if (controller.startupLoadingMessage.value.isNotEmpty) {
+              return const SizedBox.expand();
+            }
             final scripts = _orderedScripts();
+            if (controller.isStartupConnectionFailed.value) {
+              return _buildConnectionFailedView();
+            }
+            if (scripts.isEmpty) {
+              return _buildEmptyScriptsView();
+            }
             return HomeScriptGrid(
               scripts: scripts,
               scriptService: scriptService,
@@ -108,6 +130,48 @@ class _HomeViewState extends State<HomeView> {
           }),
         ),
       ],
+    );
+  }
+
+  Widget _buildConnectionFailedView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Obx(() {
+              if (controller.isStartupChecking.value) {
+                return const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(strokeWidth: 2.6),
+                );
+              }
+              return IconButton.filled(
+                onPressed: controller.retryStartupConnection,
+                icon: const Icon(Icons.refresh_rounded),
+                iconSize: 34,
+                tooltip: I18n.home_connection_retry_action.tr,
+              );
+            }),
+            const SizedBox(height: 12),
+            Text(
+              I18n.home_connection_retry_hint.tr,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyScriptsView() {
+    return Center(
+      child: Text(
+        I18n.home_empty_script_hint.tr,
+        textAlign: TextAlign.center,
+      ),
     );
   }
 

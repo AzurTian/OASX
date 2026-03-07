@@ -22,16 +22,8 @@ class ScriptService extends GetxService {
 
   @override
   Future<void> onInit() async {
-    final scriptList = await ApiClient().getScriptList();
-    syncScriptOrder(scriptList);
-    if (scriptList.isNotEmpty) {
-      await Future.wait(scriptList.map((name) => connectScript(name)));
-    }
-    autoScriptList.value =
-        ((jsonDecode(_storage.read(StorageKey.autoScriptList.name)) as List?) ??
-                [])
-            .map((e) => e.toString())
-            .toList();
+    await reloadFromServer();
+    _loadAutoScriptListFromStorage();
     super.onInit();
   }
 
@@ -197,6 +189,15 @@ class ScriptService extends GetxService {
     syncScriptOrder(latest);
   }
 
+  Future<void> reloadFromServer() async {
+    final scriptList = await ApiClient().getScriptList();
+    syncScriptOrder(scriptList);
+    if (scriptList.isEmpty) {
+      return;
+    }
+    await Future.wait(scriptList.map((name) => connectScript(name)));
+  }
+
   Future<bool> renameConfig(String oldName, String newName) async {
     final ret = await ApiClient().renameConfig(oldName, newName);
     if (!ret) {
@@ -276,5 +277,23 @@ class ScriptService extends GetxService {
     }
     autoScriptList.sort();
     _storage.write(StorageKey.autoScriptList.name, jsonEncode(autoScriptList));
+  }
+
+  void _loadAutoScriptListFromStorage() {
+    final raw = _storage.read(StorageKey.autoScriptList.name);
+    if (raw is List) {
+      autoScriptList.value = raw.map((e) => e.toString()).toList();
+      return;
+    }
+    if (raw is String && raw.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          autoScriptList.value = decoded.map((e) => e.toString()).toList();
+          return;
+        }
+      } catch (_) {}
+    }
+    autoScriptList.clear();
   }
 }

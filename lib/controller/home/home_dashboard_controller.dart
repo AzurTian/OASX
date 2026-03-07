@@ -16,7 +16,10 @@ class HomeDashboardController extends GetxController {
   static bool _hasCheckedStartupConnection = false;
   final controlScriptList = <String>[].obs;
   final isBatchSwitching = false.obs;
+  final isStartupChecking = false.obs;
+  final isStartupConnectionFailed = false.obs;
   final isStartupAutoDeploying = false.obs;
+  final startupLoadingMessage = ''.obs;
   final isLinkModeEnabled = false.obs;
   final linkedScriptList = <String>[].obs;
 
@@ -205,32 +208,90 @@ class HomeDashboardController extends GetxController {
       return;
     }
     _hasCheckedStartupConnection = true;
+    await _runStartupConnectionCheck(enableAutoDeploy: true, showFailureSnack: true);
+  }
 
-    final connected = await ApiClient().testAddress();
-    if (connected) {
+  Future<void> retryStartupConnection() async {
+    await _runStartupConnectionCheck(enableAutoDeploy: false, showFailureSnack: false);
+  }
+
+  Future<void> _runStartupConnectionCheck({
+    required bool enableAutoDeploy,
+    required bool showFailureSnack,
+  }) async {
+    if (isStartupChecking.value) {
       return;
     }
-
-    Get.snackbar(I18n.login_error.tr, I18n.login_error_msg.tr);
-    if (!Get.isRegistered<SettingsController>()) {
-      return;
-    }
-
-    final settings = Get.find<SettingsController>();
-    if (!PlatformUtils.isDesktop || !settings.autoDeploy.value) {
-      return;
-    }
-
-    isStartupAutoDeploying.value = true;
+    isStartupChecking.value = true;
+    isStartupConnectionFailed.value = false;
+    startupLoadingMessage.value = '';
     try {
-      final serverController = Get.isRegistered<ServerController>()
-          ? Get.find<ServerController>()
-          : Get.put<ServerController>(ServerController(), permanent: true);
-      await serverController.run();
-      await _waitUntilDeployFinished(serverController);
+      final connected = await ApiClient().testAddress();
+      if (connected) {
+        await _refreshScriptsAfterConnected();
+        return;
+      }
+
+      if (showFailureSnack) {
+        Get.snackbar(I18n.login_error.tr, I18n.login_error_msg.tr);
+      }
+      if (!enableAutoDeploy || !Get.isRegistered<SettingsController>()) {
+        isStartupConnectionFailed.value = true;
+        return;
+      }
+
+      final settings = Get.find<SettingsController>();
+      if (!PlatformUtils.isDesktop || !settings.autoDeploy.value) {
+        isStartupConnectionFailed.value = true;
+        return;
+      }
+
+      startupLoadingMessage.value = I18n.home_loading_auto_deploying;
+      isStartupAutoDeploying.value = true;
+      try {
+        final serverController = Get.isRegistered<ServerController>()
+            ? Get.find<ServerController>()
+            : Get.put<ServerController>(ServerController(), permanent: true);
+        await serverController.run();
+        await _waitUntilDeployFinished(serverController);
+      } finally {
+        isStartupAutoDeploying.value = false;
+      }
+
+      startupLoadingMessage.value = I18n.home_loading_auto_login;
+      final connectedAfterDeploy = await _waitForAddressConnected();
+      if (connectedAfterDeploy) {
+        await _refreshScriptsAfterConnected();
+        return;
+      }
+
+      isStartupConnectionFailed.value = true;
     } finally {
-      isStartupAutoDeploying.value = false;
+      isStartupChecking.value = false;
+      startupLoadingMessage.value = '';
     }
+  }
+
+  Future<void> _refreshScriptsAfterConnected() async {
+    isStartupConnectionFailed.value = false;
+    startupLoadingMessage.value = I18n.home_loading_config_detail;
+    await _scriptService.reloadFromServer();
+  }
+
+  Future<bool> _waitForAddressConnected({
+    int retries = 10,
+    Duration delay = const Duration(milliseconds: 500),
+  }) async {
+    for (var i = 0; i < retries; i++) {
+      final connected = await ApiClient().testAddress();
+      if (connected) {
+        return true;
+      }
+      if (i < retries - 1) {
+        await Future.delayed(delay);
+      }
+    }
+    return false;
   }
 
   Future<void> _waitUntilDeployFinished(ServerController controller) async {
