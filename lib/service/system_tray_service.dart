@@ -1,6 +1,6 @@
-import 'dart:io' show Platform;
+﻿import 'dart:io' show Platform;
 import 'package:get/get.dart';
-import 'package:oasx/model/script_model.dart';
+import 'package:oasx/modules/home/models/script_model.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/platform_utils.dart';
@@ -25,11 +25,11 @@ class SystemTrayService extends GetxService {
     await _rebuildMenu();
     _systemTray.registerSystemTrayEventHandler((eventName) async {
       if (eventName == kSystemTrayEventClick) {
-        // 单击默认显示窗口
+        // 鍗曞嚮榛樿鏄剧ず绐楀彛
         await windowManager.show();
         await windowManager.focus();
       } else if (eventName == kSystemTrayEventRightClick) {
-        // 右键打开菜单
+        // 鍙抽敭鎵撳紑鑿滃崟
         await _rebuildMenu();
         Platform.isWindows ? _systemTray.popUpContextMenu() : _appWindow.show();
       }
@@ -47,7 +47,7 @@ class SystemTrayService extends GetxService {
   Future<void> _rebuildMenu() async {
     final Menu mainMenu = Menu();
     await mainMenu.buildFrom([
-      SubMenu(label: I18n.script_list.tr, children: buildScriptMenuList()),
+      SubMenu(label: I18n.scriptList.tr, children: buildScriptMenuList()),
       MenuSeparator(),
       MenuItemLabel(
         label: I18n.showWindow.tr,
@@ -83,7 +83,7 @@ class SystemTrayService extends GetxService {
               checked: e.state.value == ScriptState.running,
               onClicked: (menuItem) async {
                 if (menuItem.checked) {
-                  // 当前正在运行
+                  // 褰撳墠姝ｅ湪杩愯
                   await Get.find<ScriptService>().stopScript(e.name);
                 } else {
                   await Get.find<ScriptService>().startScript(e.name);
@@ -101,3 +101,5 @@ class SystemTrayService extends GetxService {
     return '${scriptModel.name} - ${scriptModel.runningTask.value.taskName.value.tr}';
   }
 }
+
+

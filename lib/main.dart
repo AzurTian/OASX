@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/config/theme.dart' show darkTheme, lightTheme;
-import 'package:oasx/controller/settings.dart';
+import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/service/system_tray_service.dart';
@@ -14,7 +14,7 @@ import 'package:oasx/service/websocket_service.dart';
 import 'package:oasx/service/window_service.dart';
 import 'package:oasx/translation/i18n.dart';
 import 'package:oasx/utils/platform_utils.dart';
-import 'package:oasx/views/routes.dart';
+import 'package:oasx/routes.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 void main() async {
@@ -78,3 +78,6 @@ Future<void> initService() async {
     Get.putAsync(() async => ScriptService(), permanent: true),
   ]);
 }
+
+
+

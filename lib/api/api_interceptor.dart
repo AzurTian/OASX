@@ -1,10 +1,10 @@
-import 'package:flutter_nb_net/flutter_net.dart';
+﻿import 'package:flutter_nb_net/flutter_net.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:oasx/translation/i18n_content.dart';
 
 class ApiInterceptor extends Interceptor {
   static const _startTimeKey = 'api_start_time';
-  static const _maxLen = 200; // 最大打印长度
+  static const _maxLen = 200; // 鏈€澶ф墦鍗伴暱搴?
 
   String _short(Object? data) {
     if (data == null) return 'null';
@@ -58,10 +58,10 @@ class ApiInterceptor extends Interceptor {
       case 403:
         break;
       case 404:
-        showNetErrCodeSnackBar(I18n.network_not_found.tr, code);
+        showNetErrCodeSnackBar(I18n.networkNotFound.tr, code);
         break;
       case 500:
-        showErrSnackBar(I18n.network_server_error.tr, code, msg);
+        showErrSnackBar(I18n.networkServerError.tr, code, msg);
         break;
       default:
         showNetErrCodeSnackBar(msg, code);
@@ -72,13 +72,13 @@ class ApiInterceptor extends Interceptor {
   }
 
   void showNetErrSnackBar() {
-    Get.snackbar(I18n.network_error.tr, I18n.network_connect_timeout.tr,
+    Get.snackbar(I18n.networkError.tr, I18n.networkConnectTimeout.tr,
         duration: const Duration(seconds: 5));
   }
 
   void showNetErrCodeSnackBar(String msg, int code) {
     Get.snackbar(
-        I18n.network_error.tr, '${I18n.network_error_code.tr}: $code | $msg',
+        I18n.networkError.tr, '${I18n.networkErrorCode.tr}: $code | $msg',
         duration: const Duration(seconds: 5));
   }
 
@@ -86,3 +86,4 @@ class ApiInterceptor extends Interceptor {
     Get.snackbar('$title | $code', msg, duration: const Duration(seconds: 5));
   }
 }
+

@@ -1,11 +1,11 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:get_storage/get_storage.dart';
-import 'package:oasx/model/const/storage_key.dart';
-import 'package:oasx/model/window_state.dart';
+import 'package:oasx/modules/common/models/storage_key.dart';
+import 'package:oasx/modules/common/models/window_state.dart';
 import 'package:oasx/service/system_tray_service.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:window_manager/window_manager.dart';
@@ -143,3 +143,4 @@ class WindowService extends GetxService with WindowListener {
     windowManager.setPreventClose(newVal);
   }
 }
+

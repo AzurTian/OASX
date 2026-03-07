@@ -1,3 +1,4 @@
+﻿// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _us_base_map = {
@@ -11,9 +12,9 @@ final Map<String, String> _us_base_map = {
 };
 
 final Map<String, String> _us_ui = {
-  I18n.log_out: 'Logout',
-  I18n.zh_cn: '简体中文',
-  I18n.en_us: 'English',
+  I18n.logOut: 'Logout',
+  I18n.zhCn: '简体中文',
+  I18n.enUs: 'English',
   I18n.run: 'Running',
   I18n.pending: 'Pending',
   I18n.waiting: 'Waiting',
@@ -23,54 +24,54 @@ final Map<String, String> _us_ui = {
   I18n.cancel: 'Cancel',
   I18n.confirm: 'Confirm',
   I18n.retry: 'Retry',
-  I18n.select_all: 'Select all',
+  I18n.selectAll: 'Select all',
   I18n.clear: 'Clear',
-  I18n.selected_count: 'Selected @count',
+  I18n.selectedCount: 'Selected @count',
   I18n.time: 'Time',
-  I18n.project_statement: 'Open Source Software',
-  I18n.task_setting: 'Settings',
-  I18n.no_data: 'No data',
-  I18n.notify_test_help: 'Please refer to the documentation [Message Push] to fill in the relevant configuration',
-  I18n.root_path_server_help:
+  I18n.projectStatement: 'Open Source Software',
+  I18n.taskSetting: 'Settings',
+  I18n.noData: 'No data',
+  I18n.notifyTestHelp: 'Please refer to the documentation [Message Push] to fill in the relevant configuration',
+  I18n.rootPathServerHelp:
   'OASX and OAS are two different things. Do not confuse them, do not put them in the same directory, do not use spaces, do not use Chinese characters, and do not use overly long paths',
-  I18n.install_oas_help: 'This will download and decompress from Github. Please maintain a stable network connection. At the same time, this directory will be cleared',
-  I18n.config_update_tip: 'The current script is running, please stop it before making modifications.',
-  I18n.minimize_to_system_tray_help: 'Minimized to the system tray when closing a window',
-  I18n.login_address: 'Login address',
+  I18n.installOasHelp: 'This will download and decompress from Github. Please maintain a stable network connection. At the same time, this directory will be cleared',
+  I18n.configUpdateTip: 'The current script is running, please stop it before making modifications.',
+  I18n.minimizeToSystemTrayHelp: 'Minimized to the system tray when closing a window',
+  I18n.loginAddress: 'Login address',
   I18n.username: 'Username',
   I18n.password: 'Password',
-  I18n.user_setting: 'User settings',
-  I18n.home_select_control_script: 'Select control scripts',
-  I18n.home_overview_control: 'Overview and control',
-  I18n.home_master_switch: 'Master switch',
-  I18n.home_running_count: 'Running: @running / @total',
-  I18n.home_total_scripts: 'Total scripts',
-  I18n.home_control_script_count: 'Control scripts: @count',
-  I18n.turn_on_the_linker: 'Turn on the linker',
-  I18n.close_the_linker: 'Close the linker',
-  I18n.home_no_task: 'No tasks',
-  I18n.home_unconfigured_task: 'Unconfigured task',
-  I18n.home_running_task: 'Running task',
-  I18n.home_pending_task: 'Pending task',
-  I18n.home_waiting_task: 'Waiting task',
-  I18n.home_connection_retry_hint:
+  I18n.userSetting: 'User settings',
+  I18n.homeSelectControlScript: 'Select control scripts',
+  I18n.homeOverviewControl: 'Overview and control',
+  I18n.homeMasterSwitch: 'Master switch',
+  I18n.homeRunningCount: 'Running: @running / @total',
+  I18n.homeTotalScripts: 'Total scripts',
+  I18n.homeControlScriptCount: 'Control scripts: @count',
+  I18n.turnOnTheLinker: 'Turn on the linker',
+  I18n.closeTheLinker: 'Close the linker',
+  I18n.homeNoTask: 'No tasks',
+  I18n.homeUnconfiguredTask: 'Unconfigured task',
+  I18n.homeRunningTask: 'Running task',
+  I18n.homePendingTask: 'Pending task',
+  I18n.homeWaitingTask: 'Waiting task',
+  I18n.homeConnectionRetryHint:
       'Please confirm the backend service has started and user settings are correct',
-  I18n.home_connection_retry_action: 'Refresh',
-  I18n.home_empty_script_hint: 'No scripts yet, please add a script first',
-  I18n.home_loading_auto_deploying:
+  I18n.homeConnectionRetryAction: 'Refresh',
+  I18n.homeEmptyScriptHint: 'No scripts yet, please add a script first',
+  I18n.homeLoadingAutoDeploying:
       'Auto deployment in progress, please wait',
-  I18n.home_loading_auto_login: 'Logging into OAS, please wait',
-  I18n.home_loading_config_detail:
+  I18n.homeLoadingAutoLogin: 'Logging into OAS, please wait',
+  I18n.homeLoadingConfigDetail:
       'Loading config details, please wait',
-  I18n.task_manage: 'Task Manager',
-  I18n.task_manage_title: 'Task Manager',
-  I18n.task_search_hint: 'Search tasks',
-  I18n.task_not_found: 'No matching tasks',
-  I18n.task_menu_load_failed: 'Failed to load task menu',
+  I18n.taskManage: 'Task Manager',
+  I18n.taskManageTitle: 'Task Manager',
+  I18n.taskSearchHint: 'Search tasks',
+  I18n.taskNotFound: 'No matching tasks',
+  I18n.taskMenuLoadFailed: 'Failed to load task menu',
 };
 
 final Map<String, String> _us_script = {
-  I18n.serial_help: '''Common emulator serials can be found in the list below. 
+  I18n.serialHelp: '''Common emulator serials can be found in the list below. 
 Fill in "auto" to automatically detect the emulator. When multiple emulators are running or an emulator that does not support automatic detection is used, "auto" cannot be used and must be filled in manually.
   
 Default emulator serials: 
@@ -79,7 +80,7 @@ Default emulator serials:
 [LDPlayer](all series): emulator-5554 or 127.0.0.1:5555
 If it's not mentioned, it may not have been tested or is not recommended. You can try it yourself. 
 If you use the multi-instance function of the emulator, their serials will not be the default. You can query them by executing adb devices in console.bat, or fill them in according to the official emulator tutorial''',
-  I18n.handle_help:
+  I18n.handleHelp:
   '''Fill in "auto" to automatically detect the emulator. "auto" cannot be used when multiple emulators are running or when using an emulator that does not support automatic detection; it must be filled in manually. The input is the handle title or handle number. The handle number changes each time the emulator is started. Clearing it means not using the window operation method.
 
 Handle Title: 
@@ -90,26 +91,26 @@ Handle Title:
 Handle Number: 
 Some emulators have the same handle title when multiple instances are opened (referring to MuMu). In this case, you need to manually obtain the emulator's handle number and set it manually. 
 Please refer to the documentation for tools to obtain it: [Emulator Support]''',
-  I18n.package_name_help: 'When multiple game clients are installed on the emulator, you need to manually select the server',
-  I18n.screenshot_method_help: '''When automatic selection is used, a performance test will be performed once, and it will automatically change to the fastest screenshot solution. The general speed is: 
+  I18n.packageNameHelp: 'When multiple game clients are installed on the emulator, you need to manually select the server',
+  I18n.screenshotMethodHelp: '''When automatic selection is used, a performance test will be performed once, and it will automatically change to the fastest screenshot solution. The general speed is: 
 window_background ~= nemu_ipc >>> DroidCast_raw > ADB_nc >> DroidCast > uiautomator2 ~= ADB 
 Using window_background for screenshots is about 10ms, compared to DroidCast_raw which is about 100ms (only on the author's computer). However, window_background has a fatal flaw: the emulator cannot be minimized. 
 nemu_ipc is limited to MuMu Player 12 and requires a version greater than 3.8.13, and the emulator's execution path needs to be set''',
-  I18n.control_method_help:
+  I18n.controlMethodHelp:
   '''Speed: window_message ~= minitouch > Hermit >>> uiautomator2 ~= ADB 
 The control method simulates human speed, and faster is not always better. Using (window_message) may occasionally fail''',
-  I18n.emulatorinfo_type_help: '''Select the type of emulator you are using''',
-  I18n.emulatorinfo_name_help: '''Example: MuMuPlayer-12.0-0, if unclear, please consult the documentation''',
-  I18n.adb_restart_help: '',
-  I18n.notify_config_help: 'Input is in YAML format, there is a space after the colon ":", for details please refer to the documentation [Message Push]',
-  I18n.screenshot_interval_help:
+  I18n.emulatorinfoTypeHelp: '''Select the type of emulator you are using''',
+  I18n.emulatorinfoNameHelp: '''Example: MuMuPlayer-12.0-0, if unclear, please consult the documentation''',
+  I18n.adbRestartHelp: '',
+  I18n.notifyConfigHelp: 'Input is in YAML format, there is a space after the colon ":", for details please refer to the documentation [Message Push]',
+  I18n.screenshotIntervalHelp:
   'The minimum interval between two screenshots, limited to 0.1 ~ 0.3, can reduce CPU usage for high-configuration computers',
-  I18n.combat_screenshot_interval_help:
+  I18n.combatScreenshotIntervalHelp:
   'The minimum interval between two screenshots, limited to 0.1 ~ 1.0, can reduce CPU usage during battles',
-  I18n.task_hoarding_duration_help:
+  I18n.taskHoardingDurationHelp:
   'Can reduce the frequency of game operations during farming periods. After a task is triggered, wait X minutes, then execute the accumulated tasks all at once',
-  I18n.when_task_queue_empty_help: 'Close the game when there are no tasks, which can reduce CPU usage during farming periods',
-  I18n.schedule_rule_help: '''The scheduling objects referred to here are those in Pending; tasks in Waiting are not included. 
+  I18n.whenTaskQueueEmptyHelp: 'Close the game when there are no tasks, which can reduce CPU usage during farming periods',
+  I18n.scheduleRuleHelp: '''The scheduling objects referred to here are those in Pending; tasks in Waiting are not included. 
 Filter-based scheduling: The default option. The execution order of tasks will be scheduled according to the order determined during development, which is generally the optimal solution. 
 First-In, First-Out (FIFO)-based scheduling: Tasks will be sorted by their next execution time, and those at the front will be executed first. 
 Priority-based scheduling: High-priority tasks are executed before low-priority tasks. Tasks with the same priority are executed in a first-come, first-served order''',
@@ -118,15 +119,15 @@ Priority-based scheduling: High-priority tasks are executed before low-priority 
 };
 
 final Map<String, String> _us_restart = {
-  I18n.enable_help: 'Add this task to the scheduler',
-  I18n.next_run_help: 'The time will be automatically calculated based on the interval below',
-  I18n.priority_help:
+  I18n.enableHelp: 'Add this task to the scheduler',
+  I18n.nextRunHelp: 'The time will be automatically calculated based on the interval below',
+  I18n.priorityHelp:
   'This option is valid if the scheduling rule is set to priority-based. The default is 5. The lower the number, the higher the priority. The range is [1-15]. If the priority is the same, tasks are scheduled on a first-come, first-served basis',
-  I18n.success_interval_help: '',
-  I18n.failure_interval_help: '',
-  I18n.server_update_help:
+  I18n.successIntervalHelp: '',
+  I18n.failureIntervalHelp: '',
+  I18n.serverUpdateHelp:
   'If it\'s not set to the default "09:00:00", the task will forcibly set the next run time to the set value of the next day after each execution',
-  I18n.harvest_enable_help: 'This section is for automatically clicking on login rewards when logging into the game. It is a required option',
+  I18n.harvestEnableHelp: 'This section is for automatically clicking on login rewards when logging into the game. It is a required option',
   'rest_task_datetime_help': '',
   'delay_date_help': 'When the forced execution time is enabled above, customize how many days later to enforce execution. By default, it\'s one day later, meaning the next day',
   'float_time_help':
@@ -134,19 +135,19 @@ final Map<String, String> _us_restart = {
 };
 
 final Map<String, String> _us_global_game = {
-  I18n.friend_invitation_help: 'Accept all by default',
+  I18n.friendInvitationHelp: 'Accept all by default',
   'accept_invitation_complete_now_help': 'To prevent cancellation by the other party due to two hours of inactivity, it is enabled by default',
-  I18n.invitation_detect_interval_help: 'Detect collaboration every 10 seconds by default',
-  I18n.when_network_abnormal_help: 'By default, it will wait for 10 seconds first',
-  I18n.when_network_error_help: 'Restart the game',
-  I18n.home_client_clear_help: 'Sometimes it may require clearing the cache when entering the courtyard',
-  I18n.enable_help: 'Add this task to the scheduler',
-  I18n.broker_help: '',
-  I18n.port_help: '',
-  I18n.transport_help: '',
-  I18n.ca_help: '',
-  I18n.username_help: '',
-  I18n.password_help: '',
+  I18n.invitationDetectIntervalHelp: 'Detect collaboration every 10 seconds by default',
+  I18n.whenNetworkAbnormalHelp: 'By default, it will wait for 10 seconds first',
+  I18n.whenNetworkErrorHelp: 'Restart the game',
+  I18n.homeClientClearHelp: 'Sometimes it may require clearing the cache when entering the courtyard',
+  I18n.enableHelp: 'Add this task to the scheduler',
+  I18n.brokerHelp: '',
+  I18n.portHelp: '',
+  I18n.transportHelp: '',
+  I18n.caHelp: '',
+  I18n.usernameHelp: '',
+  I18n.passwordHelp: '',
   // ---------------------------------------------------------------------
   'costume_main': 'On Tranquil Views',
   'costume_main_1': 'Celestial Garden',
