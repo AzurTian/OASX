@@ -99,34 +99,58 @@ class ServerController extends GetxController with LogMixin {
 
   Future<void> run() async {
     isDeployLoading.value = true;
-    if (Get.isRegistered<SettingsController>()) {
-      await Get.find<SettingsController>().killServer(showTip: false);
-    }
-    clearLog();
-    shell!.kill();
-    await runShell('echo OAS working directory: ');
-    await runShell('pwd');
-    await runShell('taskkill /f /t /im pythonw.exe');
-    await runShell('python -m deploy.installer');
-    await runShell('echo Start OAS');
-    runShell('.\\toolkit\\pythonw.exe  server.py');
-    if (!autoLoginAfterDeploy.value) {
-      isDeployLoading.value = false;
-      return;
-    }
+    try {
+      if (Get.isRegistered<SettingsController>()) {
+        await Get.find<SettingsController>().killServer(
+          showTip: false,
+          resetDashboardToDisconnected: false,
+        );
+      }
+      clearLog();
+      shell!.kill();
+      await runShell('echo OAS working directory: ');
+      await runShell('pwd');
+      await runShell('taskkill /f /t /im pythonw.exe');
+      await runShell('python -m deploy.installer');
+      await runShell('echo Start OAS');
+      runShell('.\\toolkit\\pythonw.exe  server.py');
 
-    final address = _storage.read(StorageKey.address.name) ?? '';
-    if (address == '') {
+      final shouldAutoLogin = _resolveAutoLoginAfterDeploy();
+      if (!shouldAutoLogin) {
+        return;
+      }
+
+      final address = _storage.read(StorageKey.address.name) ?? '';
+      if (address.isEmpty) {
+        return;
+      }
+      await Future.delayed(const Duration(seconds: 2));
+      await _tryConnect(
+        address,
+        retries: 60,
+        retryDelay: const Duration(milliseconds: 500),
+      );
+    } finally {
       isDeployLoading.value = false;
-      return;
     }
-    Future.delayed(const Duration(seconds: 1, milliseconds: 500), () async {
-      await _tryConnect(address, retries: 10);
-      isDeployLoading.value = false;
-    });
   }
 
-  Future<bool> _tryConnect(String rawAddress, {int retries = 1}) async {
+  bool _resolveAutoLoginAfterDeploy() {
+    if (Get.isRegistered<SettingsController>()) {
+      final value = Get.find<SettingsController>().autoLoginAfterDeploy.value;
+      autoLoginAfterDeploy.value = value;
+      return value;
+    }
+    final value = _storage.read(StorageKey.autoLoginAfterDeploy.name) ?? false;
+    autoLoginAfterDeploy.value = value;
+    return value;
+  }
+
+  Future<bool> _tryConnect(
+    String rawAddress, {
+    int retries = 1,
+    Duration retryDelay = const Duration(milliseconds: 500),
+  }) async {
     final address =
         rawAddress.startsWith('http://') || rawAddress.startsWith('https://')
             ? rawAddress
@@ -136,11 +160,23 @@ class ServerController extends GetxController with LogMixin {
     for (int i = 0; i < retries; i++) {
       final connected = await ApiClient().testAddress();
       if (connected) {
+        try {
+          if (Get.isRegistered<HomeDashboardController>()) {
+            await Get.find<HomeDashboardController>()
+                .refreshAfterExternalConnected();
+          } else if (Get.isRegistered<ScriptService>()) {
+            await Get.find<ScriptService>().reloadFromServer();
+          }
+        } catch (_) {
+          // Keep navigation behavior even if dashboard refresh fails here.
+        }
         await Get.find<LocaleService>().refreshTransFromRemote();
         Get.offAllNamed('/home');
         return true;
       }
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (i < retries - 1) {
+        await Future.delayed(retryDelay);
+      }
     }
     return false;
   }

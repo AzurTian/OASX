@@ -51,13 +51,13 @@ class _SettingsViewState extends State<SettingsView> {
     ),
     _SettingsSection(
       key: GlobalKey(),
-      navTitleBuilder: () => I18n.system_setting.tr,
-      cardBuilder: () => const SystemSettingsCard(),
+      navTitleBuilder: () => 'OAS${I18n.setting.tr}',
+      cardBuilder: () => const OasSettingsCard(),
     ),
     _SettingsSection(
       key: GlobalKey(),
-      navTitleBuilder: () => 'OAS${I18n.setting.tr}',
-      cardBuilder: () => const OasSettingsCard(),
+      navTitleBuilder: () => I18n.system_setting.tr,
+      cardBuilder: () => const SystemSettingsCard(),
     ),
   ];
 
@@ -125,8 +125,9 @@ class _SettingsViewState extends State<SettingsView> {
     }
 
     final viewportTop = viewportRenderObject.localToGlobal(Offset.zero).dy;
-    int? currentSectionIndex;
-    var bestDistance = double.infinity;
+    int? passedTopSectionIndex;
+    int? upcomingSectionIndex;
+    var nearestUpcomingTop = double.infinity;
 
     for (var index = 0; index < _sections.length; index++) {
       final sectionContext = _sections[index].key.currentContext;
@@ -138,14 +139,17 @@ class _SettingsViewState extends State<SettingsView> {
 
       final sectionTop =
           sectionRenderObject.localToGlobal(Offset.zero).dy - viewportTop;
-      final distance = sectionTop.abs();
-      if (distance <= _topAlignmentTolerance && distance < bestDistance) {
-        bestDistance = distance;
-        currentSectionIndex = index;
+      if (sectionTop <= _topAlignmentTolerance) {
+        passedTopSectionIndex = index;
+        continue;
+      }
+      if (sectionTop < nearestUpcomingTop) {
+        nearestUpcomingTop = sectionTop;
+        upcomingSectionIndex = index;
       }
     }
 
-    return currentSectionIndex;
+    return passedTopSectionIndex ?? upcomingSectionIndex ?? _selectedSectionIndex;
   }
 
   Future<void> _scrollToSection(int index) async {

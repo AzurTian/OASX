@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/config/global.dart';
+import 'package:oasx/controller/home/home_dashboard_controller.dart';
 import 'package:oasx/model/const/storage_key.dart';
+import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/check_version.dart';
 import 'package:oasx/utils/platform_utils.dart';
@@ -102,9 +104,20 @@ class SettingsController extends GetxController {
     ApiClient().setAddress(normalized);
   }
 
-  Future<void> killServer({bool showTip = true}) async {
+  Future<void> killServer({
+    bool showTip = true,
+    bool resetDashboardToDisconnected = true,
+  }) async {
     final success = await ApiClient().killServer();
     if (success) {
+      if (resetDashboardToDisconnected) {
+        if (Get.isRegistered<ScriptService>()) {
+          await Get.find<ScriptService>().resetDashboardState();
+        }
+        if (Get.isRegistered<HomeDashboardController>()) {
+          Get.find<HomeDashboardController>().markConnectionFailedFromKillServer();
+        }
+      }
       if (showTip) {
         Get.snackbar(I18n.kill_server_success.tr, '');
       }

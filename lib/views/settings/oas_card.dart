@@ -13,6 +13,10 @@ class OasSettingsCard extends StatelessWidget {
           right: const Icon(Icons.input_rounded),
           onTap: notifyTest,
         ),
+        SettingItem(
+          left: Text(I18n.auto_run_script.tr),
+          right: const AutoScriptButton(),
+        ),
         if (PlatformUtils.isDesktop)
           SettingItem(
             left: Text(I18n.setup_deploy.tr),
@@ -29,10 +33,6 @@ class OasSettingsCard extends StatelessWidget {
             left: Text(I18n.auto_login_after_deploy.tr),
             right: const LoginAfterDeploySwitcher(),
           ),
-        SettingItem(
-          left: Text(I18n.auto_run_script.tr),
-          right: const AutoScriptButton(),
-        ),
         SettingItem(
           left: Text(I18n.updater.tr),
           right: const Icon(Icons.input_rounded),
@@ -206,7 +206,9 @@ void killServer() {
     onCancel: () {},
     onConfirm: () async {
       await Get.find<SettingsController>().killServer();
-      Get.offAllNamed('/home');
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
     },
   );
 }

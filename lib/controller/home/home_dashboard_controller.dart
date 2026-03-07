@@ -220,6 +220,26 @@ class HomeDashboardController extends GetxController {
     await _runStartupConnectionCheck(enableAutoDeploy: false, showFailureSnack: false);
   }
 
+  Future<void> refreshAfterExternalConnected() async {
+    if (isStartupChecking.value) {
+      return;
+    }
+    isStartupChecking.value = true;
+    try {
+      await _refreshScriptsAfterConnected();
+    } finally {
+      isStartupChecking.value = false;
+      startupLoadingMessage.value = '';
+    }
+  }
+
+  void markConnectionFailedFromKillServer() {
+    isStartupChecking.value = false;
+    isStartupAutoDeploying.value = false;
+    startupLoadingMessage.value = '';
+    isStartupConnectionFailed.value = true;
+  }
+
   Future<void> _runStartupConnectionCheck({
     required bool enableAutoDeploy,
     required bool showFailureSnack,

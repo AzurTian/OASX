@@ -18,6 +18,8 @@ import 'package:code_editor/code_editor.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/views/layout/appbar.dart';
 import 'package:oasx/controller/settings.dart';
+import 'package:oasx/controller/home/home_dashboard_controller.dart';
+import 'package:oasx/service/script_service.dart';
 
 part './deploy_view.dart';
 part '../../controller/server/server_controller.dart';
