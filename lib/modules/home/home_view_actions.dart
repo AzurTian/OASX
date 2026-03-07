@@ -8,9 +8,7 @@ extension _HomeViewActions on _HomeViewState {
         Obx(() => HomeOverviewHeader(
               scriptService: scriptService,
               loadingAddScript: _isAddingScript,
-              refreshingScripts: _isRefreshingScripts,
               onAddScriptTap: _onAddScriptCardTap,
-              onRefreshScriptsTap: _onRefreshScriptsTap,
               isLinkModeEnabled: controller.isLinkModeEnabled.value,
               onToggleLinkMode: controller.toggleLinkMode,
             )),
@@ -24,7 +22,7 @@ extension _HomeViewActions on _HomeViewState {
               return _buildConnectionFailedView();
             }
             if (scripts.isEmpty) {
-              return _buildConnectionFailedView();
+              return _buildEmptyScriptsView();
             }
             return HomeScriptGrid(
               scripts: scripts,
@@ -60,10 +58,11 @@ extension _HomeViewActions on _HomeViewState {
                   child: CircularProgressIndicator(strokeWidth: 2.6),
                 );
               }
-              return Icon(
-                Icons.cloud_off_rounded,
-                size: 34,
-                color: Theme.of(context).colorScheme.outline,
+              return IconButton.filled(
+                onPressed: controller.retryStartupConnection,
+                icon: const Icon(Icons.refresh_rounded),
+                iconSize: 34,
+                tooltip: I18n.homeConnectionRetryAction.tr,
               );
             }),
             const SizedBox(height: 12),
@@ -73,6 +72,15 @@ extension _HomeViewActions on _HomeViewState {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyScriptsView() {
+    return Center(
+      child: Text(
+        I18n.homeEmptyScriptHint.tr,
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -109,30 +117,6 @@ extension _HomeViewActions on _HomeViewState {
         });
       },
     );
-  }
-
-  Future<void> _onRefreshScriptsTap() async {
-    if (_isRefreshingScripts) {
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _isRefreshingScripts = true;
-    });
-    try {
-      await controller.retryStartupConnection();
-      controller.setControlScripts(controller.validControlScripts);
-    } catch (_) {
-      Get.snackbar(I18n.loginError.tr, I18n.loginErrorMsg.tr);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isRefreshingScripts = false;
-        });
-      }
-    }
   }
 
   void _openLogPage(String scriptName) {

@@ -40,7 +40,6 @@ extension _HomeScriptCardView on _HomeScriptCardState {
                             ? TextField(
                                 controller: _nameController,
                                 focusNode: _nameFocusNode,
-                                onTapOutside: (_) => _nameFocusNode.unfocus(),
                                 decoration: InputDecoration(
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(

@@ -112,64 +112,15 @@ void updater() {
 }
 
 void killServer() {
-  final settingsController = Get.find<SettingsController>();
-  final isKilling = false.obs;
-
-  Get.dialog(
-    Obx(() {
-      final killing = isKilling.value;
-      return AlertDialog(
-        title: Text(I18n.areYouSureKill.tr),
-        actions: [
-          TextButton(
-            onPressed: killing
-                ? null
-                : () {
-                    if (Get.isDialogOpen ?? false) {
-                      Get.back();
-                    }
-                  },
-            child: Text(I18n.cancel.tr),
-          ),
-          FilledButton(
-            onPressed: killing
-                ? null
-                : () async {
-                    isKilling.value = true;
-                    var closedByTimeout = false;
-                    final autoCloseTimer = Timer(const Duration(seconds: 5), () {
-                      closedByTimeout = true;
-                      if (Get.isDialogOpen ?? false) {
-                        Get.back();
-                      }
-                    });
-                    try {
-                      final success = await settingsController.killServer();
-                      if (success) {
-                        if (!closedByTimeout && (Get.isDialogOpen ?? false)) {
-                          Get.back();
-                        }
-                        return;
-                      }
-                      if (!closedByTimeout) {
-                        isKilling.value = false;
-                      }
-                    } finally {
-                      autoCloseTimer.cancel();
-                    }
-                  },
-            child: killing
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(I18n.confirm.tr),
-          ),
-        ],
-      );
-    }),
-    barrierDismissible: false,
+  Get.defaultDialog(
+    title: I18n.areYouSureKill.tr,
+    onCancel: () {},
+    onConfirm: () async {
+      await Get.find<SettingsController>().killServer();
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+    },
   );
 }
 

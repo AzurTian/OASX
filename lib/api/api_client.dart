@@ -1,6 +1,7 @@
+﻿import 'dart:io';
+
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_nb_net/flutter_net.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -58,16 +59,15 @@ class ApiClient {
 
   ApiClient._internal() {
     final temporaryDirectory =
-        GetStorage().read(StorageKey.temporaryDirectory.name) ?? '';
-    final cacheStore =
-        kIsWeb ? MemCacheStore() : FileCacheStore(temporaryDirectory);
+        GetStorage().read(StorageKey.temporaryDirectory.name) ??
+            Directory.systemTemp.path;
     NetOptions.instance
         .setConnectTimeout(const Duration(seconds: 3))
         .enableLogger(false)
         .addInterceptor(
           DioCacheInterceptor(
             options: CacheOptions(
-              store: cacheStore,
+              store: FileCacheStore(temporaryDirectory),
               policy: CachePolicy.request,
               hitCacheOnErrorExcept: [401, 403],
               maxStale: const Duration(days: 7),

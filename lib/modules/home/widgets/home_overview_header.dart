@@ -9,18 +9,14 @@ class HomeOverviewHeader extends StatelessWidget {
     super.key,
     required this.scriptService,
     required this.loadingAddScript,
-    required this.refreshingScripts,
     required this.onAddScriptTap,
-    required this.onRefreshScriptsTap,
     required this.isLinkModeEnabled,
     required this.onToggleLinkMode,
   });
 
   final ScriptService scriptService;
   final bool loadingAddScript;
-  final bool refreshingScripts;
   final VoidCallback onAddScriptTap;
-  final VoidCallback onRefreshScriptsTap;
   final bool isLinkModeEnabled;
   final VoidCallback onToggleLinkMode;
 
@@ -90,22 +86,6 @@ class HomeOverviewHeader extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    tooltip: I18n.homeConnectionRetryAction.tr,
-                    onPressed: refreshingScripts ? null : onRefreshScriptsTap,
-                    style: IconButton.styleFrom(
-                      backgroundColor: colorScheme.surfaceContainerHighest,
-                      foregroundColor: colorScheme.onSurfaceVariant,
-                    ),
-                    icon: refreshingScripts
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.refresh_rounded),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
                     tooltip: isLinkModeEnabled
                         ? I18n.closeTheLinker.tr
                         : I18n.turnOnTheLinker.tr,
@@ -121,20 +101,22 @@ class HomeOverviewHeader extends StatelessWidget {
                     icon: const Icon(Icons.link_rounded),
                   ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    tooltip: I18n.configAdd.tr,
-                    onPressed: loadingAddScript ? null : onAddScriptTap,
-                    style: IconButton.styleFrom(
-                      backgroundColor: colorScheme.surfaceContainerHighest,
-                      foregroundColor: colorScheme.onSurfaceVariant,
+                  Tooltip(
+                    message: I18n.configAdd.tr,
+                    child: ElevatedButton(
+                      onPressed: loadingAddScript ? null : onAddScriptTap,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: loadingAddScript
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.add_rounded, size: 20),
                     ),
-                    icon: loadingAddScript
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.add_rounded),
                   ),
                 ],
               );

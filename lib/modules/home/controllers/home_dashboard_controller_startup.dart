@@ -128,7 +128,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
 
   Future<void> _waitUntilDeployFinished(ServerController controller) async {
     var retries = 0;
-    while (controller.isDeployLoading.value && retries < 20) {
+    while (controller.isDeployLoading.value && retries < 240) {
       retries += 1;
       await Future.delayed(const Duration(milliseconds: 250));
     }

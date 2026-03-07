@@ -10,8 +10,10 @@ class _ScriptStateIndicator extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 4),
       child: switch (state) {
-        ScriptState.running =>
-          const Icon(Icons.circle_rounded, size: 24, color: Colors.green),
+        ScriptState.running => const SpinKitChasingDots(
+            color: Colors.green,
+            size: 22,
+          ),
         ScriptState.inactive =>
           const Icon(Icons.donut_large, size: 24, color: Colors.grey),
         ScriptState.warning =>

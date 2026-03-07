@@ -29,7 +29,6 @@ class _HomeViewState extends State<HomeView> {
   final scriptService = Get.find<ScriptService>();
   final controller = Get.find<HomeDashboardController>();
   bool _isAddingScript = false;
-  bool _isRefreshingScripts = false;
 
   @override
   void initState() {
