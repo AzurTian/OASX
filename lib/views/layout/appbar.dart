@@ -55,7 +55,10 @@ PreferredSizeWidget _windowAppbar(
 
 /// Desktop (Linux / macOS)
 PreferredSizeWidget _desktopAppbar(BuildContext context, {String? routePath}) {
-  return AppBar(title: getTitle(context, routePath: routePath));
+  return AppBar(
+    title: getTitle(context, routePath: routePath),
+    automaticallyImplyLeading: _shouldAutoImplyLeading(routePath),
+  );
 }
 
 /// Web
@@ -72,5 +75,10 @@ PreferredSizeWidget _mobileTabletAppbar(
   BuildContext context, {
   String? routePath,
 }) {
-  return AppBar(title: getTitle(context, routePath: routePath));
+  return AppBar(
+    title: getTitle(context, routePath: routePath),
+    automaticallyImplyLeading: _shouldAutoImplyLeading(routePath),
+  );
 }
+
+bool _shouldAutoImplyLeading(String? routePath) => routePath != '/overview';

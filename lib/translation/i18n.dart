@@ -7,7 +7,6 @@ import 'package:oasx/utils/extension_utils.dart';
 import 'i18n_content.dart';
 part 'i18n_us.dart';
 part 'i18n_cn.dart';
-part 'i18n_cn_extra.dart';
 
 class Messages extends Translations {
   @override
@@ -91,6 +90,5 @@ class Messages extends Translations {
     ..._cn_memory_scrolls_config,
     ..._cn_demon_retreat_config,
     ..._cn_dye_trials_config,
-    ...cnUiExtra,
   };
 }
