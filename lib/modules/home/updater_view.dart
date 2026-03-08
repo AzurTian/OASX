@@ -17,13 +17,10 @@ class UpdaterView extends StatelessWidget {
         builder:
             (BuildContext context, AsyncSnapshot<UpdateInfoModel> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // 褰揊uture杩樻湭瀹屾垚鏃讹紝鏄剧ず鍔犺浇涓殑UI
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
-            // 褰揊uture鍙戠敓閿欒鏃讹紝鏄剧ず閿欒鎻愮ず鐨刄I
             return Text('Error: ${snapshot.error}');
           } else {
-            // 褰揊uture鎴愬姛瀹屾垚鏃讹紝鏄剧ず鏁版嵁
             UpdateInfoModel data = snapshot.data!;
             return SingleChildScrollView(
               child: content(data, context).paddingAll(20),
@@ -74,11 +71,11 @@ class UpdaterView extends StatelessWidget {
       ],
     );
     Widget scrollableTitle = SingleChildScrollView(
-      scrollDirection: Axis.horizontal, // <-- 璁剧疆涓烘按骞虫粴鍔?
+      scrollDirection: Axis.horizontal,
       child: title,
     );
     Widget scrollableDifferTable = SingleChildScrollView(
-      scrollDirection: Axis.horizontal, // <-- 璁剧疆涓烘按骞虫粴鍔?
+      scrollDirection: Axis.horizontal,
       child: differTable,
     );
     Table submitHistory = Table(
@@ -88,7 +85,7 @@ class UpdaterView extends StatelessWidget {
       children: submitHistoryData(data, context),
     );
     Widget scrollableSubmitHistory = SingleChildScrollView(
-      scrollDirection: Axis.horizontal, // <-- 璁剧疆涓烘按骞虫粴鍔?
+      scrollDirection: Axis.horizontal,
       child: submitHistory,
     );
     return <Widget>[

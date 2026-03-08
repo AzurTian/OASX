@@ -13,6 +13,7 @@ import 'package:oasx/service/theme_service.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:oasx/service/window_service.dart';
 import 'package:oasx/translation/i18n.dart';
+import 'package:oasx/utils/logger.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:oasx/routes.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -72,6 +73,7 @@ Future<void> initService() async {
   Get.lazyPut<WebSocketService>(() => WebSocketService(), fenix: true);
 
   await Future.wait([
+    initLogger(),
     Get.putAsync(() async => LocaleService()),
     Get.putAsync(() async => ThemeService()),
     Get.putAsync(() async => WindowService()),

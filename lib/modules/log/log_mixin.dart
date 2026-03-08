@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:oasx/config/translation/i18n_content.dart';
+import 'package:oasx/translation/i18n_content.dart';
 
 mixin LogMixin on GetxController {
   /// max lines to store in log
@@ -59,16 +59,13 @@ mixin LogMixin on GetxController {
   }
 
   void _removeUIOldLogs() {
-    // 闈炶嚜鍔ㄦ粴鍔ㄧ姸鎬佷笅,涓旀湭婧㈠嚭(宸插垹闄ゆ孩鍑洪儴鍒?,鍒欎笉鍒犻櫎鏃ф棩蹇?浣跨敤鎴峰彲浠ュ仠鐣?
     if (!autoScroll.value) return;
-    // UI 闄愬埗锛氬彧淇濈暀鏈€鏂?maxLines 琛?
     if (logs.length > maxLines) {
       logs.removeRange(0, logs.length - maxLines);
     }
   }
 
   void _updateUILogs() {
-    // 鏍规嵁 backlog 鍔ㄦ€佽皟鏁存湰娆¤澶勭悊澶氬皯鏉?
     int backlog = _pendingLogs.length;
     int burst = backlog.clamp(minBurst, maxBurst);
     for (int i = 0; i < burst && _pendingLogs.isNotEmpty; i++) {
@@ -77,11 +74,9 @@ mixin LogMixin on GetxController {
   }
 
   void _clearOverflowLogs() {
-    // 璁＄畻鎬诲ぇ灏?
     int totalSize = logs.length + _pendingLogs.length;
     if (totalSize > maxBuffer) {
       int overflow = totalSize - maxBuffer;
-      // 浼樺厛鍒犻櫎 logs 閲屾渶鑰佺殑
       if (overflow > 0) {
         int removeFromLogs = min(overflow, logs.length);
         if (removeFromLogs > 0) {
@@ -89,7 +84,6 @@ mixin LogMixin on GetxController {
           overflow -= removeFromLogs;
         }
       }
-      // 濡傛灉杩樹笉澶燂紝灏变粠 pending 閲屽垹闄ゆ渶鑰佺殑
       if (overflow > 0 && _pendingLogs.isNotEmpty) {
         int removeFromPending = min(overflow, _pendingLogs.length);
         _pendingLogs.removeRange(0, removeFromPending);

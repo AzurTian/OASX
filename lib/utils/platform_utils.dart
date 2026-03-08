@@ -60,8 +60,7 @@ class PlatformUtils {
           packageInfo.installerStore!.toLowerCase().contains('microsoft')) {
         return true;
       }
-      if (packageInfo.buildSignature != null &&
-          packageInfo.buildSignature!.contains('Microsoft')) {
+      if (packageInfo.buildSignature.contains('Microsoft')) {
         return true;
       }
       if (packageName.contains('MicrosoftStore') ||
