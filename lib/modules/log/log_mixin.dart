@@ -1,0 +1,130 @@
+﻿import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:oasx/config/translation/i18n_content.dart';
+
+mixin LogMixin on GetxController {
+  /// max lines to store in log
+  int get maxLines => 200;
+
+  /// max logs+pending
+  int get maxBuffer => 1000;
+
+  /// max burst line when refreshing
+  int get maxBurst => 50;
+
+  /// min burst line when refreshing
+  int get minBurst => 1;
+
+  /// ui log
+  final logs = <String>[].obs;
+
+  /// auto scroll to bottom
+  final autoScroll = true.obs;
+
+  /// collapse log content
+  final collapseLog = false.obs;
+
+  /// logs buffer, used to limit speeded log refresh
+  final _pendingLogs = <String>[];
+
+  /// refresh timer for log
+  Timer? _refreshTimer;
+
+  double _savedScrollOffset = 0.0;
+
+  void Function({bool isJump, bool force, int scrollOffset})? scrollLogs;
+
+  @override
+  void onInit() {
+    _refreshTimer ??= Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      if (_pendingLogs.isEmpty) {
+        return;
+      }
+      _clearOverflowLogs();
+      _updateUILogs();
+      _removeUIOldLogs();
+      scrollLogs?.call();
+    });
+    super.onInit();
+  }
+
+  @override
+  void onClose() {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
+    super.onClose();
+  }
+
+  void _removeUIOldLogs() {
+    // 闈炶嚜鍔ㄦ粴鍔ㄧ姸鎬佷笅,涓旀湭婧㈠嚭(宸插垹闄ゆ孩鍑洪儴鍒?,鍒欎笉鍒犻櫎鏃ф棩蹇?浣跨敤鎴峰彲浠ュ仠鐣?
+    if (!autoScroll.value) return;
+    // UI 闄愬埗锛氬彧淇濈暀鏈€鏂?maxLines 琛?
+    if (logs.length > maxLines) {
+      logs.removeRange(0, logs.length - maxLines);
+    }
+  }
+
+  void _updateUILogs() {
+    // 鏍规嵁 backlog 鍔ㄦ€佽皟鏁存湰娆¤澶勭悊澶氬皯鏉?
+    int backlog = _pendingLogs.length;
+    int burst = backlog.clamp(minBurst, maxBurst);
+    for (int i = 0; i < burst && _pendingLogs.isNotEmpty; i++) {
+      logs.add(_pendingLogs.removeAt(0));
+    }
+  }
+
+  void _clearOverflowLogs() {
+    // 璁＄畻鎬诲ぇ灏?
+    int totalSize = logs.length + _pendingLogs.length;
+    if (totalSize > maxBuffer) {
+      int overflow = totalSize - maxBuffer;
+      // 浼樺厛鍒犻櫎 logs 閲屾渶鑰佺殑
+      if (overflow > 0) {
+        int removeFromLogs = min(overflow, logs.length);
+        if (removeFromLogs > 0) {
+          logs.removeRange(0, removeFromLogs);
+          overflow -= removeFromLogs;
+        }
+      }
+      // 濡傛灉杩樹笉澶燂紝灏变粠 pending 閲屽垹闄ゆ渶鑰佺殑
+      if (overflow > 0 && _pendingLogs.isNotEmpty) {
+        int removeFromPending = min(overflow, _pendingLogs.length);
+        _pendingLogs.removeRange(0, removeFromPending);
+      }
+    }
+  }
+
+  void addLog(String log) {
+    _pendingLogs.add(log);
+  }
+
+  void clearLog() {
+    logs.clear();
+    _pendingLogs.clear();
+  }
+
+  void copyLogs() {
+    final allLogs = logs.join("");
+    Clipboard.setData(ClipboardData(text: allLogs));
+    Get.snackbar(I18n.tip.tr, I18n.copySuccess.tr,
+        duration: const Duration(seconds: 1));
+  }
+
+  void toggleAutoScroll() {
+    autoScroll.value = !autoScroll.value;
+    if (autoScroll.value) {
+      scrollLogs?.call(force: true, scrollOffset: -1);
+    }
+  }
+
+  void toggleCollapse() => collapseLog.value = !collapseLog.value;
+
+  double get savedScrollOffsetVal => _savedScrollOffset;
+  void saveScrollOffset(double offset) {
+    _savedScrollOffset = offset;
+  }
+}
+

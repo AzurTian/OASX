@@ -1,3 +1,5 @@
+﻿import 'package:oasx/modules/home/models/script_model.dart';
+
 import '../service/websocket_service.dart';
 
 extension StringExtension on String {
@@ -36,3 +38,19 @@ extension WebSocketClientExtension on Future<WebSocketClient> {
     return await client.sendAndWaitUntil(data, check: check, onResult: onResult, timeout: timeout);
   }
 }
+
+extension WsStatusX on WsStatus {
+  ScriptState get scriptState {
+    switch (this) {
+      case WsStatus.connecting:
+      case WsStatus.connected:
+        return ScriptState.running;
+      case WsStatus.reconnecting:
+      case WsStatus.error:
+        return ScriptState.warning;
+      case WsStatus.closed:
+        return ScriptState.updating;
+    }
+  }
+}
+

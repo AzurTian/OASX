@@ -1,23 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'dart:io';
-
-import 'package:oasx/views/args/args_view.dart';
+import 'package:oasx/modules/args/index.dart';
 
 void main() {
-  test('Counter value should be incremented', () {
-    ArgsTest argsTest = ArgsTest();
-    argsTest.testArgsView();
+  test('ArgsController can load model from json string', () {
+    const payload =
+        '{"scheduler":[{"name":"enable","value":true,"type":"boolean"}]}';
+    final controller = ArgsController();
+    controller.loadModelfromStr(payload);
 
-    // expect(argsTest.testArgsView, 1);
+    expect(controller.groups.value.length, 1);
+    expect(controller.groups.value.first.groupName, 'scheduler');
   });
-}
-
-class ArgsTest {
-  void testArgsView() {
-    File jsonFile = File(
-        '${Directory.current.path}\\lib\\controller\\args\\task.json'); // 替换为您的 JSON 文件路径
-    String jsonString = jsonFile.readAsStringSync();
-    ArgsController c = ArgsController();
-    c.loadModelfromStr(jsonString);
-  }
 }

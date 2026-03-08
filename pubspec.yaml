@@ -3,7 +3,7 @@ description: The GUI of OAS
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
-version: 0.3.2+1
+version: 0.3.1+10
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -42,7 +42,7 @@ dependencies:
   form_builder_validators: ^11.0.0 # 表单验证
   get_storage: ^2.1.1 # 本地存储
   expansion_tile_group: ^1.2.3 # 多级列表
-  treemenu2: ^0.0.2 # 菜单
+#  treemenu2: ^0.0.2 # 菜单
   flutter_launcher_icons: ^0.13.1 # 自定义启动图片
   window_manager: ^0.4.2 # 自定义window窗口
   easy_rich_text: ^2.1.0 # 富文本
@@ -66,7 +66,9 @@ dependencies:
   url_launcher: ^6.3.0 # 超链接
   chinese_font_library: ^1.2.0 # 桌面平台中文字体处理
   yaml: ^3.1.2 # yaml文件处理
-  logger: ^2.6.2 # 日志
+  system_tray: ^2.0.3 # 系统托盘
+  flutter_staggered_grid_view: ^0.7.0 # 自动布局
+  flutter_slidable: ^4.0.3 # 元素滑动
 
 flutter_launcher_icons:
   android: true
@@ -95,7 +97,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
-  msix: ^3.16.12
+  msix: ^3.16.6
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -111,6 +113,7 @@ flutter:
   assets:
     - assets/release.txt
     - assets/images/Icon-app.png
+    - assets/images/Icon-app.ico
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -144,15 +147,10 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
 msix_config:
-  msstore_appId: 9NB1GM4RLB7V
   display_name: OASX
-  publisher_display_name: OAS
+  publisher_display_name: oas
   identity_name: 23723OAS.OASX
   publisher: CN=EA378061-76F2-46DD-A3E0-5361FADF914A
-  languages: zh-cn
-  msix_version: 0.3.2.0
+  msix_version: 1.1.1.1
   logo_path: ./assets/images/Icon-app.png
-  capabilities: internetClient, location
-  store: true # 反过来
-  sign_msix: false
-  install_certificate: false
+  store: true
