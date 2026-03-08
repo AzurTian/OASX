@@ -61,6 +61,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
       final connected = await ApiClient().testAddress();
       if (connected) {
         await _refreshScriptsAfterConnected();
+        await _refreshTranslationsAfterLogin();
         return;
       }
 
@@ -94,6 +95,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
       final connectedAfterDeploy = await _waitForAddressConnected();
       if (connectedAfterDeploy) {
         await _refreshScriptsAfterConnected();
+        await _refreshTranslationsAfterLogin();
         return;
       }
 
@@ -108,6 +110,17 @@ extension HomeDashboardStartupX on HomeDashboardController {
     isStartupConnectionFailed.value = false;
     startupLoadingMessage.value = I18n.homeLoadingConfigDetail;
     await _scriptService.reloadFromServer();
+  }
+
+  Future<void> _refreshTranslationsAfterLogin() async {
+    if (!Get.isRegistered<LocaleService>()) {
+      return;
+    }
+    try {
+      await Get.find<LocaleService>().refreshTransFromRemote();
+    } catch (_) {
+      // Keep login flow working even if translation refresh fails.
+    }
   }
 
   Future<bool> _waitForAddressConnected({
