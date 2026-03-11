@@ -72,13 +72,14 @@ Future<void> initService() async {
   Get.put(SettingsController(), permanent: true);
   Get.put(SystemTrayService(), permanent: true);
   Get.lazyPut<WebSocketService>(() => WebSocketService(), fenix: true);
+  final windowService = Get.put(WindowService());
 
   await Future.wait([
     initLogger(),
     Get.putAsync(() async => LocaleService()),
     Get.putAsync(() async => ThemeService()),
     Get.putAsync(() async => AutoStartService(), permanent: true),
-    Get.putAsync(() async => WindowService()),
+    windowService.ready,
     Get.putAsync(() async => ScriptService(), permanent: true),
   ]);
 }

@@ -13,28 +13,41 @@ class SystemTrayService extends GetxService {
 
   bool _isTrayVisible = false;
 
-  Future<void> showTray() async {
-    if (_isTrayVisible || !PlatformUtils.isDesktop) return;
-    String iconPath = Platform.isWindows
+  Future<bool> showTray() async {
+    if (!PlatformUtils.isDesktop) return false;
+    if (_isTrayVisible) return true;
+
+    final iconPath = Platform.isWindows
         ? 'assets/images/Icon-app.ico'
         : 'assets/images/Icon-app.png';
-    await _systemTray.initSystemTray(
-      title: "OASX",
-      iconPath: iconPath,
-    );
-    await _rebuildMenu();
-    _systemTray.registerSystemTrayEventHandler((eventName) async {
-      if (eventName == kSystemTrayEventClick) {
-        // 鍗曞嚮榛樿鏄剧ず绐楀彛
-        await windowManager.show();
-        await windowManager.focus();
-      } else if (eventName == kSystemTrayEventRightClick) {
-        // 鍙抽敭鎵撳紑鑿滃崟
-        await _rebuildMenu();
-        Platform.isWindows ? _systemTray.popUpContextMenu() : _appWindow.show();
-      }
-    });
-    _isTrayVisible = true;
+
+    try {
+      final ok = await _systemTray.initSystemTray(
+        title: 'OASX',
+        iconPath: iconPath,
+      );
+      if (!ok) return false;
+
+      await _rebuildMenu();
+      _systemTray.registerSystemTrayEventHandler((eventName) async {
+        if (eventName == kSystemTrayEventClick) {
+          // 单击默认显示窗口
+          await windowManager.show();
+          await windowManager.focus();
+        } else if (eventName == kSystemTrayEventRightClick) {
+          // 右键打开菜单
+          await _rebuildMenu();
+          Platform.isWindows
+              ? _systemTray.popUpContextMenu()
+              : _appWindow.show();
+        }
+      });
+      _isTrayVisible = true;
+      return true;
+    } catch (_) {
+      _isTrayVisible = false;
+      return false;
+    }
   }
 
   Future<void> hideTray() async {
