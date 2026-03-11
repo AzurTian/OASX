@@ -7,6 +7,7 @@ enum StorageKey {
   windowState,
   enableWindowState,
   enableSystemTray,
+  launchAtStartup,
   rootPathServer,
   autoLoginAfterDeploy,
   temporaryDirectory,

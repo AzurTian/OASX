@@ -29,7 +29,8 @@
   static const String deleteConfirm = 'Are you sure to delete', nameCannotEmpty = 'Name cannot be empty', nameInvalid = 'Name cannot be Home';
   static const String nameDuplicate = 'Name already exists', configUpdateTip = 'Config update tip', configAdd = 'Add new config';
   static const String configCopyFromExist = 'Copy from existing config', settingSaved = 'Setting saved', rememberWindowPositionSize = 'Remember window positon and size';
-  static const String minimizeToSystemTray = 'Minimize to system tray', minimizeToSystemTrayHelp = 'Minimize to system tray help', scriptList = 'Script list';
+  static const String minimizeToSystemTray = 'Minimize to system tray', minimizeToSystemTrayHelp = 'Minimize to system tray help', launchAtStartup = 'Launch at startup';
+  static const String launchAtStartupHelp = 'Launch at startup help', launchAtStartupUpdateFailed = 'Launch at startup update failed', scriptList = 'Script list';
   static const String showWindow = 'Show window', exit = 'Exit', empty = 'Empty';
   static const String systemSetting = 'System setting', userSetting = 'User setting', noNewVersion = 'No new version';
   static const String autoRunScriptList = 'Auto run script list', autoRunScript = 'Auto run script', startSuccess = 'Start success';

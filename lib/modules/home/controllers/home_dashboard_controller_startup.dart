@@ -9,6 +9,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
     await _runStartupConnectionCheck(
       enableAutoDeploy: true,
       showFailureSnack: true,
+      triggerAutoRun: true,
     );
   }
 
@@ -17,6 +18,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
     await _runStartupConnectionCheck(
       enableAutoDeploy: true,
       showFailureSnack: true,
+      triggerAutoRun: true,
     );
   }
 
@@ -24,6 +26,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
     await _runStartupConnectionCheck(
       enableAutoDeploy: false,
       showFailureSnack: false,
+      triggerAutoRun: false,
     );
   }
 
@@ -33,7 +36,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
     }
     isStartupChecking.value = true;
     try {
-      await _refreshScriptsAfterConnected();
+      await _refreshScriptsAfterConnected(triggerAutoRun: true);
     } finally {
       isStartupChecking.value = false;
       startupLoadingMessage.value = '';
@@ -50,6 +53,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
   Future<void> _runStartupConnectionCheck({
     required bool enableAutoDeploy,
     required bool showFailureSnack,
+    required bool triggerAutoRun,
   }) async {
     if (isStartupChecking.value) {
       return;
@@ -60,7 +64,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
     try {
       final connected = await ApiClient().testAddress();
       if (connected) {
-        await _refreshScriptsAfterConnected();
+        await _refreshScriptsAfterConnected(triggerAutoRun: triggerAutoRun);
         await _refreshTranslationsAfterLogin();
         return;
       }
@@ -94,7 +98,7 @@ extension HomeDashboardStartupX on HomeDashboardController {
       startupLoadingMessage.value = I18n.homeLoadingAutoLogin;
       final connectedAfterDeploy = await _waitForAddressConnected();
       if (connectedAfterDeploy) {
-        await _refreshScriptsAfterConnected();
+        await _refreshScriptsAfterConnected(triggerAutoRun: triggerAutoRun);
         await _refreshTranslationsAfterLogin();
         return;
       }
@@ -106,10 +110,17 @@ extension HomeDashboardStartupX on HomeDashboardController {
     }
   }
 
-  Future<void> _refreshScriptsAfterConnected() async {
+  Future<void> _refreshScriptsAfterConnected({
+    required bool triggerAutoRun,
+  }) async {
     isStartupConnectionFailed.value = false;
     startupLoadingMessage.value = I18n.homeLoadingConfigDetail;
     await _scriptService.reloadFromServer();
+
+    if (!triggerAutoRun) {
+      return;
+    }
+    unawaited(_scriptService.autoRunScript());
   }
 
   Future<void> _refreshTranslationsAfterLogin() async {

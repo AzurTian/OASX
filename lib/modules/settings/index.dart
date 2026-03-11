@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:oasx/config/global.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
+import 'package:oasx/service/autostart_service.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/service/theme_service.dart';

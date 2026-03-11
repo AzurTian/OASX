@@ -37,6 +37,8 @@ final Map<String, String> _us_ui = {
   I18n.installOasHelp: 'This will download and decompress from Github. Please maintain a stable network connection. At the same time, this directory will be cleared',
   I18n.configUpdateTip: 'The current script is running, please stop it before making modifications.',
   I18n.minimizeToSystemTrayHelp: 'Minimized to the system tray when closing a window',
+  I18n.launchAtStartupHelp: 'Launch OASX when you sign in',
+  I18n.launchAtStartupUpdateFailed: 'Failed to update launch at startup',
   I18n.loginAddress: 'Login address',
   I18n.username: 'Username',
   I18n.password: 'Password',

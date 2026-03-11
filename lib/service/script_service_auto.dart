@@ -15,19 +15,25 @@ extension ScriptServiceAutoX on ScriptService {
       if (isRunning(scriptName)) {
         success = true;
       } else {
-        startScript(scriptName);
+        await startScript(scriptName);
         var progress = 0.0;
         final taskStartTime = DateTime.now();
-        success = await TimeoutUtils.runWithTimeout(
-          period: const Duration(milliseconds: 30),
-          timeout: const Duration(seconds: 6),
-          check: () => _checkStartSuccess(scriptName, taskStartTime, minDelay),
-          onTick: () {
-            if (progress + 0.005 >= 1) return;
-            psController.updateMessage(scriptName);
-            psController.updateProgress(progress += 0.005);
-          },
-        );
+        try {
+          success = await TimeoutUtils.runWithTimeout(
+            period: const Duration(milliseconds: 30),
+            timeout: const Duration(seconds: 6),
+            check: () =>
+                _checkStartSuccess(scriptName, taskStartTime, minDelay),
+            onTick: () {
+              if (progress + 0.005 >= 1) return;
+              psController.updateMessage(scriptName);
+              psController.updateProgress(progress += 0.005);
+            },
+          );
+        } catch (e) {
+          success = false;
+          printError(info: 'auto run script $scriptName error: $e');
+        }
         psController.updateProgress(success ? 1 : 0);
       }
       if (success) successScriptList.add(scriptName);
@@ -40,7 +46,11 @@ extension ScriptServiceAutoX on ScriptService {
     DateTime taskStartTime,
     Duration minDelay,
   ) {
-    final isRun = scriptModelMap[scriptName]!.state.value == ScriptState.running;
+    final scriptModel = scriptModelMap[scriptName];
+    if (scriptModel == null) {
+      return false;
+    }
+    final isRun = scriptModel.state.value == ScriptState.running;
     final elapsedSinceStart = DateTime.now().difference(taskStartTime);
     final timeArrived = elapsedSinceStart >= minDelay;
     return isRun && timeArrived;

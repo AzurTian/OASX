@@ -26,15 +26,9 @@ class ScriptService extends GetxService {
 
   @override
   Future<void> onInit() async {
-    await reloadFromServer();
     _loadAutoScriptListFromStorage();
+    await reloadFromServer();
     super.onInit();
-  }
-
-  @override
-  Future<void> onReady() async {
-    await autoRunScript();
-    super.onReady();
   }
 
   @override

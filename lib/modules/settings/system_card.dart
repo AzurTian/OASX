@@ -34,6 +34,19 @@ class SystemSettingsCard extends StatelessWidget {
             ),
             right: const SystemTraySwitch(),
           ),
+        if (PlatformUtils.isDesktop)
+          SettingItem(
+            left: Row(
+              children: [
+                Text(I18n.launchAtStartup.tr),
+                Tooltip(
+                  message: I18n.launchAtStartupHelp.tr,
+                  child: const Icon(Icons.help_outline, size: 16),
+                ).paddingOnly(left: 5),
+              ],
+            ),
+            right: const LaunchAtStartupSwitch(),
+          ),
         SettingItem(
             left: Text('${I18n.currentVersion.tr}: ${GlobalVar.version}'),
             right: const CheckUpdateButton()),
@@ -108,6 +121,21 @@ class SystemTraySwitch extends StatelessWidget {
     return Obx(() => Switch(
           value: windowService.enableSystemTray.value,
           onChanged: windowService.updateSystemTrayEnable,
+        ));
+  }
+}
+
+class LaunchAtStartupSwitch extends StatelessWidget {
+  const LaunchAtStartupSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final autoStartService = Get.find<AutoStartService>();
+    return Obx(() => Switch(
+          value: autoStartService.enableLaunchAtStartup.value,
+          onChanged: autoStartService.isApplying.value
+              ? null
+              : autoStartService.updateLaunchAtStartupEnable,
         ));
   }
 }
