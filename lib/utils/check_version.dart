@@ -57,7 +57,7 @@ bool compareVersion(String current, String last) {
 Future<String> getCurrentVersion() async {
   if (kReleaseMode) {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    return 'v${packageInfo.version}';
+    return 'v${packageInfo.version}'.split('-')[0];
   }
   return 'v0.0.1';
 }
