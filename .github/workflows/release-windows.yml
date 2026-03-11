@@ -49,15 +49,41 @@ jobs:
         with:
           github-token: ${{ secrets.RELEASE_TOKEN }}
           script: |
-            const { data: releases } = await github.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            const latestRelease = releases[0];
-            const version = latestRelease.tag_name.replace(/^v/, '') + '+1'
-            console.log(JSON.stringify(latestRelease, null, 2));
-            core.setOutput('upload_url', latestRelease.upload_url);
-            core.setOutput('tag_name', latestRelease.tag_name);
+            const tag = context.ref.replace('refs/tags/', '');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            let release = null;
+            for (let attempt = 1; attempt <= 20; attempt++) {
+              try {
+                const response = await github.repos.getReleaseByTag({ owner, repo, tag });
+                release = response.data;
+                break;
+              } catch (error) {
+                if (error.status === 404 && attempt < 20) {
+                  core.info(`Release not found for ${tag}. Waiting... (${attempt}/20)`);
+                  await wait(15000);
+                  continue;
+                }
+                throw error;
+              }
+            }
+
+            if (!release) {
+              throw new Error(`Release not found for tag: ${tag}`);
+            }
+
+            const tagWithoutV = release.tag_name.replace(/^v/, '');
+            const buildName = tagWithoutV.split('+')[0];
+            const isPrereleaseTag = release.tag_name.includes('-');
+            const runNumber = process.env.GITHUB_RUN_NUMBER || '1';
+            const buildNumber = isPrereleaseTag ? runNumber : '1';
+            const version = `${buildName}+${buildNumber}`;
+
+            core.setOutput('upload_url', release.upload_url);
+            core.setOutput('tag_name', release.tag_name);
             core.setOutput('version', version);
       # 修改 yaml 版本号
       - name: Update version

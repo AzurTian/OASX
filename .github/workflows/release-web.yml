@@ -46,8 +46,14 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               });
-              const latestRelease = releases[0];
-              const version = latestRelease.tag_name.replace(/^v/, '') + '+1'
+              const latestStableRelease = releases.find(release => !release.prerelease && !release.draft);
+              const latestRelease = latestStableRelease ?? releases[0];
+              if (!latestRelease) {
+                throw new Error('No releases found.');
+              }
+              const tagWithoutV = latestRelease.tag_name.replace(/^v/, '');
+              const buildName = tagWithoutV.split('+')[0];
+              const version = `${buildName}+1`;
               console.log(JSON.stringify(latestRelease, null, 2));
               core.setOutput('upload_url', latestRelease.upload_url);
               core.setOutput('tag_name', latestRelease.tag_name);
