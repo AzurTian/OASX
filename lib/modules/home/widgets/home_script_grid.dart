@@ -46,7 +46,7 @@ class _HomeScriptGridState extends State<HomeScriptGrid> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const minCardWidth = 340.0;
+        const minCardWidth = 400.0;
         final crossAxisCount =
             max(1, (constraints.maxWidth / minCardWidth).floor());
         if (_lastCrossAxisCount != crossAxisCount) {
