@@ -37,7 +37,7 @@
   static const String autoDeploy = 'Auto deploy', loginAddress = 'login_address', homeSelectControlScript = 'home_select_control_script';
   static const String homeOverviewControl = 'home_overview_control', homeMasterSwitch = 'home_master_switch', homeRunningCount = 'home_running_count';
   static const String homeTotalScripts = 'home_total_scripts', homeControlScriptCount = 'home_control_script_count', turnOnTheLinker = 'turn_on_the_linker';
-  static const String closeTheLinker = 'close_the_linker', homeNoTask = 'home_no_task', homeUnconfiguredTask = 'home_unconfigured_task';
+  static const String closeTheLinker = 'close_the_linker', homeNoTask = 'home_no_task', homeNoLog = 'home_no_log', homeUnconfiguredTask = 'home_unconfigured_task';
   static const String homeRunningTask = 'home_running_task', homePendingTask = 'home_pending_task', homeWaitingTask = 'home_waiting_task';
   static const String homeConnectionRetryHint = 'home_connection_retry_hint', homeConnectionRetryAction = 'home_connection_retry_action', homeEmptyScriptHint = 'home_empty_script_hint';
   static const String homeLoadingAutoDeploying = 'home_loading_auto_deploying', homeLoadingAutoLogin = 'home_loading_auto_login', homeLoadingConfigDetail = 'home_loading_config_detail';

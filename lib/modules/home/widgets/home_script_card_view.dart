@@ -1,4 +1,4 @@
-﻿part of 'home_script_card.dart';
+part of 'home_script_card.dart';
 
 extension _HomeScriptCardView on _HomeScriptCardState {
   Widget _buildCard(BuildContext context) {
@@ -11,6 +11,20 @@ extension _HomeScriptCardView on _HomeScriptCardState {
           child: Obx(() {
             final state = widget.scriptModel.state.value;
             final isRunning = state == ScriptState.running;
+            final viewMode = _dashboardController.cardViewModeFor(
+              widget.scriptModel.name,
+            );
+            final taskView = HomeTaskSummary(
+              key: ValueKey('task-${widget.scriptModel.name}'),
+              scriptModel: widget.scriptModel,
+              onTapList: widget.onTaskListTap,
+              onSetTaskArgument: widget.onSetTaskArgument,
+              onOpenTaskSettings: widget.onOpenTaskSettings,
+            );
+            final logView = HomeScriptCardLogView(
+              key: ValueKey('log-${widget.scriptModel.name}'),
+              scriptName: widget.scriptModel.name,
+            );
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -108,11 +122,45 @@ extension _HomeScriptCardView on _HomeScriptCardState {
                 const Divider(height: 14),
                 SizedBox(
                   height: widget.taskListHeight,
-                  child: HomeTaskSummary(
-                    scriptModel: widget.scriptModel,
-                    onTapList: widget.onTaskListTap,
-                    onSetTaskArgument: widget.onSetTaskArgument,
-                    onOpenTaskSettings: widget.onOpenTaskSettings,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onHorizontalDragStart: _handleContentDragStart,
+                        onHorizontalDragUpdate: (details) =>
+                            _handleContentDragUpdate(
+                          details,
+                          constraints.maxWidth,
+                        ),
+                        onHorizontalDragEnd: _handleContentDragEnd,
+                        onHorizontalDragCancel: _handleContentDragCancel,
+                        child: ClipRect(
+                          child: AnimatedBuilder(
+                            animation: _contentFlipController,
+                            builder: (context, child) {
+                              final progress = _contentFlipController.value;
+                              final angle = -progress * math.pi;
+                              final isUnder = progress > 0.5;
+                              final frontChild =
+                                  viewMode == ScriptCardViewMode.logs
+                                      ? logView
+                                      : taskView;
+                              final backChild =
+                                  viewMode == ScriptCardViewMode.logs
+                                      ? taskView
+                                      : logView;
+                              final activeChild =
+                                  isUnder ? backChild : frontChild;
+                              return _buildFlipTransform(
+                                angle: angle,
+                                isUnder: isUnder,
+                                child: activeChild,
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

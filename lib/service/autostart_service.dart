@@ -189,12 +189,12 @@ class AutoStartService extends GetxService {
 
   String get _macLaunchAgentPath {
     final home = _homeDirPath();
-    final label = '${_packageName}.autostart';
+    final label = '$_packageName.autostart';
     return '$home/Library/LaunchAgents/$label.plist';
   }
 
   String _buildMacPlist() {
-    final label = '${_packageName}.autostart';
+    final label = '$_packageName.autostart';
     final executable = _xmlEscape(Platform.resolvedExecutable);
     return '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -253,7 +253,7 @@ class AutoStartService extends GetxService {
     final base = (configHome != null && configHome.trim().isNotEmpty)
         ? configHome.trim()
         : '${_homeDirPath()}/.config';
-    return '$base/autostart/${_packageName}.desktop';
+    return '$base/autostart/$_packageName.desktop';
   }
 
   String _buildLinuxDesktopEntry() {

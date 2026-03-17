@@ -1,8 +1,13 @@
 ﻿import 'dart:async';
+import 'dart:math' as math;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:easy_rich_text/easy_rich_text.dart';
+import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/overview/index.dart';
 import 'package:oasx/modules/home/models/script_model.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
@@ -13,6 +18,10 @@ import 'package:oasx/modules/home/widgets/home_task_summary.dart';
 
 part 'home_script_card_actions.dart';
 part 'home_script_card_view.dart';
+part 'home_script_card_content.dart';
+part 'home_script_card_log_view.dart';
+part 'home_script_card_log_patterns.dart';
+part 'home_script_card_log_helpers.dart';
 part 'home_script_card_state_indicator.dart';
 
 class HomeScriptCard extends StatefulWidget {
@@ -48,10 +57,20 @@ class HomeScriptCard extends StatefulWidget {
 }
 
 class _HomeScriptCardState extends State<HomeScriptCard>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  /// Duration for completing the content flip animation.
+  static const Duration _contentFlipDuration = Duration(milliseconds: 280);
+  /// Duration for reversing the content flip animation.
+  static const Duration _contentFlipReverseDuration = Duration(milliseconds: 220);
   final _nameController = TextEditingController();
   final _nameFocusNode = FocusNode();
   late final AnimationController _deleteHoldController;
+  /// Drives the interactive content flip animation.
+  late final AnimationController _contentFlipController;
+  /// Provides access to dashboard card view state.
+  late final HomeDashboardController _dashboardController;
+  /// Tracks whether the user is actively dragging the content.
+  bool _isContentDragActive = false;
   bool _isEditingName = false;
   bool _isSubmittingRename = false;
   bool _isDeleteDialogShowing = false;
@@ -60,11 +79,17 @@ class _HomeScriptCardState extends State<HomeScriptCard>
   @override
   void initState() {
     super.initState();
+    _dashboardController = Get.find<HomeDashboardController>();
     _deleteHoldController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
       reverseDuration: const Duration(milliseconds: 180),
     )..addStatusListener(_onDeleteHoldStatusChanged);
+    _contentFlipController = AnimationController(
+      vsync: this,
+      duration: _contentFlipDuration,
+      reverseDuration: _contentFlipReverseDuration,
+    );
     _nameFocusNode.addListener(_handleNameFocusChanged);
   }
 
@@ -83,6 +108,7 @@ class _HomeScriptCardState extends State<HomeScriptCard>
       ..dispose();
     _nameFocusNode.removeListener(_handleNameFocusChanged);
     _nameFocusNode.dispose();
+    _contentFlipController.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -90,5 +116,11 @@ class _HomeScriptCardState extends State<HomeScriptCard>
   @override
   Widget build(BuildContext context) => _buildCard(context);
 }
+
+
+
+
+
+
 
 

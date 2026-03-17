@@ -119,6 +119,7 @@ final Map<String, String> _cn_ui = {
   I18n.homeTotalScripts: '全部脚本',
   I18n.homeControlScriptCount: '总控脚本: @count',
   I18n.homeNoTask: '暂无任务',
+  I18n.homeNoLog: '暂无日志',
   I18n.homeUnconfiguredTask: '暂无任务,请先配置脚本',
   I18n.homeRunningTask: '运行任务',
   I18n.homePendingTask: '队列任务',
