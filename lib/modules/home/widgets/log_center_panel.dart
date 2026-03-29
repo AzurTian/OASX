@@ -58,10 +58,6 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
       style: const TextStyle(fontWeight: FontWeight.w700),
     ),
     _LogHighlightPattern(
-      expression: RegExp(r'[\{\(\)\}]'),
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    ),
-    _LogHighlightPattern(
       expression: RegExp(r'True'),
       style: const TextStyle(color: Colors.lightGreen),
     ),
