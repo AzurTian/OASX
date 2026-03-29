@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:oasx/modules/overview/index.dart';
+import 'package:oasx/modules/log/script_log_controller.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
 class LogCenterPanel extends StatefulWidget {
@@ -23,13 +23,73 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
   static final RegExp _logLevelPattern = RegExp(
     r'(^|\|)\s*(INFO|WARNING|ERROR|CRITICAL)\s*(\||$)',
   );
+  /// Cached highlight patterns reused across log rendering.
+  static final List<_LogHighlightPattern> _highlightPatterns = [
+    _LogHighlightPattern(
+      expression: RegExp(r'\d{2}:\d{2}:\d{2}\.\d{3}'),
+      style: const TextStyle(
+        color: Colors.cyan,
+        fontFeatures: [FontFeature.tabularFigures()],
+      ),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'INFO'),
+      style: const TextStyle(
+        color: Color.fromARGB(255, 55, 109, 136),
+        fontFeatures: [FontFeature.tabularFigures()],
+      ),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'WARNING'),
+      style: const TextStyle(
+        color: Colors.yellow,
+        fontFeatures: [FontFeature.tabularFigures()],
+      ),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'ERROR|CRITICAL'),
+      style: const TextStyle(
+        color: Colors.red,
+        fontFeatures: [FontFeature.tabularFigures()],
+      ),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'[\[\]【】]'),
+      style: const TextStyle(fontWeight: FontWeight.w700),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'[\{\(\)\}]'),
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'True'),
+      style: const TextStyle(color: Colors.lightGreen),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'False'),
+      style: const TextStyle(color: Colors.red),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'None'),
+      style: const TextStyle(color: Colors.purple),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'[═─]{5,}'),
+      style: const TextStyle(color: Colors.lightGreen),
+    ),
+    _LogHighlightPattern(
+      expression: RegExp(r'<<<.*?>>>'),
+      style: const TextStyle(color: Colors.lightGreen),
+    ),
+  ];
   static const String _kScrollSlot = 'home-log-center';
-  static const double _kAutoScrollAnchorOffset = 1000000000;
   static const double _kBottomThreshold = 80;
 
-  OverviewController? _logController;
+  ScriptLogController? _logController;
   ScrollController? _scrollController;
   String _level = 'ALL';
+  /// Cache of parsed log entries for incremental rendering.
+  final List<_CachedLogEntry> _cachedEntries = <_CachedLogEntry>[];
 
   @override
   void initState() {
@@ -67,15 +127,15 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
     _logController = _controllerFor(scriptName);
     _scrollController = _buildScrollController(_logController);
     _logController?.scrollLogs = _scrollLogs;
+    _cachedEntries.clear();
     previousScrollController?.dispose();
+    _primeInitialLogs();
   }
 
-  ScrollController _buildScrollController(OverviewController? controller) {
+  ScrollController _buildScrollController(ScriptLogController? controller) {
     final initialOffset = controller == null
         ? 0.0
-        : controller.autoScroll.value
-            ? _kAutoScrollAnchorOffset
-            : controller.savedScrollOffsetFor(_kScrollSlot);
+        : controller.savedScrollOffsetFor(_kScrollSlot);
     return ScrollController(initialScrollOffset: initialOffset);
   }
 
@@ -165,56 +225,106 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
       }
       final sourceLogs = _sourceLogs(controller);
       if (sourceLogs.isEmpty) {
+        _cachedEntries.clear();
         return Center(child: Text(I18n.homeNoLog.tr));
       }
-      final visibleLogs = sourceLogs.where(_matchesLevel).toList();
-      if (visibleLogs.isEmpty) {
+      _syncCache(sourceLogs);
+      final visibleEntries = _level == 'ALL'
+          ? _cachedEntries
+          : _filterEntries(_cachedEntries).toList();
+      if (visibleEntries.isEmpty) {
         return Center(child: Text(I18n.homeLogEmptyFiltered.tr));
       }
-      final spans = _buildLogSpans(visibleLogs);
-      if (spans.isEmpty) {
-        return Center(child: Text(I18n.homeLogEmptyFiltered.tr));
-      }
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final text = _LogSelectableText(
-            spans: spans,
-            style: _defaultTextStyle(context),
-          );
-          return SelectionArea(
-            child: NotificationListener<UserScrollNotification>(
-              onNotification: (_) {
-                _handleUserScroll();
-                return false;
-              },
-              child: SingleChildScrollView(
-                key: ValueKey<String>('home-log-vertical-${widget.scriptName}'),
-                controller: scrollController,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                    child: text,
-                  ),
+      final textStyle = _defaultTextStyle(context);
+      return SelectionArea(
+        child: NotificationListener<UserScrollNotification>(
+          onNotification: (_) {
+            _handleUserScroll();
+            return false;
+          },
+          child: ListView.builder(
+            key: ValueKey<String>('home-log-vertical-${widget.scriptName}'),
+            controller: scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            itemCount: visibleEntries.length,
+            itemBuilder: (context, index) {
+              final entry = visibleEntries[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 1),
+                child: _LogSelectableText(
+                  spans: _resolveSpans(entry),
+                  style: textStyle,
                 ),
-              ),
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       );
     });
   }
 
-  List<String> _sourceLogs(OverviewController controller) {
-    return controller.logs.toList();
+  List<String> _sourceLogs(ScriptLogController controller) {
+    return controller.logs;
   }
 
-  bool _matchesLevel(String raw) {
+  bool _matchesLevel(String level) {
     if (_level == 'ALL') {
       return true;
     }
-    final level = _parseEntry(raw).level;
     return level.isEmpty || level == _level;
+  }
+
+  /// Filters cached entries based on the active level filter.
+  Iterable<_CachedLogEntry> _filterEntries(List<_CachedLogEntry> entries) {
+    if (_level == 'ALL') {
+      return entries;
+    }
+    return entries.where((entry) => _matchesLevel(_resolveLevel(entry)));
+  }
+
+  /// Synchronizes cached entries with the current log list.
+  void _syncCache(List<String> sourceLogs) {
+    if (sourceLogs.isEmpty) {
+      _cachedEntries.clear();
+      return;
+    }
+    if (_cachedEntries.isEmpty ||
+        sourceLogs.length < _cachedEntries.length ||
+        _cachedEntries.first.raw != sourceLogs.first) {
+      _cachedEntries
+        ..clear()
+        ..addAll(sourceLogs.map(_buildCacheEntry));
+      return;
+    }
+    if (sourceLogs.length == _cachedEntries.length) {
+      return;
+    }
+    for (int i = _cachedEntries.length; i < sourceLogs.length; i++) {
+      _cachedEntries.add(_buildCacheEntry(sourceLogs[i]));
+    }
+  }
+
+  /// Builds a cached entry with normalized content and spans.
+  _CachedLogEntry _buildCacheEntry(String raw) {
+    return _CachedLogEntry(raw: raw);
+  }
+
+  /// Returns a cached normalized log line.
+  String _resolveNormalized(_CachedLogEntry entry) {
+    entry.normalized ??= _normalizeLogLine(entry.raw);
+    return entry.normalized!;
+  }
+
+  /// Returns the cached level extracted from a log line.
+  String _resolveLevel(_CachedLogEntry entry) {
+    entry.level ??= _parseEntry(entry.raw).level;
+    return entry.level!;
+  }
+
+  /// Returns cached spans for the log line, building once when needed.
+  List<InlineSpan> _resolveSpans(_CachedLogEntry entry) {
+    entry.spans ??= _buildHighlightedLine(_resolveNormalized(entry));
+    return entry.spans!;
   }
 
   _ParsedEntry _parseEntry(String raw) {
@@ -228,20 +338,9 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
     );
   }
 
-  List<InlineSpan> _buildLogSpans(List<String> rawLogs) {
-    final spans = <InlineSpan>[];
-    for (var index = 0; index < rawLogs.length; index++) {
-      spans.addAll(_buildHighlightedLine(_normalizeLogLine(rawLogs[index])));
-      if (index < rawLogs.length - 1) {
-        spans.add(const TextSpan(text: '\n'));
-      }
-    }
-    return spans;
-  }
-
   List<InlineSpan> _buildHighlightedLine(String raw) {
     final spans = <InlineSpan>[];
-    final patterns = _highlightPatterns();
+    final patterns = _highlightPatterns;
     var cursor = 0;
     while (cursor < raw.length) {
       _LogHighlightMatch? match;
@@ -270,67 +369,6 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
       cursor = match.end;
     }
     return spans;
-  }
-
-  List<_LogHighlightPattern> _highlightPatterns() {
-    return [
-      _LogHighlightPattern(
-        expression: RegExp(r'\d{2}:\d{2}:\d{2}\.\d{3}'),
-        style: const TextStyle(
-          color: Colors.cyan,
-          fontFeatures: [FontFeature.tabularFigures()],
-        ),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'INFO'),
-        style: const TextStyle(
-          color: Color.fromARGB(255, 55, 109, 136),
-          fontFeatures: [FontFeature.tabularFigures()],
-        ),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'WARNING'),
-        style: const TextStyle(
-          color: Colors.yellow,
-          fontFeatures: [FontFeature.tabularFigures()],
-        ),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'ERROR|CRITICAL'),
-        style: const TextStyle(
-          color: Colors.red,
-          fontFeatures: [FontFeature.tabularFigures()],
-        ),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'[\[\]【】]'),
-        style: const TextStyle(fontWeight: FontWeight.w700),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'[\{\(\)\}]'),
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'True'),
-        style: const TextStyle(color: Colors.lightGreen),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'False'),
-        style: const TextStyle(color: Colors.red),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'None'),
-        style: const TextStyle(color: Colors.purple),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'[═─]{5,}'),
-        style: const TextStyle(color: Colors.lightGreen),
-      ),
-      _LogHighlightPattern(
-        expression: RegExp(r'<<<.*?>>>'),
-        style: const TextStyle(color: Colors.lightGreen),
-      ),
-    ];
   }
 
   String _normalizeLogLine(String raw) {
@@ -395,9 +433,10 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
     if (controller == null) {
       return;
     }
-    final visibleLogs = _sourceLogs(controller)
-        .where(_matchesLevel)
-        .map(_normalizeLogLine)
+    final sourceLogs = _sourceLogs(controller);
+    _syncCache(sourceLogs);
+    final visibleLogs = _filterEntries(_cachedEntries)
+        .map(_resolveNormalized)
         .join('\n');
     Clipboard.setData(ClipboardData(text: visibleLogs));
     Get.snackbar(
@@ -413,6 +452,7 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
       return;
     }
     controller.clearLog();
+    _cachedEntries.clear();
     controller.saveScrollOffsetFor(_kScrollSlot, 0);
     final scrollController = _scrollController;
     if (scrollController != null && scrollController.hasClients) {
@@ -428,18 +468,18 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
     );
   }
 
-  OverviewController _resolveController(String scriptName) {
-    if (Get.isRegistered<OverviewController>(tag: scriptName)) {
-      return Get.find<OverviewController>(tag: scriptName);
+  ScriptLogController _resolveController(String scriptName) {
+    if (Get.isRegistered<ScriptLogController>(tag: scriptName)) {
+      return Get.find<ScriptLogController>(tag: scriptName);
     }
     return Get.put(
-      OverviewController(name: scriptName),
+      ScriptLogController(name: scriptName),
       tag: scriptName,
       permanent: true,
     );
   }
 
-  OverviewController? _controllerFor(String scriptName) {
+  ScriptLogController? _controllerFor(String scriptName) {
     final normalized = scriptName.trim();
     if (normalized.isEmpty) {
       return null;
@@ -472,6 +512,10 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
       if (distance < 1) {
         return;
       }
+      if (isJump || distance > 2000) {
+        scrollController.jumpTo(targetOffset);
+        return;
+      }
       final durationMs = (distance / 2).clamp(120, 800).toInt();
       scrollController.animateTo(
         targetOffset,
@@ -479,6 +523,26 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
         curve: Curves.easeOut,
       );
     });
+  }
+
+  /// Seeds initial log content and ensures auto-scroll positions.
+  void _primeInitialLogs() {
+    final controller = _logController;
+    if (controller == null) {
+      return;
+    }
+    final flushed = controller.flushPendingLogs(maxBatch: controller.maxLines);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (controller.autoScroll.value) {
+        _scrollLogs(isJump: true, force: true, scrollOffset: -1);
+      }
+    });
+    if (flushed <= 0) {
+      return;
+    }
   }
 
   void _handleUserScroll() {
@@ -534,6 +598,25 @@ class _LogSelectableText extends StatelessWidget {
           .withValues(alpha: 0.35),
     );
   }
+}
+
+/// Cached log entry with prebuilt highlight spans.
+class _CachedLogEntry {
+  _CachedLogEntry({
+    required this.raw,
+  });
+
+  /// Raw log line as received.
+  final String raw;
+
+  /// Cached normalized log line.
+  String? normalized;
+
+  /// Cached parsed level from the log line.
+  String? level;
+
+  /// Cached spans for highlight rendering.
+  List<InlineSpan>? spans;
 }
 
 class _ParsedEntry {

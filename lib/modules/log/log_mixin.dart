@@ -16,6 +16,9 @@ mixin LogMixin on GetxController {
 
   int get minBurst => 1;
 
+  /// Controls the maximum UI refresh rate for log updates.
+  Duration get uiRefreshInterval => const Duration(milliseconds: 120);
+
   final logs = <String>[].obs;
 
   final archivedLogs = <String>[].obs;
@@ -32,16 +35,32 @@ mixin LogMixin on GetxController {
 
   double _savedScrollOffset = 0.0;
 
+  /// Monotonic stopwatch for UI refresh throttling.
+  final Stopwatch _uiRefreshWatch = Stopwatch();
+
+  /// Tracks the last refresh tick in milliseconds.
+  int _lastUiRefreshTick = 0;
+
   void Function({bool isJump, bool force, int scrollOffset})? scrollLogs;
 
   @override
   void onInit() {
+    _uiRefreshWatch.start();
     _refreshTimer ??= Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (_pendingLogs.isEmpty) {
         return;
       }
+      final nowTick = _uiRefreshWatch.elapsedMilliseconds;
+      if (nowTick - _lastUiRefreshTick < uiRefreshInterval.inMilliseconds) {
+        _clearOverflowLogs();
+        return;
+      }
+      _lastUiRefreshTick = nowTick;
       _clearOverflowLogs();
-      _updateUILogs();
+      final appended = _updateUILogs();
+      if (appended == 0) {
+        return;
+      }
       _removeUIOldLogs();
       scrollLogs?.call();
     });
@@ -67,14 +86,41 @@ mixin LogMixin on GetxController {
     }
   }
 
-  void _updateUILogs() {
+  /// Moves a batch of pending logs into the UI-facing collections.
+  int _updateUILogs() {
     final backlog = _pendingLogs.length;
     final burst = backlog.clamp(minBurst, maxBurst);
-    for (int i = 0; i < burst && _pendingLogs.isNotEmpty; i++) {
-      final nextLog = _pendingLogs.removeAt(0);
-      logs.add(nextLog);
-      archivedLogs.add(nextLog);
+    if (burst <= 0) {
+      return 0;
     }
+    final batch = _pendingLogs.take(burst).toList();
+    if (batch.isEmpty) {
+      return 0;
+    }
+    _pendingLogs.removeRange(0, batch.length);
+    logs.addAll(batch);
+    archivedLogs.addAll(batch);
+    return batch.length;
+  }
+
+  /// Forces pending logs into the UI list to avoid empty views on switch.
+  int flushPendingLogs({int? maxBatch}) {
+    if (_pendingLogs.isEmpty) {
+      return 0;
+    }
+    _clearOverflowLogs();
+    final limit = maxBatch ?? _pendingLogs.length;
+    final count = min(limit, _pendingLogs.length);
+    if (count <= 0) {
+      return 0;
+    }
+    final batch = _pendingLogs.take(count).toList();
+    _pendingLogs.removeRange(0, count);
+    logs.addAll(batch);
+    archivedLogs.addAll(batch);
+    _removeUIOldLogs();
+    _lastUiRefreshTick = _uiRefreshWatch.elapsedMilliseconds;
+    return count;
   }
 
   void _clearOverflowLogs() {

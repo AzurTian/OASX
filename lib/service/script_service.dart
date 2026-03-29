@@ -7,11 +7,12 @@ import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/common/controllers/progress_snackbar_controller.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/models/taskitem_model.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/extension_utils.dart';
 import 'package:oasx/utils/time_utils.dart';
-import 'package:oasx/modules/overview/index.dart';
+import 'package:oasx/modules/log/script_log_controller.dart';
 
 part 'script_service_ws.dart';
 part 'script_service_auto.dart';
@@ -37,7 +38,7 @@ class ScriptService extends GetxService {
       ...scriptModelMap.keys.map((e) => Future.wait([
             stopScript(e),
             wsService.close(e),
-            Get.delete<OverviewController>(tag: e, force: true),
+            Get.delete<ScriptLogController>(tag: e, force: true),
           ])),
     ]);
     scriptModelMap.clear();
@@ -142,9 +143,9 @@ class ScriptService extends GetxService {
     await wsService.closeAll();
     final names = scriptModelMap.keys.toList();
     for (final name in names) {
-      if (Get.isRegistered<OverviewController>(tag: name)) {
+      if (Get.isRegistered<ScriptLogController>(tag: name)) {
         try {
-          Get.delete<OverviewController>(tag: name, force: true);
+          Get.delete<ScriptLogController>(tag: name, force: true);
         } catch (_) {}
       }
     }
@@ -157,9 +158,9 @@ class ScriptService extends GetxService {
     if (!ret) {
       return false;
     }
-    if (Get.isRegistered<OverviewController>(tag: oldName)) {
+    if (Get.isRegistered<ScriptLogController>(tag: oldName)) {
       try {
-        Get.delete<OverviewController>(tag: oldName, force: true);
+        Get.delete<ScriptLogController>(tag: oldName, force: true);
       } catch (_) {}
     }
     await refreshScriptsFromServer();
@@ -171,9 +172,9 @@ class ScriptService extends GetxService {
     if (!ret) {
       return false;
     }
-    if (Get.isRegistered<OverviewController>(tag: name)) {
+    if (Get.isRegistered<ScriptLogController>(tag: name)) {
       try {
-        Get.delete<OverviewController>(tag: name, force: true);
+        Get.delete<ScriptLogController>(tag: name, force: true);
       } catch (_) {}
     }
     deleteScriptModel(name);

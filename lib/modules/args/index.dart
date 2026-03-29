@@ -13,7 +13,7 @@ import 'package:flutter_pickers/time_picker/model/pduration.dart';
 import 'package:flutter_pickers/time_picker/model/suffix.dart';
 import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
-import 'package:oasx/modules/overview/index.dart';
+import 'package:oasx/modules/home/models/taskitem_model.dart';
 import 'package:oasx/service/theme_service.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:styled_widget/styled_widget.dart';

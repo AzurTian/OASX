@@ -1,5 +1,5 @@
 ﻿import 'package:get/get.dart';
-import 'package:oasx/modules/overview/index.dart';
+import 'package:oasx/modules/home/models/taskitem_model.dart';
 
 enum ScriptState {
   inactive,

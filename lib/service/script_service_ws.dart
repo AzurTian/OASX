@@ -5,9 +5,9 @@ extension ScriptServiceWsX on ScriptService {
     if (!scriptModelMap.containsKey(name)) {
       addScriptModel(name);
     }
-    if (!Get.isRegistered<OverviewController>(tag: name)) {
+    if (!Get.isRegistered<ScriptLogController>(tag: name)) {
       Get.put(
-        OverviewController(name: name),
+        ScriptLogController(name: name),
         tag: name,
         permanent: true,
       );
@@ -35,14 +35,14 @@ extension ScriptServiceWsX on ScriptService {
       return;
     }
     if (!message.startsWith('{') || !message.endsWith('}')) {
-      if (!Get.isRegistered<OverviewController>(tag: name)) {
+      if (!Get.isRegistered<ScriptLogController>(tag: name)) {
         Get.put(
-          OverviewController(name: name),
+          ScriptLogController(name: name),
           tag: name,
           permanent: true,
         );
       }
-      Get.find<OverviewController>(tag: name).addLog(message);
+      Get.find<ScriptLogController>(tag: name).addLog(message);
       return;
     }
     final data = jsonDecode(message) as Map<String, dynamic>;
