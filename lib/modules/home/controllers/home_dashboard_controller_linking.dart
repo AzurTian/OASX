@@ -36,6 +36,10 @@ extension HomeDashboardLinkingX on HomeDashboardController {
       .toList()
     ..sort();
 
+  List<String> linkedScopeScriptsFor(String sourceScript) {
+    return _collectCascadeTargets(sourceScript);
+  }
+
   bool shouldCascadeFrom(String sourceScript) {
     final source = sourceScript.trim();
     if (!isLinkModeEnabled.value || source.isEmpty) {

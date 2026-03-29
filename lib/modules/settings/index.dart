@@ -32,7 +32,12 @@ part 'user_card.dart';
 part 'settings_view_navigation.dart';
 
 class SettingsView extends StatefulWidget {
-  const SettingsView({Key? key}) : super(key: key);
+  const SettingsView({
+    Key? key,
+    this.standalone = true,
+  }) : super(key: key);
+
+  final bool standalone;
 
   @override
   State<SettingsView> createState() => _SettingsViewState();
@@ -89,9 +94,8 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: buildPlatformAppBar(context, routePath: '/settings'),
-      body: LayoutBuilder(
+    final body = SafeArea(
+      child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= _wideLayoutBreakpoint;
           final settingList = _buildSettingList();
@@ -111,9 +115,12 @@ class _SettingsViewState extends State<SettingsView> {
         },
       ),
     );
+    if (!widget.standalone) {
+      return body;
+    }
+    return Scaffold(
+      appBar: buildPlatformAppBar(context, routePath: '/settings'),
+      body: body,
+    );
   }
 }
-
-
-
-

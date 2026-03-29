@@ -23,6 +23,8 @@ class ArgumentView extends StatefulWidget {
 class _ArgumentViewState extends State<ArgumentView> {
   Timer? timer;
   bool landscape = true;
+  late final TextEditingController _textController;
+  late final FocusNode _focusNode;
 
   ArgumentModel get model {
     final controller = Get.find<ArgsController>();
@@ -30,23 +32,45 @@ class _ArgumentViewState extends State<ArgumentView> {
     return groupsModel!.members[widget.index];
   }
 
+  ArgsController get _argsController => Get.find<ArgsController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: model.value.toString());
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    landscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    if (landscape) {
-      return Row(
+    return Obx(() {
+      landscape = MediaQuery.of(context).orientation == Orientation.landscape;
+      _syncTextController();
+      final title = _title();
+      final form = _buildFormSection();
+      if (landscape) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: title),
+            const SizedBox(width: 12),
+            Expanded(child: form),
+          ],
+        ).padding(bottom: 8);
+      }
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: _title()),
-          _form(),
-        ],
+        children: [title, form],
       ).padding(bottom: 8);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [_title(), _form()],
-    ).padding(bottom: 8);
+    });
   }
 
   Widget _title() {
@@ -61,63 +85,39 @@ class _ArgumentViewState extends State<ArgumentView> {
           SelectableText(
             model.description!.tr,
             style: Theme.of(context).textTheme.bodySmall,
-          ),
+          ).padding(top: 4),
       ],
     );
   }
 
-  Widget _form() {
-    return switch (model.type) {
+  Widget _buildFormSection() {
+    final errorText = _argsController.fieldError(widget.getGroupName(), model.title);
+    final child = switch (model.type) {
       'boolean' => Checkbox(value: model.value, onChanged: onCheckboxChanged)
-          .alignment(Alignment.centerLeft)
-          .constrained(width: landscape ? 200 : null),
-      'string' => TextFormField(
-          initialValue: model.value.toString(),
-          onChanged: (value) {
-            timer?.cancel();
-            timer = Timer(const Duration(milliseconds: 1000),
-                () => onStringChanged(value));
-          },
-        ).constrained(width: landscape ? 200 : null),
-      'multi_line' => TextFormField(
-          keyboardType: TextInputType.multiline,
-          textInputAction: TextInputAction.newline,
-          maxLines: null,
-          initialValue: model.value.toString(),
-          onChanged: (value) {
-            timer?.cancel();
-            timer = Timer(const Duration(milliseconds: 1000),
-                () => onStringChanged(value));
-          },
-        ).constrained(width: landscape ? 200 : null),
-      'number' => TextFormField(
+          .alignment(Alignment.centerLeft),
+      'string' => _buildTextField(errorText: errorText),
+      'multi_line' => _buildTextField(errorText: errorText, maxLines: null),
+      'number' => _buildTextField(
+          errorText: errorText,
           keyboardType: TextInputType.number,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp('[-0-9.]')),
           ],
-          initialValue: model.value.toString(),
-          onChanged: (value) {
-            timer?.cancel();
-            timer = Timer(const Duration(milliseconds: 1000),
-                () => onNumberChanged(value));
-          },
-        ).constrained(width: landscape ? 200 : null),
-      'integer' => TextFormField(
+          onChanged: _scheduleNumberChange,
+        ),
+      'integer' => _buildTextField(
+          errorText: errorText,
           keyboardType: TextInputType.number,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp('[-0-9]')),
           ],
-          initialValue: model.value.toString(),
-          onChanged: (value) {
-            timer?.cancel();
-            timer = Timer(const Duration(milliseconds: 1000),
-                () => onIntegerChanged(value));
-          },
-        ).constrained(width: landscape ? 200 : null),
-      'enum' => DropdownButton<String>(
-          isExpanded: !landscape,
-          menuMaxHeight: Get.height * 0.5,
+          onChanged: _scheduleIntegerChange,
+        ),
+      'enum' => DropdownButtonFormField<String>(
           value: model.value.toString(),
+          isExpanded: true,
+          menuMaxHeight: Get.height * 0.5,
+          decoration: InputDecoration(errorText: errorText),
           items: model.enumEnum!
               .map<DropdownMenuItem<String>>(
                 (e) => DropdownMenuItem(
@@ -125,26 +125,108 @@ class _ArgumentViewState extends State<ArgumentView> {
                   child: Text(
                     e.toString().tr,
                     style: Theme.of(context).textTheme.bodyLarge,
-                  ).constrained(width: landscape ? 177 : null),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              )
+              .toList(),
+          selectedItemBuilder: (context) => model.enumEnum!
+              .map<Widget>(
+                (e) => Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    e.toString().tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ),
               )
               .toList(),
           onChanged: onEnumChanged,
         ),
-      'date_time' => DateTimePicker(
-          value: model.value,
-          onChange: onDateTimeChanged,
-        ).constrained(width: landscape ? 200 : null),
-      'time_delta' => TimeDeltaPicker(
-          value: ensureTimeDeltaString(model.value),
-          onChange: onTimeDeltaChanged,
-        ).constrained(width: landscape ? 200 : null),
-      'time' => TimePicker(
-          value: model.value,
-          onChange: onTimeChanged,
-        ).constrained(width: landscape ? 200 : null),
-      _ =>
-        Text(model.value.toString()).constrained(width: landscape ? 200 : null),
+      'date_time' => _buildPicker(
+          DateTimePicker(value: model.value, onChange: onDateTimeChanged),
+          errorText,
+        ),
+      'time_delta' => _buildPicker(
+          TimeDeltaPicker(
+            value: ensureTimeDeltaString(model.value),
+            onChange: onTimeDeltaChanged,
+          ),
+          errorText,
+        ),
+      'time' => _buildPicker(
+          TimePicker(value: model.value, onChange: onTimeChanged),
+          errorText,
+        ),
+      _ => Text(model.value.toString()),
     };
+    return child;
+  }
+
+  Widget _buildTextField({
+    required String? errorText,
+    int? maxLines = 1,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    ValueChanged<String>? onChanged,
+  }) {
+    return TextFormField(
+      controller: _textController,
+      focusNode: _focusNode,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      decoration: InputDecoration(errorText: errorText),
+      onChanged: onChanged ?? _scheduleStringChange,
+    );
+  }
+
+  Widget _buildPicker(Widget picker, String? errorText) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        picker,
+        if (errorText != null && errorText.isNotEmpty)
+          Text(
+            errorText,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+              fontSize: 12,
+            ),
+          ).padding(top: 4),
+      ],
+    );
+  }
+
+  void _syncTextController() {
+    if (_focusNode.hasFocus) {
+      return;
+    }
+    final nextValue = model.value.toString();
+    if (_textController.text == nextValue) {
+      return;
+    }
+    _textController.value = TextEditingValue(
+      text: nextValue,
+      selection: TextSelection.collapsed(offset: nextValue.length),
+    );
+  }
+
+  void _scheduleStringChange(String value) {
+    timer?.cancel();
+    timer = Timer(const Duration(milliseconds: 150), () => onStringChanged(value));
+  }
+
+  void _scheduleNumberChange(String value) {
+    timer?.cancel();
+    timer = Timer(const Duration(milliseconds: 150), () => onNumberChanged(value));
+  }
+
+  void _scheduleIntegerChange(String value) {
+    timer?.cancel();
+    timer = Timer(const Duration(milliseconds: 150), () => onIntegerChanged(value));
   }
 }

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _us_base_map = {
@@ -30,6 +30,7 @@ final Map<String, String> _us_ui = {
   I18n.time: 'Time',
   I18n.projectStatement: 'Open Source Software',
   I18n.taskSetting: 'Settings',
+  I18n.copy: 'Copy',
   I18n.noData: 'No data',
   I18n.notifyTestHelp: 'Please refer to the documentation [Message Push] to fill in the relevant configuration',
   I18n.rootPathServerHelp:
@@ -39,6 +40,7 @@ final Map<String, String> _us_ui = {
   I18n.minimizeToSystemTrayHelp: 'Minimized to the system tray when closing a window',
   I18n.launchAtStartupHelp: 'Launch OASX when you sign in',
   I18n.launchAtStartupUpdateFailed: 'Failed to update launch at startup',
+  I18n.scriptList: 'Configs',
   I18n.loginAddress: 'Login address',
   I18n.username: 'Username',
   I18n.password: 'Password',
@@ -60,12 +62,53 @@ final Map<String, String> _us_ui = {
   I18n.homeConnectionRetryHint:
       'Please confirm the backend service has started and user settings are correct',
   I18n.homeConnectionRetryAction: 'Refresh',
-  I18n.homeEmptyScriptHint: 'No scripts yet, please add a script first',
+  I18n.homeEmptyScriptHint: 'Add a config first',
   I18n.homeLoadingAutoDeploying:
       'Auto deployment in progress, please wait',
   I18n.homeLoadingAutoLogin: 'Logging into OAS, please wait',
   I18n.homeLoadingConfigDetail:
       'Loading config details, please wait',
+  I18n.homeScriptAbnormal: 'Abnormal',
+  I18n.homeScriptOffline: 'Offline',
+  I18n.homeScriptSearchHint: 'Search configs',
+  I18n.homeSortByStatus: 'Sort by status',
+  I18n.homeSortByName: 'Sort by name',
+  I18n.homeNoScriptSelected: 'Select a config first',
+  I18n.homeStatusTab: 'Status',
+  I18n.homeTasksTab: 'Tasks',
+  I18n.homeParamsTab: 'Params',
+  I18n.homeTaskFilterAll: 'All tasks',
+  I18n.homeTaskFilterEnabled: 'Enabled',
+  I18n.homeTaskFilterDisabled: 'Disabled',
+  I18n.homeTaskEnabled: 'Enabled',
+  I18n.homeTaskDisabled: 'Disabled',
+  I18n.homeQuickRun: 'Run now',
+  I18n.homeQuickWait: 'Wait now',
+  I18n.homeOpenTaskParams: 'Edit',
+  I18n.homeTaskConfigureAndEnable: 'Configure and enable',
+  I18n.homeTaskSelectPrompt: 'Select a task from the task list first',
+  I18n.homeRealtimeLog: 'Realtime',
+  I18n.homeHistoryLog: 'History',
+  I18n.homeLogSearchHint: 'Search logs or enter regex',
+  I18n.homeLogUseRegex: 'Regex',
+  I18n.homeLogWrapLines: 'Wrap lines',
+  I18n.homeLogAutoScroll: 'Auto-scroll',
+  I18n.homeLogLoadOlder: 'Load older',
+  I18n.homeLogEmptyFiltered: 'No matching logs',
+  I18n.argsDraftDirty: 'Pending changes',
+  I18n.argsMixedValue: 'Mixed value',
+  I18n.argsDiscardChanges: 'Discard',
+  I18n.argsSaveChanges: 'Save',
+  I18n.argsValidationFailed: 'Fix validation errors before saving',
+  I18n.argsInvalidInteger: 'Enter a valid integer',
+  I18n.argsInvalidNumber: 'Enter a valid number',
+  I18n.argsInvalidTime: 'Time must use HH:MM:SS',
+  I18n.argsInvalidTimeDelta: 'Duration must use DD HH:MM:SS',
+  I18n.argsInvalidDateTime: 'Date time must use YYYY-MM-DD HH:MM:SS',
+  I18n.argsInvalidEnum: 'Select a valid option',
+  I18n.argsMinValue: 'Min value',
+  I18n.argsMaxValue: 'Max value',
+  I18n.argsUnsavedPrompt: 'There are unsaved changes. Discard them?',
   I18n.taskManage: 'Task Manager',
   I18n.taskManageTitle: 'Task Manager',
   I18n.taskSearchHint: 'Search tasks',
@@ -200,3 +243,5 @@ Preset groups support [1-7], and preset teams support [1-4]''',
   'enable_switch_by_name_help':
   'This is another way to switch souls. Compared to the method above, it supports more presets, but similarly, you still need to ensure that the preset team is in a locked state',
 };
+
+

@@ -5,6 +5,13 @@ extension ScriptServiceWsX on ScriptService {
     if (!scriptModelMap.containsKey(name)) {
       addScriptModel(name);
     }
+    if (!Get.isRegistered<OverviewController>(tag: name)) {
+      Get.put(
+        OverviewController(name: name),
+        tag: name,
+        permanent: true,
+      );
+    }
     wsService.removeAllListeners(name);
     final client = await wsService.connect(
       name: name,
@@ -28,9 +35,14 @@ extension ScriptServiceWsX on ScriptService {
       return;
     }
     if (!message.startsWith('{') || !message.endsWith('}')) {
-      if (Get.isRegistered<OverviewController>(tag: name)) {
-        Get.find<OverviewController>(tag: name).addLog(message);
+      if (!Get.isRegistered<OverviewController>(tag: name)) {
+        Get.put(
+          OverviewController(name: name),
+          tag: name,
+          permanent: true,
+        );
       }
+      Get.find<OverviewController>(tag: name).addLog(message);
       return;
     }
     final data = jsonDecode(message) as Map<String, dynamic>;

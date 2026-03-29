@@ -1,10 +1,11 @@
-﻿import 'dart:math';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
-import 'package:oasx/translation/i18n_content.dart';
+import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/home/widgets/home_task_settings_dialog.dart';
+import 'package:oasx/translation/i18n_content.dart';
 
 part 'home_task_manager_dialog_section.dart';
 
@@ -12,25 +13,22 @@ class HomeTaskManagerDialog extends StatefulWidget {
   const HomeTaskManagerDialog({
     super.key,
     required this.scriptName,
-    this.setArgumentOverride,
+    this.saveArgumentOverride,
   });
 
   final String scriptName;
-  final void Function(String? config, String? task, String group,
-      String argument, String type, dynamic value)? setArgumentOverride;
+  final SaveArgumentCallback? saveArgumentOverride;
 
   static Future<void> show({
     required BuildContext context,
     required String scriptName,
-    void Function(String? config, String? task, String group, String argument,
-            String type, dynamic value)?
-        setArgumentOverride,
+    SaveArgumentCallback? saveArgumentOverride,
   }) async {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => HomeTaskManagerDialog(
         scriptName: scriptName,
-        setArgumentOverride: setArgumentOverride,
+        saveArgumentOverride: saveArgumentOverride,
       ),
     );
   }
@@ -105,7 +103,7 @@ class _HomeTaskManagerDialogState extends State<HomeTaskManagerDialog> {
                         section: section,
                         scriptName: widget.scriptName,
                         forceExpanded: searching,
-                        setArgumentOverride: widget.setArgumentOverride,
+                        saveArgumentOverride: widget.saveArgumentOverride,
                       );
                     },
                   );
@@ -162,4 +160,3 @@ class _HomeTaskManagerDialogState extends State<HomeTaskManagerDialog> {
     return sections;
   }
 }
-

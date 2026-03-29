@@ -122,19 +122,14 @@ extension _HomeScriptCardActions on _HomeScriptCardState {
     await HomeTaskManagerDialog.show(
       context: context,
       scriptName: widget.scriptModel.name,
-      setArgumentOverride: (config, task, group, argument, type, value) {
-        if (config == null || task == null) {
-          return;
-        }
-        unawaited(
-          widget.onSetTaskArgument(
-            config,
-            task,
-            group,
-            argument,
-            type,
-            value,
-          ),
+      saveArgumentOverride: (config, task, group, argument, type, value) {
+        return widget.onSetTaskArgument(
+          config,
+          task,
+          group,
+          argument,
+          type,
+          value,
         );
       },
     );

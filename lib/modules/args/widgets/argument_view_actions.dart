@@ -1,115 +1,79 @@
-﻿// ignore_for_file: invalid_use_of_protected_member
+// ignore_for_file: invalid_use_of_protected_member
 part of args;
 
 extension _ArgumentViewActions on _ArgumentViewState {
+  ArgsController get _argsController => Get.find<ArgsController>();
+
+  bool get _isDraftMode => _argsController.isDraftMode.value;
+
   void onCheckboxChanged(bool? value) {
-    setState(() {
-      widget.setArgument(
-        widget.scriptName,
-        widget.taskName,
-        widget.getGroupName(),
-        model.title,
-        'boolean',
-        value,
-      );
-      model.value = value;
-    });
-    showSnakbar(value);
+    _applyValue(value ?? false, 'boolean', useSetState: true);
   }
 
   void onStringChanged(String? value) {
-    widget.setArgument(
-      widget.scriptName,
-      widget.taskName,
-      widget.getGroupName(),
-      model.title,
-      'string',
-      value,
-    );
-    showSnakbar(value);
+    _applyValue(value ?? '', 'string');
   }
 
   void onNumberChanged(String? value) {
-    widget.setArgument(
-      widget.scriptName,
-      widget.taskName,
-      widget.getGroupName(),
-      model.title,
-      'number',
-      value,
-    );
-    showSnakbar(value);
+    _applyValue(value ?? '', 'number');
   }
 
   void onIntegerChanged(String? value) {
+    _applyValue(value ?? '', 'integer');
+  }
+
+  void onEnumChanged(String? value) {
+    _applyValue(value ?? '', 'enum', useSetState: true);
+  }
+
+  void onDateTimeChanged(String? value) {
+    _applyValue(value ?? '', 'date_time', useSetState: true);
+  }
+
+  void onTimeDeltaChanged(String? value) {
+    _applyValue(value ?? '', 'time_delta', useSetState: true);
+  }
+
+  void onTimeChanged(String? value) {
+    _applyValue(value ?? '', 'time', useSetState: true);
+  }
+
+  void _applyValue(
+    dynamic value,
+    String type, {
+    bool useSetState = false,
+  }) {
+    if (_isDraftMode) {
+      if (useSetState) {
+        setState(() {
+          model.value = value;
+        });
+      } else {
+        model.value = value;
+      }
+      _argsController.stageArgumentChange(
+        widget.getGroupName(),
+        model.title,
+        value,
+        type,
+      );
+      return;
+    }
+    if (useSetState) {
+      setState(() {
+        model.value = value;
+      });
+    } else {
+      model.value = value;
+    }
     widget.setArgument(
       widget.scriptName,
       widget.taskName,
       widget.getGroupName(),
       model.title,
-      'integer',
+      type,
       value,
     );
-    showSnakbar(value);
-  }
-
-  void onEnumChanged(String? value) {
-    setState(() {
-      model.value = value;
-      widget.setArgument(
-        widget.scriptName,
-        widget.taskName,
-        widget.getGroupName(),
-        model.title,
-        'enum',
-        value,
-      );
-    });
-    showSnakbar(value);
-  }
-
-  void onDateTimeChanged(String? value) {
-    setState(() {
-      model.value = value;
-      widget.setArgument(
-        widget.scriptName,
-        widget.taskName,
-        widget.getGroupName(),
-        model.title,
-        'date_time',
-        value,
-      );
-    });
-    showSnakbar(value);
-  }
-
-  void onTimeDeltaChanged(String? value) {
-    setState(() {
-      model.value = value;
-      widget.setArgument(
-        widget.scriptName,
-        widget.taskName,
-        widget.getGroupName(),
-        model.title,
-        'time_delta',
-        value,
-      );
-    });
-    showSnakbar(value);
-  }
-
-  void onTimeChanged(String? value) {
-    setState(() {
-      model.value = value;
-      widget.setArgument(
-        widget.scriptName,
-        widget.taskName,
-        widget.getGroupName(),
-        model.title,
-        'time',
-        value,
-      );
-    });
     showSnakbar(value);
   }
 
@@ -121,4 +85,3 @@ extension _ArgumentViewActions on _ArgumentViewState {
     );
   }
 }
-

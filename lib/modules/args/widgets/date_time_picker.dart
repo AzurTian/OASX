@@ -1,13 +1,7 @@
-﻿// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable
 
 part of args;
 
-final dateYears = <String>['2023', '2024', '2025', '2026'];
-final dateMonths = List.generate(
-        12, (index) => (index + 1) < 10 ? '0${index + 1}' : '${index + 1}')
-    .toList();
-final dateDaysInMonth = List.generate(daysInMonth(),
-    (index) => (index + 1) < 10 ? '0${index + 1}' : '${index + 1}').toList();
 final dateDaysInWeek =
     List.generate(7, (index) => index < 10 ? '0$index' : '$index').toList();
 final dateHours =
@@ -17,14 +11,6 @@ final dateMinutes =
 final dateSeconds =
     List.generate(60, (index) => index < 10 ? '0$index' : '$index').toList();
 
-final dateTimeData = [
-  dateYears,
-  dateMonths,
-  dateDaysInMonth,
-  dateHours,
-  dateMinutes,
-  dateSeconds,
-];
 final dateTimeDelta = [
   dateDaysInWeek,
   dateHours,
@@ -36,15 +22,6 @@ final dateTime = [
   dateMinutes,
   dateSeconds,
 ];
-
-int daysInMonth() {
-  final now = DateTime.now();
-  final year = now.year;
-  final month = now.month;
-  final lastDayOfMonth =
-      DateTime(year, month + 1, 1).subtract(const Duration(days: 1));
-  return lastDayOfMonth.day;
-}
 
 String ensureTimeDeltaString(dynamic value) {
   if (value is String) {
@@ -110,18 +87,68 @@ class DateTimePickerBaseState extends State<DateTimePickerBase> {
   }
 
   void showPicker(context, dynamic value) {
-    Pickers.showMultiPicker(
+    final now = DateTime.now();
+    final minDate = DateTime(now.year - 1, 1, 1);
+    final maxDate = DateTime(now.year + 1, 12, 31, 23, 59, 59);
+    Pickers.showDatePicker(
       context,
-      data: dateTimeData,
-      suffix: [
-        I18n.year.tr,
-        I18n.month.tr,
-        I18n.day.tr,
-        I18n.hour.tr,
-        I18n.minute.tr,
-        I18n.seconds.tr,
-      ],
+      mode: DateMode.YMDHMS,
+      pickerStyle: Theme.of(context).brightness == Brightness.light
+          ? DefaultPickerStyle()
+          : DefaultPickerStyle.dark(),
+      suffix: Suffix(
+        years: I18n.year.tr,
+        month: I18n.month.tr,
+        days: I18n.day.tr,
+        hours: I18n.hour.tr,
+        minutes: I18n.minute.tr,
+        seconds: I18n.seconds.tr,
+      ),
+      minDate: PDuration.parse(minDate),
+      maxDate: PDuration.parse(maxDate),
+      selectDate: _clampSelectedDate(value, minDate, maxDate),
+      onConfirm: (p) => widget.onChange(_formatPickerValue(p)),
     );
+  }
+
+  PDuration _clampSelectedDate(
+    dynamic value,
+    DateTime minDate,
+    DateTime maxDate,
+  ) {
+    final parsed = _parsePickerValue(value) ?? DateTime.now();
+    final normalized = parsed.isBefore(minDate)
+        ? minDate
+        : parsed.isAfter(maxDate)
+            ? maxDate
+            : parsed;
+    return PDuration.parse(normalized);
+  }
+
+  DateTime? _parsePickerValue(dynamic value) {
+    if (value is! String) {
+      return null;
+    }
+    final normalized = value.trim();
+    if (normalized.isEmpty) {
+      return null;
+    }
+    return DateTime.tryParse(normalized.replaceFirst(' ', 'T'));
+  }
+
+  String _formatPickerValue(PDuration value) {
+    final year = value.year ?? 0;
+    final month = _twoDigits(value.month);
+    final day = _twoDigits(value.day);
+    final hour = _twoDigits(value.hour);
+    final minute = _twoDigits(value.minute);
+    final second = _twoDigits(value.second);
+    return '$year-$month-$day $hour:$minute:$second';
+  }
+
+  String _twoDigits(int? value) {
+    final normalized = value ?? 0;
+    return normalized < 10 ? '0$normalized' : '$normalized';
   }
 }
 
@@ -138,43 +165,4 @@ class DateTimePicker extends DateTimePickerBase {
   State<StatefulWidget> createState() => DateTimePickerState();
 }
 
-class DateTimePickerState extends DateTimePickerBaseState {
-  @override
-  void showPicker(context, dynamic value) {
-    Pickers.showMultiPicker(
-      context,
-      pickerStyle: Theme.of(context).brightness == Brightness.light
-          ? DefaultPickerStyle()
-          : DefaultPickerStyle.dark(),
-      data: dateTimeData,
-      selectData: prePrecess(value),
-      onConfirm: onConfirm,
-      suffix: [
-        I18n.year.tr,
-        I18n.month.tr,
-        I18n.day.tr,
-        I18n.hour.tr,
-        I18n.minute.tr,
-        I18n.seconds.tr,
-      ],
-    );
-  }
-
-  dynamic onConfirm(List<dynamic> p, List<int> position) {
-    final year = dateTimeData[0][position[0]];
-    final month = dateTimeData[1][position[1]];
-    final day = dateTimeData[2][position[2]];
-    final hour = dateTimeData[3][position[3]];
-    final minute = dateTimeData[4][position[4]];
-    final seconds = dateTimeData[5][position[5]];
-    widget.onChange('$year-$month-$day $hour:$minute:$seconds');
-  }
-
-  List prePrecess(dynamic value) {
-    List result = [0, 0, 0, 0, 0, 0];
-    if (value is String) {
-      result = value.split(RegExp(r'\D+'));
-    }
-    return result;
-  }
-}
+class DateTimePickerState extends DateTimePickerBaseState {}

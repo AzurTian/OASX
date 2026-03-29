@@ -1,4 +1,4 @@
-﻿class I18n {
+class I18n {
   static const String logOut = 'Log out', zhCn = 'zh-CN', enUs = 'en-US';
   static const String changeTheme = 'Change Theme', changeLanguage = 'Change Language', projectStatement = 'Project Statement';
   static const String year = 'Years', month = 'Months', day = 'Days';
@@ -9,7 +9,7 @@
   static const String scheduler = 'scheduler', run = 'Run', pending = 'Pendings';
   static const String waiting = 'Waitings', stop = 'Stop', warning = 'Warning';
   static const String connecting = 'Connecting', taskSetting = 'Task Setting', log = 'Log';
-  static const String clearLog = 'Clear Log', login = 'Login', setting = 'Setting';
+  static const String clearLog = 'Clear Log', copy = 'Copy', login = 'Login', setting = 'Setting';
   static const String notifyTest = 'Notify Test', autoLoginAfterDeploy = 'Auto login after deploy', notifyTestConfig = 'Notify Config';
   static const String notifyTestHelp = 'Notify Help', notifyTestTitle = 'Notify Title', notifyTestContent = 'Notify Content';
   static const String notifyTestSend = 'Notify Send', notifyTestSuccess = 'Notify Success', notifyTestFailed = 'Notify Failed';
@@ -41,9 +41,23 @@
   static const String homeRunningTask = 'home_running_task', homePendingTask = 'home_pending_task', homeWaitingTask = 'home_waiting_task';
   static const String homeConnectionRetryHint = 'home_connection_retry_hint', homeConnectionRetryAction = 'home_connection_retry_action', homeEmptyScriptHint = 'home_empty_script_hint';
   static const String homeLoadingAutoDeploying = 'home_loading_auto_deploying', homeLoadingAutoLogin = 'home_loading_auto_login', homeLoadingConfigDetail = 'home_loading_config_detail';
+  static const String homeScriptAbnormal = 'home_script_abnormal', homeScriptOffline = 'home_script_offline', homeScriptSearchHint = 'home_script_search_hint';
+  static const String homeSortByStatus = 'home_sort_by_status', homeSortByName = 'home_sort_by_name', homeNoScriptSelected = 'home_no_script_selected';
+  static const String homeStatusTab = 'home_status_tab', homeTasksTab = 'home_tasks_tab', homeParamsTab = 'home_params_tab';
+  static const String homeTaskFilterAll = 'home_task_filter_all', homeTaskFilterEnabled = 'home_task_filter_enabled', homeTaskFilterDisabled = 'home_task_filter_disabled';
+  static const String homeTaskEnabled = 'home_task_enabled', homeTaskDisabled = 'home_task_disabled', homeQuickRun = 'home_quick_run';
+  static const String homeQuickWait = 'home_quick_wait', homeOpenTaskParams = 'home_open_task_params', homeTaskConfigureAndEnable = 'home_task_configure_and_enable';
+  static const String homeTaskSelectPrompt = 'home_task_select_prompt', homeRealtimeLog = 'home_realtime_log', homeHistoryLog = 'home_history_log';
+  static const String homeLogSearchHint = 'home_log_search_hint', homeLogUseRegex = 'home_log_use_regex', homeLogWrapLines = 'home_log_wrap_lines';
+  static const String homeLogAutoScroll = 'home_log_auto_scroll', homeLogLoadOlder = 'home_log_load_older', homeLogEmptyFiltered = 'home_log_empty_filtered';
   static const String taskManage = 'task_manage', taskManageTitle = 'task_manage_title', taskSearchHint = 'task_search_hint';
   static const String taskNotFound = 'task_not_found', taskMenuLoadFailed = 'task_menu_load_failed', loginError = 'Login error';
   static const String loginErrorMsg = 'The OAS connection fails, confirm that OAS is running', success = 'Success', overview = 'Overview';
+  static const String argsDraftDirty = 'args_draft_dirty', argsMixedValue = 'args_mixed_value', argsDiscardChanges = 'args_discard_changes';
+  static const String argsSaveChanges = 'args_save_changes', argsValidationFailed = 'args_validation_failed', argsInvalidInteger = 'args_invalid_integer';
+  static const String argsInvalidNumber = 'args_invalid_number', argsInvalidTime = 'args_invalid_time', argsInvalidTimeDelta = 'args_invalid_time_delta';
+  static const String argsInvalidDateTime = 'args_invalid_date_time', argsInvalidEnum = 'args_invalid_enum', argsMinValue = 'args_min_value';
+  static const String argsMaxValue = 'args_max_value', argsUnsavedPrompt = 'args_unsaved_prompt';
   static const String home = 'Home', about = 'About', updater = 'Updater';
   static const String tool = 'Tool', taskList = 'TaskList', script = 'Script';
   static const String restart = 'Restart', globalGame = 'GlobalGame', soulZones = 'Soul Zones';
@@ -91,4 +105,6 @@
   static const String passwordHelp = 'password_help', password = 'password', executeUpdate = 'execute_update';
   static const String goOasxRelease = 'Click to download', tip = 'Tip', copySuccess = 'Copy success';
 }
+
+
 

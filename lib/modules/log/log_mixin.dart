@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/services.dart';
@@ -6,31 +6,28 @@ import 'package:get/get.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
 mixin LogMixin on GetxController {
-  /// max lines to store in log
   int get maxLines => 200;
 
-  /// max logs+pending
   int get maxBuffer => 1000;
 
-  /// max burst line when refreshing
+  int get maxArchivedLines => 5000;
+
   int get maxBurst => 50;
 
-  /// min burst line when refreshing
   int get minBurst => 1;
 
-  /// ui log
   final logs = <String>[].obs;
 
-  /// auto scroll to bottom
+  final archivedLogs = <String>[].obs;
+
   final autoScroll = true.obs;
 
-  /// collapse log content
   final collapseLog = false.obs;
 
-  /// logs buffer, used to limit speeded log refresh
   final _pendingLogs = <String>[];
 
-  /// refresh timer for log
+  final Map<String, double> _savedScrollOffsets = <String, double>{};
+
   Timer? _refreshTimer;
 
   double _savedScrollOffset = 0.0;
@@ -59,33 +56,40 @@ mixin LogMixin on GetxController {
   }
 
   void _removeUIOldLogs() {
-    if (!autoScroll.value) return;
+    if (!autoScroll.value) {
+      return;
+    }
     if (logs.length > maxLines) {
       logs.removeRange(0, logs.length - maxLines);
+    }
+    if (archivedLogs.length > maxArchivedLines) {
+      archivedLogs.removeRange(0, archivedLogs.length - maxArchivedLines);
     }
   }
 
   void _updateUILogs() {
-    int backlog = _pendingLogs.length;
-    int burst = backlog.clamp(minBurst, maxBurst);
+    final backlog = _pendingLogs.length;
+    final burst = backlog.clamp(minBurst, maxBurst);
     for (int i = 0; i < burst && _pendingLogs.isNotEmpty; i++) {
-      logs.add(_pendingLogs.removeAt(0));
+      final nextLog = _pendingLogs.removeAt(0);
+      logs.add(nextLog);
+      archivedLogs.add(nextLog);
     }
   }
 
   void _clearOverflowLogs() {
-    int totalSize = logs.length + _pendingLogs.length;
+    var totalSize = logs.length + _pendingLogs.length;
     if (totalSize > maxBuffer) {
-      int overflow = totalSize - maxBuffer;
+      var overflow = totalSize - maxBuffer;
       if (overflow > 0) {
-        int removeFromLogs = min(overflow, logs.length);
+        final removeFromLogs = min(overflow, logs.length);
         if (removeFromLogs > 0) {
           logs.removeRange(0, removeFromLogs);
           overflow -= removeFromLogs;
         }
       }
       if (overflow > 0 && _pendingLogs.isNotEmpty) {
-        int removeFromPending = min(overflow, _pendingLogs.length);
+        final removeFromPending = min(overflow, _pendingLogs.length);
         _pendingLogs.removeRange(0, removeFromPending);
       }
     }
@@ -97,14 +101,18 @@ mixin LogMixin on GetxController {
 
   void clearLog() {
     logs.clear();
+    archivedLogs.clear();
     _pendingLogs.clear();
   }
 
   void copyLogs() {
-    final allLogs = logs.join("");
+    final allLogs = logs.join('');
     Clipboard.setData(ClipboardData(text: allLogs));
-    Get.snackbar(I18n.tip.tr, I18n.copySuccess.tr,
-        duration: const Duration(seconds: 1));
+    Get.snackbar(
+      I18n.tip.tr,
+      I18n.copySuccess.tr,
+      duration: const Duration(seconds: 1),
+    );
   }
 
   void toggleAutoScroll() {
@@ -117,8 +125,16 @@ mixin LogMixin on GetxController {
   void toggleCollapse() => collapseLog.value = !collapseLog.value;
 
   double get savedScrollOffsetVal => _savedScrollOffset;
+
+  double savedScrollOffsetFor(String slot) {
+    return _savedScrollOffsets[slot] ?? 0.0;
+  }
+
   void saveScrollOffset(double offset) {
     _savedScrollOffset = offset;
   }
-}
 
+  void saveScrollOffsetFor(String slot, double offset) {
+    _savedScrollOffsets[slot] = offset;
+  }
+}

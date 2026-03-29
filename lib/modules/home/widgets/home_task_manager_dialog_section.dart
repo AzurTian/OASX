@@ -1,18 +1,17 @@
-﻿part of 'home_task_manager_dialog.dart';
+part of 'home_task_manager_dialog.dart';
 
 class _TaskMenuSection extends StatelessWidget {
   const _TaskMenuSection({
     required this.section,
     required this.scriptName,
     required this.forceExpanded,
-    this.setArgumentOverride,
+    this.saveArgumentOverride,
   });
 
   final _TaskSection section;
   final String scriptName;
   final bool forceExpanded;
-  final void Function(String? config, String? task, String group,
-      String argument, String type, dynamic value)? setArgumentOverride;
+  final SaveArgumentCallback? saveArgumentOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +82,8 @@ class _TaskMenuSection extends StatelessWidget {
         onPressed: () => HomeTaskSettingsDialog.show(
           scriptName: scriptName,
           taskName: taskName,
-          setArgumentOverride: setArgumentOverride,
+          saveArgumentOverride: saveArgumentOverride,
+          scopeScripts: [scriptName],
         ),
         icon: const Icon(Icons.settings_rounded, size: 18),
         label: Text(I18n.setting.tr),
