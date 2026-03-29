@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-const _kHomeSplitScrollRowBackgroundKey =
+const _kSplitScrollRowBackgroundKey =
     ValueKey<String>('home-split-scroll-row-background');
 
-class HomeSplitScrollRow extends StatefulWidget {
-  const HomeSplitScrollRow({
+class SplitScrollRow extends StatefulWidget {
+  const SplitScrollRow({
     super.key,
     required this.leading,
     required this.trailing,
@@ -28,10 +28,10 @@ class HomeSplitScrollRow extends StatefulWidget {
   final double scrollbarSpacing;
 
   @override
-  State<HomeSplitScrollRow> createState() => _HomeSplitScrollRowState();
+  State<SplitScrollRow> createState() => _SplitScrollRowState();
 }
 
-class _HomeSplitScrollRowState extends State<HomeSplitScrollRow> {
+class _SplitScrollRowState extends State<SplitScrollRow> {
   final ScrollController _scrollController = ScrollController();
   bool _showsScrollbar = false;
   bool _syncQueued = false;
@@ -107,7 +107,7 @@ class _HomeSplitScrollRowState extends State<HomeSplitScrollRow> {
         children: [
           if (_showsScrollbar)
             Positioned(
-              key: _kHomeSplitScrollRowBackgroundKey,
+              key: _kSplitScrollRowBackgroundKey,
               top: 0,
               left: 0,
               right: 0,

@@ -11,7 +11,7 @@ extension _HomeViewActions on _HomeViewState {
       }
       return Padding(
         padding: const EdgeInsets.all(12),
-        child: HomeScriptWorkbench(
+        child: ConfigWorkbench(
           controller: controller,
           scriptService: scriptService,
           loadingAddScript: _isAddingScript,

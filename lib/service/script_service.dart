@@ -6,7 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/common/controllers/progress_snackbar_controller.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/extension_utils.dart';

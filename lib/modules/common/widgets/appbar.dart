@@ -1,11 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'package:oasx/utils/platform_utils.dart';
 import 'package:oasx/modules/common/widgets/title.dart';
+import 'package:oasx/utils/platform_utils.dart';
 
-/// Unified entry: build app bar by platform.
 PreferredSizeWidget buildPlatformAppBar(
   BuildContext context, {
   bool isCollapsed = false,
@@ -46,7 +45,6 @@ PreferredSizeWidget buildPlatformAppBar(
   };
 }
 
-/// Windows specific title bar.
 PreferredSizeWidget _windowAppbar(
   BuildContext context, {
   VoidCallback? onMenuPressed,
@@ -68,7 +66,6 @@ PreferredSizeWidget _windowAppbar(
   );
 }
 
-/// Desktop (Linux / macOS)
 PreferredSizeWidget _desktopAppbar(
   BuildContext context, {
   String? routePath,
@@ -76,12 +73,11 @@ PreferredSizeWidget _desktopAppbar(
 }) {
   return AppBar(
     title: getTitle(context, routePath: routePath),
-    automaticallyImplyLeading: _shouldAutoImplyLeading(routePath),
+    automaticallyImplyLeading: _shouldAutoImplyLeading(),
     actions: trailingActions.isEmpty ? null : trailingActions,
   );
 }
 
-/// Web
 PreferredSizeWidget _webAppbar(
   BuildContext context, {
   String? routePath,
@@ -102,18 +98,17 @@ PreferredSizeWidget _webAppbar(
   );
 }
 
-/// Mobile (Android / iOS)
 PreferredSizeWidget _mobileTabletAppbar(
   BuildContext context, {
   String? routePath,
 }) {
   return AppBar(
     title: getTitle(context, routePath: routePath),
-    automaticallyImplyLeading: _shouldAutoImplyLeading(routePath),
+    automaticallyImplyLeading: _shouldAutoImplyLeading(),
   );
 }
 
-bool _shouldAutoImplyLeading(String? routePath) => routePath != '/overview';
+bool _shouldAutoImplyLeading() => true;
 
 Widget _buildWindowTitle(
   BuildContext context, {
@@ -137,4 +132,3 @@ Widget _buildWindowTitle(
     ],
   );
 }
-

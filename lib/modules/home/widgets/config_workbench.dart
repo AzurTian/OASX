@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/home_script_actions.dart';
-import 'package:oasx/modules/home/widgets/home_active_script_panel.dart';
-import 'package:oasx/modules/home/widgets/home_log_center_panel.dart';
-import 'package:oasx/modules/home/widgets/home_script_collection_panel.dart';
+import 'package:oasx/modules/home/config_actions.dart';
+import 'package:oasx/modules/home/widgets/active_config_panel.dart';
+import 'package:oasx/modules/home/widgets/log_center_panel.dart';
+import 'package:oasx/modules/home/widgets/config_collection_panel.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeScriptWorkbench extends StatelessWidget {
-  const HomeScriptWorkbench({
+class ConfigWorkbench extends StatelessWidget {
+  const ConfigWorkbench({
     super.key,
     required this.controller,
     required this.scriptService,
@@ -32,7 +32,7 @@ class HomeScriptWorkbench extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final layoutMode = resolveHomeWorkbenchLayoutMode(constraints.maxWidth);
-        final collection = HomeScriptCollectionPanel(
+        final collection = ConfigCollectionPanel(
           controller: controller,
           fillHeight: true,
           loadingAddScript: loadingAddScript,
@@ -46,7 +46,7 @@ class HomeScriptWorkbench extends StatelessWidget {
           onRenameScript: (scriptName) => _renameScript(context, scriptName),
           onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
         );
-        final details = HomeActiveScriptPanel(
+        final details = ActiveConfigPanel(
           controller: controller,
           layoutMode: layoutMode,
           onChangeTab: (tab) => _changeTab(context, tab),
@@ -62,7 +62,7 @@ class HomeScriptWorkbench extends StatelessWidget {
               : null,
         );
         final logs = Obx(
-          () => HomeLogCenterPanel(
+          () => LogCenterPanel(
             scriptName: controller.activeScriptName.value,
           ),
         );
@@ -164,7 +164,7 @@ class HomeScriptWorkbench extends StatelessWidget {
     if (!await _confirmDiscardDraft(context)) {
       return;
     }
-    await HomeScriptActions.showRenameDialog(
+    await ConfigActions.showRenameDialog(
       scriptService: scriptService,
       oldName: scriptName,
     );
@@ -175,7 +175,7 @@ class HomeScriptWorkbench extends StatelessWidget {
     if (!await _confirmDiscardDraft(context)) {
       return;
     }
-    await HomeScriptActions.showDeleteDialog(
+    await ConfigActions.showDeleteDialog(
       scriptService: scriptService,
       name: scriptName,
     );

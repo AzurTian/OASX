@@ -1,4 +1,16 @@
-part of server;
+import 'dart:io';
+
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:process_run/shell.dart';
+
+import 'package:oasx/api/api_client.dart';
+import 'package:oasx/modules/common/models/storage_key.dart';
+import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/log/log_mixin.dart';
+import 'package:oasx/modules/settings/controllers/settings_controller.dart';
+import 'package:oasx/service/locale_service.dart';
+import 'package:oasx/service/script_service.dart';
 
 class ServerController extends GetxController with LogMixin {
   final rootPathServer = ''.obs;
@@ -13,8 +25,8 @@ class ServerController extends GetxController with LogMixin {
 
   @override
   void onInit() {
-    rootPathServer.value = _storage.read(StorageKey.rootPathServer.name) ??
-        'Please set OAS root path';
+    rootPathServer.value =
+        _storage.read(StorageKey.rootPathServer.name) ?? 'Please set OAS root path';
     autoLoginAfterDeploy.value =
         _storage.read(StorageKey.autoLoginAfterDeploy.name) ?? false;
     shell = getShell;
@@ -70,6 +82,35 @@ class ServerController extends GetxController with LogMixin {
     return true;
   }
 
+  void readDeploy() {
+    final filePath = '${rootPathServer.value}\\config\\deploy.yaml';
+    try {
+      final file = File(filePath);
+      if (file.existsSync()) {
+        deployContent.value = file.readAsStringSync();
+      } else {
+        deployContent.value = 'File not found';
+      }
+    } catch (e) {
+      deployContent.value = 'Error reading file: $e';
+    }
+  }
+
+  void writeDeploy(String value) {
+    final filePath = '${rootPathServer.value}\\config\\deploy.yaml';
+    deployContent.value = value;
+    try {
+      final file = File(filePath);
+      if (file.existsSync()) {
+        file.writeAsStringSync(deployContent.value);
+      } else {
+        deployContent.value = 'File not found';
+      }
+    } catch (e) {
+      deployContent.value = 'Error writing file: $e';
+    }
+  }
+
   String get pathGit => '${rootPathServer.value}\\toolkit\\Git\\mingw64\\bin"';
   String get pathPython => '${rootPathServer.value}\\toolkit';
   String get pathAdb =>
@@ -90,7 +131,7 @@ class ServerController extends GetxController with LogMixin {
 
   Future<void> runShell(String command) async {
     try {
-      var result = await shell!.run(command);
+      final result = await shell!.run(command);
       printInfo(info: result.errText);
     } on ShellException catch (e) {
       addLog('ERROR: ${e.toString()}');

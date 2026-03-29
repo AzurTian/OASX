@@ -1,6 +1,6 @@
-﻿import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 import 'package:get/get.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/platform_utils.dart';

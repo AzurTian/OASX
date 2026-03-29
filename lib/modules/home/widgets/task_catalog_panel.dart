@@ -3,13 +3,13 @@ import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
-import 'package:oasx/modules/home/widgets/home_split_scroll_row.dart';
-import 'package:oasx/modules/home/widgets/home_task_parameter_panel.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
+import 'package:oasx/modules/home/widgets/task_parameter_panel.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeTaskCatalogPanel extends StatefulWidget {
-  const HomeTaskCatalogPanel({
+class TaskCatalogPanel extends StatefulWidget {
+  const TaskCatalogPanel({
     super.key,
     required this.controller,
     required this.scriptModel,
@@ -25,10 +25,10 @@ class HomeTaskCatalogPanel extends StatefulWidget {
   final Future<void> Function(String taskName) onQuickWait;
 
   @override
-  State<HomeTaskCatalogPanel> createState() => _HomeTaskCatalogPanelState();
+  State<TaskCatalogPanel> createState() => _TaskCatalogPanelState();
 }
 
-class _HomeTaskCatalogPanelState extends State<HomeTaskCatalogPanel> {
+class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
   late final Future<Map<String, List<String>>> _menuFuture;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -45,7 +45,7 @@ class _HomeTaskCatalogPanelState extends State<HomeTaskCatalogPanel> {
   }
 
   @override
-  void didUpdateWidget(covariant HomeTaskCatalogPanel oldWidget) {
+  void didUpdateWidget(covariant TaskCatalogPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.scriptModel.name == widget.scriptModel.name) {
       return;
@@ -68,7 +68,7 @@ class _HomeTaskCatalogPanelState extends State<HomeTaskCatalogPanel> {
         index: activeTask.isEmpty ? 0 : 1,
         children: [
           _buildTaskList(context),
-          HomeTaskParameterPanel(
+          TaskParameterPanel(
             controller: widget.controller,
             scriptModel: widget.scriptModel,
             onBack: _handleBackFromParameters,
@@ -353,7 +353,7 @@ class _CatalogTaskRow extends StatelessWidget {
     final supportsEnable = !isScriptGroup || task.name == I18n.restart;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: HomeSplitScrollRow(
+      child: SplitScrollRow(
         scrollKey: PageStorageKey<String>('task-row-scroll-${task.name}'),
         minHeight: _minRowHeight,
         trailingExtent: _actionExtent,

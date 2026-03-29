@@ -1,4 +1,4 @@
-part of overview;
+import 'package:get/get.dart';
 
 class TaskItemModel {
   final String scriptName;

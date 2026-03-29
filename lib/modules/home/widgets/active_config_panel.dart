@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
-import 'package:oasx/modules/home/widgets/home_log_center_panel.dart';
-import 'package:oasx/modules/home/widgets/home_script_state_indicator.dart';
-import 'package:oasx/modules/home/widgets/home_task_catalog_panel.dart';
-import 'package:oasx/modules/home/widgets/home_task_status_panel.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/widgets/log_center_panel.dart';
+import 'package:oasx/modules/home/widgets/config_state_indicator.dart';
+import 'package:oasx/modules/home/widgets/task_catalog_panel.dart';
+import 'package:oasx/modules/home/widgets/task_status_panel.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeActiveScriptPanel extends StatelessWidget {
-  const HomeActiveScriptPanel({
+class ActiveConfigPanel extends StatelessWidget {
+  const ActiveConfigPanel({
     super.key,
     required this.controller,
     required this.layoutMode,
@@ -64,7 +64,7 @@ class HomeActiveScriptPanel extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
-                  HomeScriptStateIndicator(
+                  ConfigStateIndicator(
                     state: controller.scriptStateFor(script),
                     size: 20,
                   ),
@@ -102,20 +102,20 @@ class HomeActiveScriptPanel extends StatelessWidget {
 
   Widget _buildTabContent(ScriptModel script, HomeWorkbenchTab currentTab) {
     return switch (currentTab) {
-      HomeWorkbenchTab.status => HomeTaskStatusPanel(
+      HomeWorkbenchTab.status => TaskStatusPanel(
           scriptModel: script,
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
           onEditTask: onOpenTask,
         ),
-      HomeWorkbenchTab.tasks => HomeTaskCatalogPanel(
+      HomeWorkbenchTab.tasks => TaskCatalogPanel(
           controller: controller,
           scriptModel: script,
           onOpenTask: onOpenTask,
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
         ),
-      HomeWorkbenchTab.logs => HomeLogCenterPanel(scriptName: script.name),
+      HomeWorkbenchTab.logs => LogCenterPanel(scriptName: script.name),
     };
   }
 

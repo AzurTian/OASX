@@ -1,4 +1,7 @@
-part of overview;
+import 'package:get/get.dart';
+
+import 'package:oasx/modules/log/log_mixin.dart';
+import 'package:oasx/service/script_service.dart';
 
 class OverviewController extends GetxController with LogMixin {
   final String name;

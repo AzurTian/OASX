@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeTaskParameterPanel extends StatefulWidget {
-  const HomeTaskParameterPanel({
+class TaskParameterPanel extends StatefulWidget {
+  const TaskParameterPanel({
     super.key,
     required this.controller,
     required this.scriptModel,
@@ -18,14 +18,15 @@ class HomeTaskParameterPanel extends StatefulWidget {
   final Future<void> Function() onBack;
 
   @override
-  State<HomeTaskParameterPanel> createState() => _HomeTaskParameterPanelState();
+  State<TaskParameterPanel> createState() => _TaskParameterPanelState();
 }
 
-class _HomeTaskParameterPanelState extends State<HomeTaskParameterPanel> {
+class _TaskParameterPanelState extends State<TaskParameterPanel> {
   Future<void>? _loadFuture;
   String _loadKey = '';
   String _scriptName = '';
   String _taskName = '';
+  bool _lockImmediateScheduling = false;
 
   @override
   void didChangeDependencies() {
@@ -34,7 +35,7 @@ class _HomeTaskParameterPanelState extends State<HomeTaskParameterPanel> {
   }
 
   @override
-  void didUpdateWidget(covariant HomeTaskParameterPanel oldWidget) {
+  void didUpdateWidget(covariant TaskParameterPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     _ensureLoad();
   }
@@ -90,6 +91,7 @@ class _HomeTaskParameterPanelState extends State<HomeTaskParameterPanel> {
                   taskName: _taskName,
                   groupDraggable: false,
                   stagingMode: true,
+                  lockImmediateScheduling: _lockImmediateScheduling,
                   onCancel: () async {
                     widget.controller.clearActiveTask();
                   },
@@ -106,14 +108,27 @@ class _HomeTaskParameterPanelState extends State<HomeTaskParameterPanel> {
     final nextTask = widget.controller.activeTaskName.value.trim();
     final nextScript = widget.scriptModel.name.trim();
     final nextScope = widget.controller.linkedScopeScriptsFor(nextScript);
+    final runningTaskName = widget.scriptModel.runningTask.value.taskName.value.trim();
+    final shouldLockImmediateScheduling =
+        nextTask.isNotEmpty && runningTaskName == nextTask;
     final nextKey = '$nextScript/$nextTask';
     final argsController = Get.find<ArgsController>();
+    if (_lockImmediateScheduling != shouldLockImmediateScheduling) {
+      _lockImmediateScheduling = shouldLockImmediateScheduling;
+      if (_lockImmediateScheduling) {
+        argsController.discardDraftField(
+          ArgsController.schedulerGroup,
+          ArgsController.nextRunArg,
+        );
+      }
+    }
     if (nextTask.isEmpty || nextKey == _loadKey) {
       if (nextTask.isEmpty) {
         _loadKey = '';
         _loadFuture = null;
         _scriptName = '';
         _taskName = '';
+        _lockImmediateScheduling = false;
         argsController.updateScopeScripts(const []);
       } else {
         argsController.updateScopeScripts(nextScope, config: nextScript);

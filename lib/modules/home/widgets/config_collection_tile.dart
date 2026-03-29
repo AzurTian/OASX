@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
-import 'package:oasx/modules/home/widgets/home_split_scroll_row.dart';
-import 'package:oasx/modules/home/widgets/home_script_collection_task_preview.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
+import 'package:oasx/modules/home/widgets/config_collection_task_preview.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeScriptCollectionTile extends StatelessWidget {
-  const HomeScriptCollectionTile({
+class ConfigCollectionTile extends StatelessWidget {
+  const ConfigCollectionTile({
     super.key,
     required this.controller,
     required this.script,
@@ -64,7 +64,7 @@ class HomeScriptCollectionTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: HomeSplitScrollRow(
+                  child: SplitScrollRow(
                     trailingExtent: _actionExtent,
                     trailingBackgroundColor: rowColor,
                     trailing: _ScriptActionBar(
@@ -116,7 +116,7 @@ class _ScriptMeta extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 2),
-        HomeScriptCollectionTaskPreview(script: script),
+        ConfigCollectionTaskPreview(script: script),
       ],
     );
   }

@@ -1,4 +1,17 @@
-﻿part of settings;
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:styled_widget/styled_widget.dart';
+
+import 'package:oasx/config/global.dart';
+import 'package:oasx/modules/settings/widgets/setting_card.dart';
+import 'package:oasx/modules/settings/widgets/setting_item.dart';
+import 'package:oasx/service/autostart_service.dart';
+import 'package:oasx/service/locale_service.dart';
+import 'package:oasx/service/theme_service.dart';
+import 'package:oasx/service/window_service.dart';
+import 'package:oasx/translation/i18n_content.dart';
+import 'package:oasx/utils/check_version.dart';
+import 'package:oasx/utils/platform_utils.dart';
 
 class SystemSettingsCard extends StatelessWidget {
   const SystemSettingsCard({super.key});
@@ -48,8 +61,9 @@ class SystemSettingsCard extends StatelessWidget {
             right: const LaunchAtStartupSwitch(),
           ),
         SettingItem(
-            left: Text('${I18n.currentVersion.tr}: ${GlobalVar.version}'),
-            right: const CheckUpdateButton()),
+          left: Text('${I18n.currentVersion.tr}: ${GlobalVar.version}'),
+          right: const CheckUpdateButton(),
+        ),
       ],
     );
   }
@@ -151,4 +165,3 @@ class CheckUpdateButton extends StatelessWidget {
     );
   }
 }
-

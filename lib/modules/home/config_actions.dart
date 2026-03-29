@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeScriptActions {
-  const HomeScriptActions._();
+class ConfigActions {
+  const ConfigActions._();
 
   static String? validateRenameName({
     required String oldName,

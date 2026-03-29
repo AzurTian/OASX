@@ -53,6 +53,7 @@ class Args extends StatelessWidget {
     this.taskName,
     this.groupDraggable = true,
     this.stagingMode = false,
+    this.lockImmediateScheduling = false,
     this.setArgumentOverride,
     this.onCancel,
   }) : super(key: key);
@@ -61,6 +62,7 @@ class Args extends StatelessWidget {
   final String? taskName;
   final bool groupDraggable;
   final bool stagingMode;
+  final bool lockImmediateScheduling;
   final SetArgumentCallback? setArgumentOverride;
   final Future<void> Function()? onCancel;
 
@@ -146,6 +148,7 @@ class Args extends StatelessWidget {
           taskName: taskName,
           setArgument: setArgument,
           getGroupName: groupsModel.getGroupName,
+          lockImmediateScheduling: lockImmediateScheduling,
           index: i,
         ),
       );
@@ -216,7 +219,6 @@ class ArgsDraftBar extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-
             TextButton(
               onPressed: () async {
                 await controller.discardDraftChanges();
@@ -257,13 +259,3 @@ class ArgsDraftBar extends StatelessWidget {
     });
   }
 }
-
-
-
-
-
-
-
-
-
-

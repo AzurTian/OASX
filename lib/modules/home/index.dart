@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:oasx/modules/common/widgets/add_config_dialog.dart';
 import 'package:oasx/modules/common/widgets/appbar.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/widgets/home_script_workbench.dart';
+import 'package:oasx/modules/home/widgets/config_workbench.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/check_version.dart';

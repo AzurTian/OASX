@@ -24,6 +24,9 @@ class ArgsController extends GetxController {
   List<String> _scopeScripts = const [];
   SaveArgumentCallback? _saveArgumentOverride;
 
+  static bool isImmediateSchedulingField(String group, String argument) {
+    return group == schedulerGroup && argument == nextRunArg;
+  }
 
   void loadModel(Map<String, dynamic> json) {
     groups.value = [];
@@ -130,6 +133,28 @@ class ArgsController extends GetxController {
       fieldErrors.remove(key);
     }
     fieldErrors.refresh();
+  }
+
+  void discardDraftField(String group, String argument) {
+    final key = _fieldKey(group, argument);
+    final model = findArgument(group, argument);
+    final hasOriginal = _originalValues.containsKey(key);
+    var shouldRefreshModel = false;
+    if (model != null && hasOriginal && !_isEqualValue(model.value, _originalValues[key])) {
+      model.value = _originalValues[key];
+      shouldRefreshModel = true;
+    }
+    final removedDirty = dirtyFieldKeys.remove(key);
+    final removedError = fieldErrors.remove(key) != null;
+    if (!shouldRefreshModel && !removedDirty && !removedError) {
+      return;
+    }
+    dirtyFieldKeys.refresh();
+    fieldErrors.refresh();
+    if (shouldRefreshModel) {
+      groups.refresh();
+      groupsData.refresh();
+    }
   }
 
   ArgumentModel? findArgument(String group, String argument) {

@@ -1,10 +1,11 @@
-﻿part of args;
+part of args;
 
 class ArgumentView extends StatefulWidget {
   const ArgumentView({
     required this.setArgument,
     required this.getGroupName,
     required this.index,
+    this.lockImmediateScheduling = false,
     Key? key,
     this.scriptName,
     this.taskName,
@@ -13,6 +14,7 @@ class ArgumentView extends StatefulWidget {
   final SetArgumentCallback setArgument;
   final String Function() getGroupName;
   final int index;
+  final bool lockImmediateScheduling;
   final String? scriptName;
   final String? taskName;
 
@@ -33,6 +35,14 @@ class _ArgumentViewState extends State<ArgumentView> {
   }
 
   ArgsController get _argsController => Get.find<ArgsController>();
+
+  bool get _isProtectedImmediateScheduleField {
+    return widget.lockImmediateScheduling &&
+        ArgsController.isImmediateSchedulingField(
+          widget.getGroupName(),
+          model.title,
+        );
+  }
 
   @override
   void initState() {
@@ -92,11 +102,18 @@ class _ArgumentViewState extends State<ArgumentView> {
 
   Widget _buildFormSection() {
     final errorText = _argsController.fieldError(widget.getGroupName(), model.title);
+    final isLocked = _isProtectedImmediateScheduleField;
     final child = switch (model.type) {
-      'boolean' => Checkbox(value: model.value, onChanged: onCheckboxChanged)
-          .alignment(Alignment.centerLeft),
-      'string' => _buildTextField(errorText: errorText),
-      'multi_line' => _buildTextField(errorText: errorText, maxLines: null),
+      'boolean' => Checkbox(
+          value: model.value,
+          onChanged: isLocked ? null : onCheckboxChanged,
+        ).alignment(Alignment.centerLeft),
+      'string' => _buildTextField(errorText: errorText, enabled: !isLocked),
+      'multi_line' => _buildTextField(
+          errorText: errorText,
+          maxLines: null,
+          enabled: !isLocked,
+        ),
       'number' => _buildTextField(
           errorText: errorText,
           keyboardType: TextInputType.number,
@@ -104,6 +121,7 @@ class _ArgumentViewState extends State<ArgumentView> {
             FilteringTextInputFormatter.allow(RegExp('[-0-9.]')),
           ],
           onChanged: _scheduleNumberChange,
+          enabled: !isLocked,
         ),
       'integer' => _buildTextField(
           errorText: errorText,
@@ -112,6 +130,7 @@ class _ArgumentViewState extends State<ArgumentView> {
             FilteringTextInputFormatter.allow(RegExp('[-0-9]')),
           ],
           onChanged: _scheduleIntegerChange,
+          enabled: !isLocked,
         ),
       'enum' => DropdownButtonFormField<String>(
           value: model.value.toString(),
@@ -144,11 +163,12 @@ class _ArgumentViewState extends State<ArgumentView> {
                 ),
               )
               .toList(),
-          onChanged: onEnumChanged,
+          onChanged: isLocked ? null : onEnumChanged,
         ),
       'date_time' => _buildPicker(
           DateTimePicker(value: model.value, onChange: onDateTimeChanged),
           errorText,
+          enabled: !isLocked,
         ),
       'time_delta' => _buildPicker(
           TimeDeltaPicker(
@@ -156,10 +176,12 @@ class _ArgumentViewState extends State<ArgumentView> {
             onChange: onTimeDeltaChanged,
           ),
           errorText,
+          enabled: !isLocked,
         ),
       'time' => _buildPicker(
           TimePicker(value: model.value, onChange: onTimeChanged),
           errorText,
+          enabled: !isLocked,
         ),
       _ => Text(model.value.toString()),
     };
@@ -168,6 +190,7 @@ class _ArgumentViewState extends State<ArgumentView> {
 
   Widget _buildTextField({
     required String? errorText,
+    bool enabled = true,
     int? maxLines = 1,
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
@@ -176,6 +199,7 @@ class _ArgumentViewState extends State<ArgumentView> {
     return TextFormField(
       controller: _textController,
       focusNode: _focusNode,
+      enabled: enabled,
       maxLines: maxLines,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
@@ -184,20 +208,30 @@ class _ArgumentViewState extends State<ArgumentView> {
     );
   }
 
-  Widget _buildPicker(Widget picker, String? errorText) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        picker,
-        if (errorText != null && errorText.isNotEmpty)
-          Text(
-            errorText,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.error,
-              fontSize: 12,
-            ),
-          ).padding(top: 4),
-      ],
+  Widget _buildPicker(
+    Widget picker,
+    String? errorText, {
+    bool enabled = true,
+  }) {
+    return IgnorePointer(
+      ignoring: !enabled,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.6,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            picker,
+            if (errorText != null && errorText.isNotEmpty)
+              Text(
+                errorText,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 12,
+                ),
+              ).padding(top: 4),
+          ],
+        ),
+      ),
     );
   }
 

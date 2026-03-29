@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
 
-class HomeScriptStateIndicator extends StatelessWidget {
-  const HomeScriptStateIndicator({
+class ConfigStateIndicator extends StatelessWidget {
+  const ConfigStateIndicator({
     super.key,
     required this.state,
     this.size = 18,

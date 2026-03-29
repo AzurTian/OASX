@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/service/script_service.dart';
@@ -19,12 +19,6 @@ import 'package:oasx/modules/server/index.dart';
 part 'home_dashboard_controller_linking.dart';
 part 'home_dashboard_controller_startup.dart';
 part 'home_dashboard_controller_workspace.dart';
-
-/// Defines which content view is visible in a home script card.
-enum ScriptCardViewMode {
-  tasks,
-  logs,
-}
 
 /// Defines the visible dashboard health state for a script.
 enum HomeScriptStateFilter {
@@ -107,8 +101,6 @@ class HomeDashboardController extends GetxController {
   final _lastPrimaryWorkbenchTab = HomeWorkbenchTab.status.obs;
   final taskCatalogFilter = HomeTaskCatalogFilter.all.obs;
   final activeTaskName = ''.obs;
-  /// Stores the per-script card content view mode.
-  final _cardViewModes = <String, ScriptCardViewMode>{}.obs;
 
   ScriptService get _scriptService => Get.find<ScriptService>();
 
@@ -202,19 +194,4 @@ class HomeDashboardController extends GetxController {
       .toList();
 
   int get validControlScriptCount => validControlScripts.length;
-
-  /// Returns the current card view mode for a script.
-  ScriptCardViewMode cardViewModeFor(String scriptName) {
-    return _cardViewModes[scriptName] ?? ScriptCardViewMode.tasks;
-  }
-
-  /// Toggles the card view mode for a script and returns the new mode.
-  ScriptCardViewMode toggleCardViewMode(String scriptName) {
-    final current = cardViewModeFor(scriptName);
-    final next = current == ScriptCardViewMode.tasks
-        ? ScriptCardViewMode.logs
-        : ScriptCardViewMode.tasks;
-    _cardViewModes[scriptName] = next;
-    return next;
-  }
 }

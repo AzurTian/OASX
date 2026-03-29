@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
-import 'package:oasx/modules/home/widgets/home_split_scroll_row.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeTaskStatusPanel extends StatelessWidget {
-  const HomeTaskStatusPanel({
+class TaskStatusPanel extends StatelessWidget {
+  const TaskStatusPanel({
     super.key,
     required this.scriptModel,
     required this.onQuickRun,
@@ -103,13 +103,13 @@ class _StatusTaskRow extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(10),
-        child: HomeSplitScrollRow(
+        child: SplitScrollRow(
           minHeight: _minRowHeight,
           trailingExtent: _actionExtent,
           trailingBackgroundColor: rowBackground,
           trailing: _TaskActionBar(
-            onQuickRun: () => onQuickRun(task.name),
-            onQuickWait: () => onQuickWait(task.name),
+            onQuickRun: task.canQuickSchedule ? () => onQuickRun(task.name) : null,
+            onQuickWait: task.canQuickSchedule ? () => onQuickWait(task.name) : null,
             onEditTask: () => onEditTask(task.name),
           ),
           leading: Row(
@@ -204,9 +204,9 @@ class _TaskActionBar extends StatelessWidget {
     required this.onEditTask,
   });
 
-  final VoidCallback onQuickRun;
-  final VoidCallback onQuickWait;
-  final VoidCallback onEditTask;
+  final VoidCallback? onQuickRun;
+  final VoidCallback? onQuickWait;
+  final VoidCallback? onEditTask;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +242,7 @@ class _TaskActionIcon extends StatelessWidget {
 
   final IconData icon;
   final String tooltip;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -265,6 +265,8 @@ class _StatusTaskData {
   final String name;
   final _StatusTaskType type;
   final String timeText;
+
+  bool get canQuickSchedule => type != _StatusTaskType.running;
 }
 
 enum _StatusTaskType {

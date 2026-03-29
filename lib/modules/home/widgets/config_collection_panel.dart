@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
-import 'package:oasx/modules/home/widgets/home_script_collection_tile.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/widgets/config_collection_tile.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeScriptCollectionPanel extends StatelessWidget {
+class ConfigCollectionPanel extends StatelessWidget {
   static const _visibleStateFilters = [
     HomeScriptStateFilter.all,
     HomeScriptStateFilter.running,
@@ -13,7 +13,7 @@ class HomeScriptCollectionPanel extends StatelessWidget {
     HomeScriptStateFilter.abnormal,
   ];
 
-  const HomeScriptCollectionPanel({
+  const ConfigCollectionPanel({
     super.key,
     required this.controller,
     required this.fillHeight,
@@ -52,7 +52,7 @@ class HomeScriptCollectionPanel extends StatelessWidget {
               height: 1,
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
-            itemBuilder: (context, index) => HomeScriptCollectionTile(
+            itemBuilder: (context, index) => ConfigCollectionTile(
               controller: controller,
               script: scripts[index],
               state: controller.scriptCollectionStateFor(scripts[index]),

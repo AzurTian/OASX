@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeScriptCollectionTaskPreview extends StatelessWidget {
-  const HomeScriptCollectionTaskPreview({
+class ConfigCollectionTaskPreview extends StatelessWidget {
+  const ConfigCollectionTaskPreview({
     super.key,
     required this.script,
   });
@@ -34,7 +34,7 @@ class HomeScriptCollectionTaskPreview extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            preview.name.tr,
+            preview.displayName,
             maxLines: 1,
             overflow: TextOverflow.visible,
             softWrap: false,
@@ -72,6 +72,7 @@ class HomeScriptCollectionTaskPreview extends StatelessWidget {
       return _TaskPreviewData(
         type: _PreviewTaskType.waiting,
         name: taskName,
+        timeText: task.nextRun.value.trim(),
       );
     }
     return null;
@@ -88,10 +89,29 @@ class _TaskPreviewData {
   const _TaskPreviewData({
     required this.type,
     required this.name,
+    this.timeText = '',
   });
 
   final _PreviewTaskType type;
   final String name;
+  final String timeText;
+
+  String get displayName {
+    final localizedName = name.tr;
+    if (timeText.isEmpty || type != _PreviewTaskType.waiting) {
+      return localizedName;
+    }
+    return '$localizedName ${_timeOfDayText(timeText)}';
+  }
+
+  String _timeOfDayText(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) {
+      return normalized;
+    }
+    final parts = normalized.split(' ');
+    return parts.isEmpty ? normalized : parts.last;
+  }
 
   IconData get icon {
     return switch (type) {

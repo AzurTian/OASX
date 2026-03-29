@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/common/widgets/primary_navigation_shell.dart';
-import 'package:oasx/modules/home/index.dart';
 import 'package:oasx/modules/home/home_binding.dart';
-import 'package:oasx/modules/overview/index.dart';
+import 'package:oasx/modules/home/index.dart';
 import 'package:oasx/modules/server/index.dart';
 import 'package:oasx/modules/settings/index.dart';
 import 'package:oasx/utils/platform_utils.dart';
@@ -18,15 +16,6 @@ class Routes {
       name: '/home',
       page: () => _buildPrimaryPage('/home'),
       binding: HomeBinding(),
-    ),
-    GetPage(
-      name: '/overview',
-      page: () => const OverviewRouteView(),
-      binding: BindingsBuilder(() {
-        if (!Get.isRegistered<ArgsController>()) {
-          Get.lazyPut<ArgsController>(() => ArgsController(), fenix: true);
-        }
-      }),
     ),
     GetPage(
       name: '/settings',
@@ -52,4 +41,3 @@ class Routes {
     return PrimaryNavigationShell(routePath: routePath);
   }
 }
-

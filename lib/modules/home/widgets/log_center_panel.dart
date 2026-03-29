@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:oasx/modules/overview/index.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class HomeLogCenterPanel extends StatefulWidget {
-  const HomeLogCenterPanel({
+class LogCenterPanel extends StatefulWidget {
+  const LogCenterPanel({
     super.key,
     required this.scriptName,
   });
@@ -13,10 +13,10 @@ class HomeLogCenterPanel extends StatefulWidget {
   final String scriptName;
 
   @override
-  State<HomeLogCenterPanel> createState() => _HomeLogCenterPanelState();
+  State<LogCenterPanel> createState() => _LogCenterPanelState();
 }
 
-class _HomeLogCenterPanelState extends State<HomeLogCenterPanel> {
+class _LogCenterPanelState extends State<LogCenterPanel> {
   static final RegExp _logPattern = RegExp(
     r'^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) \|\s*([^|]+?)\s*\|\s*([A-Z]+)\s*\|\s*(.*)$',
   );
@@ -38,7 +38,7 @@ class _HomeLogCenterPanelState extends State<HomeLogCenterPanel> {
   }
 
   @override
-  void didUpdateWidget(covariant HomeLogCenterPanel oldWidget) {
+  void didUpdateWidget(covariant LogCenterPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.scriptName == widget.scriptName) {
       return;

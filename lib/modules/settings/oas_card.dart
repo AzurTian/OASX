@@ -1,4 +1,13 @@
-﻿part of settings;
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import 'package:oasx/modules/home/tool_view.dart';
+import 'package:oasx/modules/settings/controllers/settings_controller.dart';
+import 'package:oasx/modules/settings/oas_card_extra.dart';
+import 'package:oasx/modules/settings/widgets/setting_card.dart';
+import 'package:oasx/modules/settings/widgets/setting_item.dart';
+import 'package:oasx/translation/i18n_content.dart';
+import 'package:oasx/utils/platform_utils.dart';
 
 class OasSettingsCard extends StatelessWidget {
   const OasSettingsCard({super.key});
