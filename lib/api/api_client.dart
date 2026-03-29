@@ -56,26 +56,29 @@ class ApiClient {
 
   factory ApiClient() => _instance;
 
+  late final CacheOptions _cacheOptions;
+
   ApiClient._internal() {
     final temporaryDirectory =
         GetStorage().read(StorageKey.temporaryDirectory.name) ?? '';
     final cacheStore =
         kIsWeb ? MemCacheStore() : FileCacheStore(temporaryDirectory);
+    _cacheOptions = CacheOptions(
+      store: cacheStore,
+      policy: CachePolicy.request,
+      hitCacheOnErrorExcept: [401, 403],
+      maxStale: const Duration(days: 7),
+      priority: CachePriority.normal,
+      cipher: null,
+      keyBuilder: CacheOptions.defaultCacheKeyBuilder,
+      allowPostMethod: false,
+    );
     NetOptions.instance
         .setConnectTimeout(const Duration(seconds: 3))
         .enableLogger(false)
         .addInterceptor(
           DioCacheInterceptor(
-            options: CacheOptions(
-              store: cacheStore,
-              policy: CachePolicy.request,
-              hitCacheOnErrorExcept: [401, 403],
-              maxStale: const Duration(days: 7),
-              priority: CachePriority.normal,
-              cipher: null,
-              keyBuilder: CacheOptions.defaultCacheKeyBuilder,
-              allowPostMethod: false,
-            ),
+            options: _cacheOptions,
           ),
         )
         .addInterceptor(ApiInterceptor())
@@ -87,6 +90,20 @@ class ApiClient {
   void setAddress(String address) {
     this.address = address;
     NetOptions.instance.dio.options.baseUrl = address;
+  }
+
+  Options _buildUpdateCheckOptions(UpdateCheckPolicy cachePolicy) {
+    final dioCacheOptions = cachePolicy == UpdateCheckPolicy.manualNoCache
+        ? _cacheOptions.copyWith(
+            policy: CachePolicy.refresh,
+            hitCacheOnErrorExcept: const Nullable<List<int>>(null),
+          )
+        : _cacheOptions;
+    return buildCacheOptions(
+      const Duration(days: 7),
+      options: dioCacheOptions.toOptions(),
+      forceRefresh: cachePolicy == UpdateCheckPolicy.manualNoCache,
+    );
   }
 
   Future<ApiResult<T>> request<T>(
@@ -138,11 +155,13 @@ class ApiClient {
     return false;
   }
 
-  Future<GithubVersionModel> getGithubVersion() async {
+  Future<GithubVersionModel> getGithubVersion({
+    UpdateCheckPolicy cachePolicy = UpdateCheckPolicy.autoCached,
+  }) async {
     final res = await request(
       () => get(
         updateUrlGithub,
-        options: buildCacheOptions(const Duration(days: 7)),
+        options: _buildUpdateCheckOptions(cachePolicy),
         decodeType: GithubVersionModel(),
       ),
     );

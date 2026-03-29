@@ -32,7 +32,11 @@ class GithubVersionModel extends BaseNetModel {
   String? updatedAt; // 长这样 2025-08-26T12:32:36Z
 }
 
-// 瀵圭増鏈繘琛屽姣旓紝濡傛灉last > current 鍒欒繑鍥瀟rue
+enum UpdateCheckPolicy {
+  autoCached,
+  manualNoCache,
+}
+
 bool compareVersion(String current, String last) {
   if (current.contains('v')) {
     current = current.substring(1);
@@ -66,11 +70,19 @@ void showUpdateVersion(String content) {
   Get.dialog(Markdown(data: content));
 }
 
-Future<void> checkUpdate({bool showTip = false}) async {
+// Update check cache policy:
+// - autoCached uses the 7-day cache on app open
+// - manualNoCache forces a network check when user triggers it
+Future<void> checkUpdate({
+  bool showTip = false,
+  UpdateCheckPolicy cachePolicy = UpdateCheckPolicy.autoCached,
+}) async {
   if (!kReleaseMode) {
     return;
   }
-  GithubVersionModel githubVersionModel = await ApiClient().getGithubVersion();
+  GithubVersionModel githubVersionModel = await ApiClient().getGithubVersion(
+    cachePolicy: cachePolicy,
+  );
   String currentVersion = await getCurrentVersion();
   String githubVersion = githubVersionModel.version ?? 'v0.0.0';
   debugPrint('currentVersion: $currentVersion, githubVersion: $githubVersion');

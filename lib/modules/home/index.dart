@@ -50,7 +50,7 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 300), () {
-      checkUpdate();
+      checkUpdate(cachePolicy: UpdateCheckPolicy.autoCached);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.checkStartupConnection();

@@ -160,8 +160,12 @@ class CheckUpdateButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () async => await checkUpdate(showTip: true),
+      onPressed: () async => await checkUpdate(
+        showTip: true,
+        cachePolicy: UpdateCheckPolicy.manualNoCache,
+      ),
       child: Text(I18n.executeUpdate.tr),
     );
   }
 }
+
