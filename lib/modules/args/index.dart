@@ -233,9 +233,13 @@ class ArgsDraftBar extends StatelessWidget {
                   : () async {
                       final ret = await controller.saveDraftChanges();
                       if (ret) {
+                        final localizedTaskName = taskName.tr;
+                        final contextText = scriptName.isEmpty
+                            ? localizedTaskName
+                            : '$scriptName / $localizedTaskName';
                         Get.snackbar(
                           I18n.settingSaved.tr,
-                          '$scriptName / $taskName',
+                          contextText,
                         );
                         return;
                       }

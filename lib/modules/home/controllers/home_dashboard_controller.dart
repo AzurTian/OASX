@@ -107,6 +107,7 @@ class HomeDashboardController extends GetxController {
   final taskCatalogFilter = HomeTaskCatalogFilter.all.obs;
   final activeTaskName = ''.obs;
   final _taskParameterEntrySource = Rxn<HomeTaskParameterEntrySource>();
+  final _taskAvailabilityCache = <String, bool>{};
 
   ScriptService get _scriptService => Get.find<ScriptService>();
 

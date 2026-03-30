@@ -283,16 +283,17 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
       return false;
     }
     final argsController = Get.find<ArgsController>();
-    var allSuccess = true;
-    for (final name in _resolveScopeTargets(source)) {
-      final ret = await argsController.updateScriptTaskNextRun(
-        name,
-        normalizedTask,
-        normalizedNextRun,
-      );
-      allSuccess = ret && allSuccess;
-    }
-    return allSuccess;
+    return _applyTaskActionAcrossLinkedScope(
+      sourceScript: source,
+      taskName: normalizedTask,
+      action: (target, resolvedTask) {
+        return argsController.updateScriptTaskNextRun(
+          target,
+          resolvedTask,
+          normalizedNextRun,
+        );
+      },
+    );
   }
 
   Future<bool> quickToggleTaskEnabled({
@@ -300,13 +301,19 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     required String taskName,
     required bool enable,
   }) async {
-    final argsController = Get.find<ArgsController>();
-    var allSuccess = true;
-    for (final name in _resolveScopeTargets(scriptName)) {
-      final ret = await argsController.updateScriptTask(name, taskName, enable);
-      allSuccess = ret && allSuccess;
+    final source = scriptName.trim();
+    final normalizedTask = taskName.trim();
+    if (source.isEmpty || normalizedTask.isEmpty) {
+      return false;
     }
-    return allSuccess;
+    final argsController = Get.find<ArgsController>();
+    return _applyTaskActionAcrossLinkedScope(
+      sourceScript: source,
+      taskName: normalizedTask,
+      action: (target, resolvedTask) {
+        return argsController.updateScriptTask(target, resolvedTask, enable);
+      },
+    );
   }
 
   bool _matchesVisibleFilter(ScriptModel model) {
@@ -325,6 +332,76 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
   List<String> _resolveScopeTargets(String sourceScript) {
     final source = sourceScript.trim();
     return source.isEmpty ? const [] : [source];
+  }
+
+  Future<bool> _applyTaskActionAcrossLinkedScope({
+    required String sourceScript,
+    required String taskName,
+    required Future<bool> Function(String scriptName, String taskName) action,
+  }) async {
+    final source = sourceScript.trim();
+    final normalizedTask = taskName.trim();
+    if (source.isEmpty || normalizedTask.isEmpty) {
+      return false;
+    }
+    final targets = await _resolveLinkedTaskTargets(source, normalizedTask);
+    if (targets.isEmpty) {
+      return false;
+    }
+    var allSuccess = true;
+    for (final target in targets) {
+      final ret = await action(target, normalizedTask);
+      allSuccess = ret && allSuccess;
+    }
+    return allSuccess;
+  }
+
+  Future<List<String>> _resolveLinkedTaskTargets(
+    String sourceScript,
+    String taskName,
+  ) async {
+    final source = sourceScript.trim();
+    final normalizedTask = taskName.trim();
+    if (source.isEmpty || normalizedTask.isEmpty) {
+      return const [];
+    }
+    final scopeTargets = linkedScopeScriptsFor(source);
+    if (scopeTargets.length <= 1) {
+      return scopeTargets;
+    }
+    if (!scopeTargets.contains(source)) {
+      return [source];
+    }
+    final targets = <String>[source];
+    for (final target in scopeTargets) {
+      if (target == source) {
+        continue;
+      }
+      if (await _scriptContainsTask(target, normalizedTask)) {
+        targets.add(target);
+      }
+    }
+    return targets;
+  }
+
+  Future<bool> _scriptContainsTask(String scriptName, String taskName) async {
+    final normalizedScript = scriptName.trim();
+    final normalizedTask = taskName.trim();
+    if (normalizedScript.isEmpty || normalizedTask.isEmpty) {
+      return false;
+    }
+    final cacheKey = '$normalizedScript::$normalizedTask';
+    final cached = _taskAvailabilityCache[cacheKey];
+    if (cached != null) {
+      return cached;
+    }
+    final taskData = await ApiClient().getScriptTask(
+      normalizedScript,
+      normalizedTask,
+    );
+    final supported = taskData.isNotEmpty;
+    _taskAvailabilityCache[cacheKey] = supported;
+    return supported;
   }
 
   void _ensureActiveScript(List<ScriptModel> candidates) {

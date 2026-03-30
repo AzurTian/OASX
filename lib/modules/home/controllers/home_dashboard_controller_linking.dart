@@ -1,4 +1,4 @@
-﻿part of 'home_dashboard_controller.dart';
+part of 'home_dashboard_controller.dart';
 
 extension HomeDashboardLinkingX on HomeDashboardController {
   void toggleLinkMode() {
@@ -71,24 +71,25 @@ extension HomeDashboardLinkingX on HomeDashboardController {
     required dynamic value,
   }) async {
     final source = (config ?? '').trim();
-    if (source.isEmpty) {
+    final normalizedTask = (task ?? '').trim();
+    if (source.isEmpty || normalizedTask.isEmpty) {
       return false;
     }
     final argsController = Get.find<ArgsController>();
-    var allSuccess = true;
-    final targets = _collectCascadeTargets(source);
-    for (final target in targets) {
-      final ret = await argsController.setArgument(
-        target,
-        task,
-        group,
-        argument,
-        type,
-        value,
-      );
-      allSuccess = ret && allSuccess;
-    }
-    return allSuccess;
+    return _applyTaskActionAcrossLinkedScope(
+      sourceScript: source,
+      taskName: normalizedTask,
+      action: (target, resolvedTask) {
+        return argsController.setArgument(
+          target,
+          resolvedTask,
+          group,
+          argument,
+          type,
+          value,
+        );
+      },
+    );
   }
 
   List<String> _collectCascadeTargets(String sourceScript) {
@@ -106,4 +107,3 @@ extension HomeDashboardLinkingX on HomeDashboardController {
     return targets.toList()..sort();
   }
 }
-
