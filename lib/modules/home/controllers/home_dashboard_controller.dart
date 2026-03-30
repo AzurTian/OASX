@@ -49,6 +49,12 @@ enum HomeWorkbenchTab {
   logs,
 }
 
+/// Records which workbench tab opened the task parameter editor.
+enum HomeTaskParameterEntrySource {
+  overview,
+  tasks,
+}
+
 /// Defines the task catalog filter shown in the active script workspace.
 enum HomeTaskCatalogFilter {
   all,
@@ -101,6 +107,7 @@ class HomeDashboardController extends GetxController {
   final _lastPrimaryWorkbenchTab = HomeWorkbenchTab.status.obs;
   final taskCatalogFilter = HomeTaskCatalogFilter.all.obs;
   final activeTaskName = ''.obs;
+  final _taskParameterEntrySource = Rxn<HomeTaskParameterEntrySource>();
 
   ScriptService get _scriptService => Get.find<ScriptService>();
 

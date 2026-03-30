@@ -25,18 +25,4 @@ extension ApiClientScriptX on ApiClient {
     );
     return res.isSuccess && res.data == true;
   }
-
-  Future<bool> syncNextRun(
-    String scriptName,
-    String taskName, {
-    String? targetDt,
-  }) async {
-    final res = await request(
-      () => put(
-        '/$scriptName/$taskName/sync_next_run',
-        queryParameters: {'target_dt': targetDt},
-      ),
-    );
-    return res.isSuccess && res.data == true;
-  }
 }

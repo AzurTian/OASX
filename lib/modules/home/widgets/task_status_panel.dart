@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
 import 'package:oasx/translation/i18n_content.dart';
@@ -8,12 +11,16 @@ class TaskStatusPanel extends StatelessWidget {
   const TaskStatusPanel({
     super.key,
     required this.scriptModel,
+    required this.canQuickScheduleTask,
+    required this.onSetNextRun,
     required this.onQuickRun,
     required this.onQuickWait,
     required this.onEditTask,
   });
 
   final ScriptModel scriptModel;
+  final bool Function(String taskName) canQuickScheduleTask;
+  final Future<void> Function(String taskName, String nextRun) onSetNextRun;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
   final Future<void> Function(String taskName) onEditTask;
@@ -32,6 +39,8 @@ class TaskStatusPanel extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) => _StatusTaskRow(
           task: tasks[index],
+          canQuickSchedule: canQuickScheduleTask(tasks[index].name),
+          onSetNextRun: onSetNextRun,
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
           onEditTask: onEditTask,
@@ -80,12 +89,16 @@ class TaskStatusPanel extends StatelessWidget {
 class _StatusTaskRow extends StatelessWidget {
   const _StatusTaskRow({
     required this.task,
+    required this.canQuickSchedule,
+    required this.onSetNextRun,
     required this.onQuickRun,
     required this.onQuickWait,
     required this.onEditTask,
   });
 
   final _StatusTaskData task;
+  final bool canQuickSchedule;
+  final Future<void> Function(String taskName, String nextRun) onSetNextRun;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
   final Future<void> Function(String taskName) onEditTask;
@@ -108,8 +121,8 @@ class _StatusTaskRow extends StatelessWidget {
           trailingExtent: _actionExtent,
           trailingBackgroundColor: rowBackground,
           trailing: _TaskActionBar(
-            onQuickRun: task.canQuickSchedule ? () => onQuickRun(task.name) : null,
-            onQuickWait: task.canQuickSchedule ? () => onQuickWait(task.name) : null,
+            onQuickRun: canQuickSchedule ? () => onQuickRun(task.name) : null,
+            onQuickWait: canQuickSchedule ? () => onQuickWait(task.name) : null,
             onEditTask: () => onEditTask(task.name),
           ),
           leading: Row(
@@ -117,7 +130,10 @@ class _StatusTaskRow extends StatelessWidget {
             children: [
               _TaskTypeIcon(type: task.type),
               const SizedBox(width: 10),
-              _TaskMeta(task: task),
+              _TaskMeta(
+                task: task,
+                onSetNextRun: onSetNextRun,
+              ),
             ],
           ),
         ),
@@ -147,9 +163,11 @@ class _StatusTaskRow extends StatelessWidget {
 class _TaskMeta extends StatelessWidget {
   const _TaskMeta({
     required this.task,
+    required this.onSetNextRun,
   });
 
   final _StatusTaskData task;
+  final Future<void> Function(String taskName, String nextRun) onSetNextRun;
 
   @override
   Widget build(BuildContext context) {
@@ -166,12 +184,15 @@ class _TaskMeta extends StatelessWidget {
         ),
         if (task.timeText.isNotEmpty) ...[
           const SizedBox(height: 2),
-          Text(
-            task.timeText,
-            maxLines: 1,
-            overflow: TextOverflow.visible,
-            softWrap: false,
-            style: Theme.of(context).textTheme.labelMedium,
+          DateTimePicker(
+            value: task.timeText,
+            notHoverStyle: Theme.of(context).textTheme.labelMedium,
+            hoverStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            onChange: (value) {
+              unawaited(onSetNextRun(task.name, value));
+            },
           ),
         ],
       ],
@@ -265,8 +286,6 @@ class _StatusTaskData {
   final String name;
   final _StatusTaskType type;
   final String timeText;
-
-  bool get canQuickSchedule => type != _StatusTaskType.running;
 }
 
 enum _StatusTaskType {

@@ -26,7 +26,6 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
   String _loadKey = '';
   String _scriptName = '';
   String _taskName = '';
-  bool _lockImmediateScheduling = false;
 
   @override
   void didChangeDependencies() {
@@ -91,9 +90,8 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
                   taskName: _taskName,
                   groupDraggable: false,
                   stagingMode: true,
-                  lockImmediateScheduling: _lockImmediateScheduling,
                   onCancel: () async {
-                    widget.controller.clearActiveTask();
+                    await widget.controller.closeTaskParameters();
                   },
                 );
               },
@@ -108,27 +106,14 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
     final nextTask = widget.controller.activeTaskName.value.trim();
     final nextScript = widget.scriptModel.name.trim();
     final nextScope = widget.controller.linkedScopeScriptsFor(nextScript);
-    final runningTaskName = widget.scriptModel.runningTask.value.taskName.value.trim();
-    final shouldLockImmediateScheduling =
-        nextTask.isNotEmpty && runningTaskName == nextTask;
     final nextKey = '$nextScript/$nextTask';
     final argsController = Get.find<ArgsController>();
-    if (_lockImmediateScheduling != shouldLockImmediateScheduling) {
-      _lockImmediateScheduling = shouldLockImmediateScheduling;
-      if (_lockImmediateScheduling) {
-        argsController.discardDraftField(
-          ArgsController.schedulerGroup,
-          ArgsController.nextRunArg,
-        );
-      }
-    }
     if (nextTask.isEmpty || nextKey == _loadKey) {
       if (nextTask.isEmpty) {
         _loadKey = '';
         _loadFuture = null;
         _scriptName = '';
         _taskName = '';
-        _lockImmediateScheduling = false;
         argsController.updateScopeScripts(const []);
       } else {
         argsController.updateScopeScripts(nextScope, config: nextScript);

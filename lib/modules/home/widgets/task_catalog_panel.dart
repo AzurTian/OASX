@@ -130,6 +130,11 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
                   onOpenTask: widget.onOpenTask,
                   onQuickRun: widget.onQuickRun,
                   onQuickWait: widget.onQuickWait,
+                  canQuickScheduleTask: (taskName) =>
+                      widget.controller.canQuickScheduleTask(
+                        widget.scriptModel,
+                        taskName,
+                      ),
                 ),
               );
             },
@@ -249,7 +254,7 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
 
   Future<void> _handleBackFromParameters() async {
     await Get.find<ArgsController>().discardDraftChanges();
-    widget.controller.clearActiveTask();
+    await widget.controller.closeTaskParameters();
   }
 
   void _syncEnabledOverrides(Set<String> enabledTaskNames) {
@@ -334,6 +339,7 @@ class _CatalogTaskRow extends StatelessWidget {
     required this.onOpenTask,
     required this.onQuickRun,
     required this.onQuickWait,
+    required this.canQuickScheduleTask,
   });
 
   final _CatalogTaskData task;
@@ -342,6 +348,7 @@ class _CatalogTaskRow extends StatelessWidget {
   final Future<void> Function(String taskName) onOpenTask;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
+  final bool Function(String taskName) canQuickScheduleTask;
   static const _actionExtent = 132.0;
   static const _minRowHeight = 40.0;
 
@@ -363,6 +370,7 @@ class _CatalogTaskRow extends StatelessWidget {
           onOpenTask: onOpenTask,
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
+          canQuickSchedule: canQuickScheduleTask(task.name),
         ),
         leading: Row(
           mainAxisSize: MainAxisSize.min,
@@ -438,6 +446,7 @@ class _CatalogSectionCard extends StatelessWidget {
     required this.onOpenTask,
     required this.onQuickRun,
     required this.onQuickWait,
+    required this.canQuickScheduleTask,
   });
 
   final _CatalogSectionData section;
@@ -449,6 +458,7 @@ class _CatalogSectionCard extends StatelessWidget {
   final Future<void> Function(String taskName) onOpenTask;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
+  final bool Function(String taskName) canQuickScheduleTask;
 
   @override
   Widget build(BuildContext context) {
@@ -502,6 +512,7 @@ class _CatalogSectionCard extends StatelessWidget {
                       onOpenTask: onOpenTask,
                       onQuickRun: onQuickRun,
                       onQuickWait: onQuickWait,
+                      canQuickScheduleTask: canQuickScheduleTask,
                     ),
                   ],
                 ],
@@ -520,12 +531,14 @@ class _TaskIconBar extends StatelessWidget {
     required this.onOpenTask,
     required this.onQuickRun,
     required this.onQuickWait,
+    required this.canQuickSchedule,
   });
 
   final _CatalogTaskData task;
   final Future<void> Function(String taskName) onOpenTask;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
+  final bool canQuickSchedule;
 
   @override
   Widget build(BuildContext context) {
@@ -538,13 +551,17 @@ class _TaskIconBar extends StatelessWidget {
           _IconOnlyButton(
             icon: Icons.flash_on_rounded,
             tooltip: I18n.homeQuickRun.tr,
-            onPressed: task.enabled ? () => onQuickRun(task.name) : null,
+            onPressed: task.enabled && canQuickSchedule
+                ? () => onQuickRun(task.name)
+                : null,
           ),
         if (showQuickActions)
           _IconOnlyButton(
             icon: Icons.schedule_rounded,
             tooltip: I18n.homeQuickWait.tr,
-            onPressed: task.enabled ? () => onQuickWait(task.name) : null,
+            onPressed: task.enabled && canQuickSchedule
+                ? () => onQuickWait(task.name)
+                : null,
           ),
         _IconOnlyButton(
           icon: Icons.tune_rounded,

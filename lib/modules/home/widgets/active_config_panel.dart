@@ -18,6 +18,7 @@ class ActiveConfigPanel extends StatelessWidget {
     required this.onTogglePower,
     required this.onRenameScript,
     required this.onDeleteScript,
+    required this.onSetNextRun,
     required this.onQuickRun,
     required this.onQuickWait,
     this.onBackToScripts,
@@ -26,10 +27,14 @@ class ActiveConfigPanel extends StatelessWidget {
   final HomeDashboardController controller;
   final HomeWorkbenchLayoutMode layoutMode;
   final Future<void> Function(HomeWorkbenchTab tab) onChangeTab;
-  final Future<void> Function(String taskName) onOpenTask;
+  final Future<void> Function(
+    String taskName,
+    HomeTaskParameterEntrySource source,
+  ) onOpenTask;
   final Future<void> Function(String scriptName, bool enable) onTogglePower;
   final Future<void> Function(String scriptName) onRenameScript;
   final Future<void> Function(String scriptName) onDeleteScript;
+  final Future<void> Function(String taskName, String nextRun) onSetNextRun;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
   final VoidCallback? onBackToScripts;
@@ -104,14 +109,19 @@ class ActiveConfigPanel extends StatelessWidget {
     return switch (currentTab) {
       HomeWorkbenchTab.status => TaskStatusPanel(
           scriptModel: script,
+          canQuickScheduleTask: (taskName) =>
+              controller.canQuickScheduleTask(script, taskName),
+          onSetNextRun: onSetNextRun,
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
-          onEditTask: onOpenTask,
+          onEditTask: (taskName) =>
+              onOpenTask(taskName, HomeTaskParameterEntrySource.overview),
         ),
       HomeWorkbenchTab.tasks => TaskCatalogPanel(
           controller: controller,
           scriptModel: script,
-          onOpenTask: onOpenTask,
+          onOpenTask: (taskName) =>
+              onOpenTask(taskName, HomeTaskParameterEntrySource.tasks),
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
         ),

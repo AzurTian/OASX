@@ -1,6 +1,16 @@
 part of 'home_dashboard_controller.dart';
 
 extension HomeDashboardWorkspaceX on HomeDashboardController {
+  bool canQuickScheduleTask(ScriptModel model, String taskName) {
+    final normalized = taskName.trim();
+    if (normalized.isEmpty) {
+      return false;
+    }
+    final runningTaskName = model.runningTask.value.taskName.value.trim();
+    final isConfigRunning = model.state.value == ScriptState.running;
+    return !isConfigRunning || runningTaskName != normalized;
+  }
+
   List<HomeWorkbenchTab> workbenchTabsFor(HomeWorkbenchLayoutMode mode) {
     if (mode == HomeWorkbenchLayoutMode.threePane) {
       return const [HomeWorkbenchTab.status, HomeWorkbenchTab.tasks];
@@ -118,11 +128,12 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     if (activeScriptName.value == normalized) {
       return;
     }
-    activeTaskName.value = '';
+    clearActiveTask();
     activeScriptName.value = normalized;
   }
 
   void showScriptListPage() {
+    clearActiveTask();
     workbenchPage.value = HomeWorkbenchPage.scripts;
   }
 
@@ -163,7 +174,7 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
       _lastPrimaryWorkbenchTab.value = value;
     }
     if (value != HomeWorkbenchTab.tasks) {
-      activeTaskName.value = '';
+      clearActiveTask();
     }
     activeWorkbenchTab.value = value;
   }
@@ -172,16 +183,32 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     taskCatalogFilter.value = value;
   }
 
-  void setActiveTask(String taskName, {bool openParams = false}) {
-    activeTaskName.value = taskName.trim();
-    if (openParams) {
-      _lastPrimaryWorkbenchTab.value = HomeWorkbenchTab.tasks;
-      activeWorkbenchTab.value = HomeWorkbenchTab.tasks;
+  void openTaskParameters(
+    String taskName, {
+    required HomeTaskParameterEntrySource source,
+  }) {
+    final normalized = taskName.trim();
+    if (normalized.isEmpty) {
+      return;
     }
+    activeTaskName.value = normalized;
+    _taskParameterEntrySource.value = source;
+    activeWorkbenchTab.value = HomeWorkbenchTab.tasks;
   }
 
   void clearActiveTask() {
     activeTaskName.value = '';
+    _taskParameterEntrySource.value = null;
+  }
+
+  Future<void> closeTaskParameters() async {
+    final returnTab = switch (_taskParameterEntrySource.value) {
+      HomeTaskParameterEntrySource.overview => HomeWorkbenchTab.status,
+      HomeTaskParameterEntrySource.tasks || null => HomeWorkbenchTab.tasks,
+    };
+    clearActiveTask();
+    _lastPrimaryWorkbenchTab.value = returnTab;
+    activeWorkbenchTab.value = returnTab;
   }
 
   void syncWorkspaceState() {
@@ -237,16 +264,32 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     final targetDt = formatDateTime(
       DateTime.now().add(Duration(days: runNow ? -1 : 1)),
     );
+    return updateTaskNextRun(
+      scriptName: scriptName,
+      taskName: taskName,
+      nextRun: targetDt,
+    );
+  }
+
+  Future<bool> updateTaskNextRun({
+    required String scriptName,
+    required String taskName,
+    required String nextRun,
+  }) async {
+    final source = scriptName.trim();
+    final normalizedTask = taskName.trim();
+    final normalizedNextRun = nextRun.trim();
+    if (source.isEmpty || normalizedTask.isEmpty || normalizedNextRun.isEmpty) {
+      return false;
+    }
+    final argsController = Get.find<ArgsController>();
     var allSuccess = true;
-    for (final name in _resolveScopeTargets(scriptName)) {
-      final ret = await ApiClient().syncNextRun(
+    for (final name in _resolveScopeTargets(source)) {
+      final ret = await argsController.updateScriptTaskNextRun(
         name,
-        taskName,
-        targetDt: targetDt,
+        normalizedTask,
+        normalizedNextRun,
       );
-      if (ret) {
-        await Get.find<WebSocketService>().send(name, 'get_schedule');
-      }
       allSuccess = ret && allSuccess;
     }
     return allSuccess;
@@ -291,6 +334,7 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
       return;
     }
     if (candidates.isEmpty) {
+      clearActiveTask();
       activeScriptName.value = '';
       workbenchPage.value = HomeWorkbenchPage.scripts;
       return;

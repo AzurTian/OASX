@@ -50,11 +50,13 @@ class ConfigWorkbench extends StatelessWidget {
           controller: controller,
           layoutMode: layoutMode,
           onChangeTab: (tab) => _changeTab(context, tab),
-          onOpenTask: (taskName) => _openTask(context, taskName),
+          onOpenTask: (taskName, source) =>
+              _openTaskFromSource(context, taskName, source),
           onTogglePower: (scriptName, enable) =>
               controller.applySelectionPowerToggle(sourceScript: scriptName, enable: enable),
           onRenameScript: (scriptName) => _renameScript(context, scriptName),
           onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
+          onSetNextRun: _setTaskNextRun,
           onQuickRun: (taskName) => _quickSchedule(taskName, true),
           onQuickWait: (taskName) => _quickSchedule(taskName, false),
           onBackToScripts: layoutMode == HomeWorkbenchLayoutMode.singlePane
@@ -138,11 +140,15 @@ class ConfigWorkbench extends StatelessWidget {
     controller.showScriptListPage();
   }
 
-  Future<void> _openTask(BuildContext context, String taskName) async {
+  Future<void> _openTaskFromSource(
+    BuildContext context,
+    String taskName,
+    HomeTaskParameterEntrySource source,
+  ) async {
     if (!await _confirmDiscardDraft(context)) {
       return;
     }
-    controller.setActiveTask(taskName, openParams: true);
+    controller.openTaskParameters(taskName, source: source);
   }
 
   Future<void> _quickSchedule(String taskName, bool runNow) async {
@@ -154,6 +160,21 @@ class ConfigWorkbench extends StatelessWidget {
       scriptName: scriptName,
       taskName: taskName,
       runNow: runNow,
+    );
+    if (ret) {
+      Get.snackbar(I18n.success.tr, taskName.tr);
+    }
+  }
+
+  Future<void> _setTaskNextRun(String taskName, String nextRun) async {
+    final scriptName = controller.activeScriptName.value.trim();
+    if (scriptName.isEmpty) {
+      return;
+    }
+    final ret = await controller.updateTaskNextRun(
+      scriptName: scriptName,
+      taskName: taskName,
+      nextRun: nextRun,
     );
     if (ret) {
       Get.snackbar(I18n.success.tr, taskName.tr);
