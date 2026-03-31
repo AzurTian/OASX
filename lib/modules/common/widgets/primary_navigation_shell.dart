@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/common/widgets/appbar.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
 import 'package:oasx/modules/home/index.dart';
+import 'package:oasx/modules/home/models/home_workbench_layout.dart';
 import 'package:oasx/modules/settings/index.dart';
 import 'package:oasx/translation/i18n_content.dart';
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/args/index.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
 import 'package:oasx/modules/home/widgets/task_parameter_panel.dart';
@@ -616,3 +616,4 @@ class _CatalogTaskData {
   final String groupName;
   bool enabled;
 }
+

@@ -6,7 +6,7 @@ import 'package:process_run/shell.dart';
 
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/log/log_mixin.dart';
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/service/locale_service.dart';
@@ -222,3 +222,4 @@ class ServerController extends GetxController with LogMixin {
     return false;
   }
 }
+

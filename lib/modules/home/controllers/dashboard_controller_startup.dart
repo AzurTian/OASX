@@ -1,4 +1,4 @@
-﻿part of 'home_dashboard_controller.dart';
+part of 'dashboard_controller.dart';
 
 extension HomeDashboardStartupX on HomeDashboardController {
   Future<void> checkStartupConnection() async {
@@ -158,4 +158,5 @@ extension HomeDashboardStartupX on HomeDashboardController {
     }
   }
 }
+
 

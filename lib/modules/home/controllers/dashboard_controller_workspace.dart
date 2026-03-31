@@ -1,4 +1,4 @@
-part of 'home_dashboard_controller.dart';
+part of 'dashboard_controller.dart';
 
 extension HomeDashboardWorkspaceX on HomeDashboardController {
   bool canQuickScheduleTask(ScriptModel model, String taskName) {
@@ -12,10 +12,7 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
   }
 
   List<HomeWorkbenchTab> workbenchTabsFor(HomeWorkbenchLayoutMode mode) {
-    if (mode == HomeWorkbenchLayoutMode.threePane) {
-      return const [HomeWorkbenchTab.status, HomeWorkbenchTab.tasks];
-    }
-    return HomeWorkbenchTab.values;
+    return resolveHomeWorkbenchTabs(mode);
   }
 
   HomeWorkbenchTab displayedWorkbenchTabFor(HomeWorkbenchLayoutMode mode) {
@@ -419,3 +416,4 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     activeScriptName.value = candidates.isEmpty ? '' : candidates.first.name;
   }
 }
+

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/modules/home/widgets/config_collection_tile.dart';
 import 'package:oasx/translation/i18n_content.dart';
@@ -246,4 +246,5 @@ class ExpandedOrSizedBox extends StatelessWidget {
     return SizedBox(height: 320, child: child);
   }
 }
+
 

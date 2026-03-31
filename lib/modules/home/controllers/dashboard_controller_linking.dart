@@ -1,4 +1,4 @@
-part of 'home_dashboard_controller.dart';
+part of 'dashboard_controller.dart';
 
 extension HomeDashboardLinkingX on HomeDashboardController {
   void toggleLinkMode() {
@@ -107,3 +107,4 @@ extension HomeDashboardLinkingX on HomeDashboardController {
     return targets.toList()..sort();
   }
 }
+

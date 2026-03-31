@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 
 class ConfigStateIndicator extends StatelessWidget {
   const ConfigStateIndicator({
@@ -70,3 +70,4 @@ class _StatePalette {
   final Color color;
   final IconData icon;
 }
+

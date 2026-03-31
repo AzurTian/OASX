@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/args/index.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
@@ -148,3 +148,4 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
     );
   }
 }
+

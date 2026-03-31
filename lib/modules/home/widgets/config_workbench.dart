@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/args/index.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/config_actions.dart';
+import 'package:oasx/modules/home/models/home_workbench_layout.dart';
 import 'package:oasx/modules/home/widgets/active_config_panel.dart';
 import 'package:oasx/modules/home/widgets/log_center_panel.dart';
 import 'package:oasx/modules/home/widgets/config_collection_panel.dart';
+import 'package:oasx/modules/home/widgets/home_workbench_body.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
@@ -29,72 +31,42 @@ class ConfigWorkbench extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final layoutMode = resolveHomeWorkbenchLayoutMode(constraints.maxWidth);
-        final collection = ConfigCollectionPanel(
-          controller: controller,
-          fillHeight: true,
-          loadingAddScript: loadingAddScript,
-          refreshingScripts: refreshingScripts,
-          onAddScriptTap: onAddScriptTap,
-          onRefreshScriptsTap: onRefreshScriptsTap,
-          onActivateScript: (scriptName) =>
-              _activateScript(context, scriptName, layoutMode),
-          onTogglePower: (scriptName, enable) =>
-              controller.applySelectionPowerToggle(sourceScript: scriptName, enable: enable),
-          onRenameScript: (scriptName) => _renameScript(context, scriptName),
-          onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
-        );
-        final details = ActiveConfigPanel(
-          controller: controller,
-          layoutMode: layoutMode,
-          onChangeTab: (tab) => _changeTab(context, tab),
-          onOpenTask: (taskName, source) =>
-              _openTaskFromSource(context, taskName, source),
-          onTogglePower: (scriptName, enable) =>
-              controller.applySelectionPowerToggle(sourceScript: scriptName, enable: enable),
-          onRenameScript: (scriptName) => _renameScript(context, scriptName),
-          onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
-          onSetNextRun: _setTaskNextRun,
-          onQuickRun: (taskName) => _quickSchedule(taskName, true),
-          onQuickWait: (taskName) => _quickSchedule(taskName, false),
-          onBackToScripts: layoutMode == HomeWorkbenchLayoutMode.singlePane
-              ? () => _showScriptListPage(context)
-              : null,
-        );
-        final logs = Obx(
-          () => LogCenterPanel(
-            scriptName: controller.activeScriptName.value,
-          ),
-        );
-        if (layoutMode == HomeWorkbenchLayoutMode.threePane) {
-          return Row(
-            children: [
-              SizedBox(width: kHomeWorkbenchScriptListWidth, child: collection),
-              const SizedBox(width: kHomeWorkbenchPaneGap),
-              Expanded(child: details),
-              const SizedBox(width: kHomeWorkbenchPaneGap),
-              Expanded(child: logs),
-            ],
-          );
-        }
-        if (layoutMode == HomeWorkbenchLayoutMode.twoPane) {
-          return Row(
-            children: [
-              SizedBox(width: kHomeWorkbenchScriptListWidth, child: collection),
-              const SizedBox(width: kHomeWorkbenchPaneGap),
-              Expanded(child: details),
-            ],
-          );
-        }
-        return Obx(() {
-          final showWorkspace =
-              controller.workbenchPage.value == HomeWorkbenchPage.workspace &&
-                  controller.activeScriptName.value.trim().isNotEmpty;
-          return showWorkspace ? details : collection;
-        });
-      },
+    return HomeWorkbenchBody(
+      controller: controller,
+      collectionBuilder: (layoutMode) => ConfigCollectionPanel(
+        controller: controller,
+        fillHeight: true,
+        loadingAddScript: loadingAddScript,
+        refreshingScripts: refreshingScripts,
+        onAddScriptTap: onAddScriptTap,
+        onRefreshScriptsTap: onRefreshScriptsTap,
+        onActivateScript: (scriptName) =>
+            _activateScript(context, scriptName, layoutMode),
+        onTogglePower: (scriptName, enable) =>
+            controller.applySelectionPowerToggle(sourceScript: scriptName, enable: enable),
+        onRenameScript: (scriptName) => _renameScript(context, scriptName),
+        onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
+      ),
+      detailsBuilder: (layoutMode) => ActiveConfigPanel(
+        controller: controller,
+        layoutMode: layoutMode,
+        onChangeTab: (tab) => _changeTab(context, tab),
+        onOpenTask: (taskName, source) =>
+            _openTaskFromSource(context, taskName, source),
+        onTogglePower: (scriptName, enable) =>
+            controller.applySelectionPowerToggle(sourceScript: scriptName, enable: enable),
+        onRenameScript: (scriptName) => _renameScript(context, scriptName),
+        onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
+        onSetNextRun: _setTaskNextRun,
+        onQuickRun: (taskName) => _quickSchedule(taskName, true),
+        onQuickWait: (taskName) => _quickSchedule(taskName, false),
+        onBackToScripts: layoutMode == HomeWorkbenchLayoutMode.singlePane
+            ? () => _showScriptListPage(context)
+            : null,
+      ),
+      logs: Obx(() {
+        return LogCenterPanel(scriptName: controller.activeScriptName.value);
+      }),
     );
   }
 
@@ -232,3 +204,4 @@ class ConfigWorkbench extends StatelessWidget {
     return true;
   }
 }
+

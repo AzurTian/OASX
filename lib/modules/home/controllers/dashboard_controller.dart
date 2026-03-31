@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/models/home_workbench_layout.dart';
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/service/script_service.dart';
@@ -15,9 +16,10 @@ import 'package:oasx/utils/time_utils.dart';
 import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/server/index.dart';
 
-part 'home_dashboard_controller_linking.dart';
-part 'home_dashboard_controller_startup.dart';
-part 'home_dashboard_controller_workspace.dart';
+part 'dashboard_controller_linking.dart';
+part 'dashboard_controller_layout.dart';
+part 'dashboard_controller_startup.dart';
+part 'dashboard_controller_workspace.dart';
 
 /// Defines the visible dashboard health state for a script.
 enum HomeScriptStateFilter {
@@ -26,13 +28,6 @@ enum HomeScriptStateFilter {
   abnormal,
   stopped,
   offline,
-}
-
-/// Defines the responsive layout mode for the home workbench.
-enum HomeWorkbenchLayoutMode {
-  threePane,
-  twoPane,
-  singlePane,
 }
 
 /// Defines the visible page when the workbench collapses to a single pane.
@@ -45,6 +40,7 @@ enum HomeWorkbenchPage {
 enum HomeWorkbenchTab {
   status,
   tasks,
+  stats,
   logs,
 }
 
@@ -61,28 +57,18 @@ enum HomeTaskCatalogFilter {
   disabled,
 }
 
-const double kHomeWorkbenchPaneGap = 12;
-const double kHomeWorkbenchScriptListWidth = 340;
-const double kHomeWorkbenchMinDetailsWidth = 360;
-const double kHomeWorkbenchMinLogWidth = 360;
-
-/// Resolves the current responsive layout mode from the available width.
-HomeWorkbenchLayoutMode resolveHomeWorkbenchLayoutMode(double maxWidth) {
-  final availableWidth = maxWidth.isFinite ? maxWidth : 0.0;
-  const threePaneWidth = kHomeWorkbenchScriptListWidth +
-      kHomeWorkbenchMinDetailsWidth +
-      kHomeWorkbenchMinLogWidth +
-      kHomeWorkbenchPaneGap * 2;
-  if (availableWidth >= threePaneWidth) {
-    return HomeWorkbenchLayoutMode.threePane;
+/// Returns the visible workbench tabs for the active layout mode.
+List<HomeWorkbenchTab> resolveHomeWorkbenchTabs(
+  HomeWorkbenchLayoutMode mode,
+) {
+  if (mode == HomeWorkbenchLayoutMode.threePane) {
+    return const [
+      HomeWorkbenchTab.status,
+      HomeWorkbenchTab.tasks,
+      HomeWorkbenchTab.stats,
+    ];
   }
-  const twoPaneWidth = kHomeWorkbenchScriptListWidth +
-      kHomeWorkbenchMinDetailsWidth +
-      kHomeWorkbenchPaneGap;
-  if (availableWidth >= twoPaneWidth) {
-    return HomeWorkbenchLayoutMode.twoPane;
-  }
-  return HomeWorkbenchLayoutMode.singlePane;
+  return HomeWorkbenchTab.values;
 }
 
 class HomeDashboardController extends GetxController {
@@ -102,6 +88,7 @@ class HomeDashboardController extends GetxController {
   final activeScriptName = ''.obs;
   final selectedScriptList = <String>[].obs;
   final workbenchPage = HomeWorkbenchPage.scripts.obs;
+  final workbenchSplitRatio = kHomeWorkbenchDefaultSplitRatio.obs;
   final activeWorkbenchTab = HomeWorkbenchTab.status.obs;
   final _lastPrimaryWorkbenchTab = HomeWorkbenchTab.status.obs;
   final taskCatalogFilter = HomeTaskCatalogFilter.all.obs;
@@ -114,6 +101,7 @@ class HomeDashboardController extends GetxController {
   @override
   void onInit() {
     _loadSelection();
+    _loadWorkbenchSplitRatio();
     syncWorkspaceState();
     _workspaceSyncWorker = everAll([
       _scriptService.scriptOrderList,
@@ -202,3 +190,4 @@ class HomeDashboardController extends GetxController {
 
   int get validControlScriptCount => validControlScripts.length;
 }
+

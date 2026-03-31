@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 
 import 'package:oasx/modules/common/widgets/appbar.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/modules/settings/oas_card.dart';
 import 'package:oasx/modules/settings/system_card.dart';
@@ -304,3 +304,4 @@ class _SettingsSection {
   final String Function() navTitleBuilder;
   final Widget Function() cardBuilder;
 }
+

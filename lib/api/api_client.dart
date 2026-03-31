@@ -7,6 +7,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_interceptor.dart';
 import 'package:oasx/config/constants.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
+import 'package:oasx/modules/home/models/script_statistics_models.dart';
 import 'package:oasx/translation/i18n.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/check_version.dart';
@@ -18,6 +19,7 @@ import 'dio_http_cache/dio_http_cache.dart';
 part 'api_client_menu_config.dart';
 part 'api_client_script.dart';
 part 'api_client_feedback.dart';
+part 'api_client_statistics.dart';
 
 class ApiResult<T> {
   ApiResult({this.data, this.error, this.code});

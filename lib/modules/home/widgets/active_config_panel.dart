@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
-import 'package:oasx/modules/home/widgets/log_center_panel.dart';
+import 'package:oasx/modules/home/models/home_workbench_layout.dart';
 import 'package:oasx/modules/home/widgets/config_state_indicator.dart';
+import 'package:oasx/modules/home/widgets/log_center_panel.dart';
+import 'package:oasx/modules/home/widgets/statistics_panel.dart';
 import 'package:oasx/modules/home/widgets/task_catalog_panel.dart';
 import 'package:oasx/modules/home/widgets/task_status_panel.dart';
 import 'package:oasx/translation/i18n_content.dart';
@@ -125,6 +127,7 @@ class ActiveConfigPanel extends StatelessWidget {
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
         ),
+      HomeWorkbenchTab.stats => ScriptStatisticsPanel(),
       HomeWorkbenchTab.logs => LogCenterPanel(scriptName: script.name),
     };
   }
@@ -133,7 +136,9 @@ class ActiveConfigPanel extends StatelessWidget {
     return switch (value) {
       HomeWorkbenchTab.status => I18n.overview.tr,
       HomeWorkbenchTab.tasks => I18n.homeTasksTab.tr,
+      HomeWorkbenchTab.stats => I18n.homeStatsTab.tr,
       HomeWorkbenchTab.logs => I18n.log.tr,
     };
   }
 }
+

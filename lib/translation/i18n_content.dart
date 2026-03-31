@@ -44,6 +44,22 @@ class I18n {
   static const String homeScriptAbnormal = 'home_script_abnormal', homeScriptOffline = 'home_script_offline', homeScriptSearchHint = 'home_script_search_hint';
   static const String homeSortByStatus = 'home_sort_by_status', homeSortByName = 'home_sort_by_name', homeNoScriptSelected = 'home_no_script_selected';
   static const String homeStatusTab = 'home_status_tab', homeTasksTab = 'home_tasks_tab', homeParamsTab = 'home_params_tab';
+  static const String homeStatsTab = 'home_stats_tab', homeStatsGeneratedAt = 'home_stats_generated_at', homeStatsRetentionDays = 'home_stats_retention_days';
+  static const String homeStatsToday = 'home_stats_today', homeStatsSelectedDate = 'home_stats_selected_date', homeStatsTasks = 'home_stats_tasks', homeStatsRunCount = 'home_stats_run_count';
+  static const String homeStatsTotalDuration = 'home_stats_total_duration', homeStatsBattleCount = 'home_stats_battle_count', homeStatsBattleTotalDuration = 'home_stats_battle_total_duration', homeStatsBattleAvgDuration = 'home_stats_battle_avg_duration';
+  static const String homeStatsAvgRunDuration = 'home_stats_avg_run_duration', homeStatsMetricRunCount = 'home_stats_metric_run_count', homeStatsMetricBattleCount = 'home_stats_metric_battle_count';
+  static const String homeStatsMetricBattleAvgDuration = 'home_stats_metric_battle_avg_duration', homeStatsMetricAvgRunDuration = 'home_stats_metric_avg_run_duration';
+  static const String homeStatsWaitingSnapshot = 'home_stats_waiting_snapshot', homeStatsConnected = 'home_stats_connected', homeStatsDisconnected = 'home_stats_disconnected';
+  static const String homeStatsReconnecting = 'home_stats_reconnecting', homeStatsStreamError = 'home_stats_stream_error', homeStatsTimelineEmpty = 'home_stats_timeline_empty';
+  static const String homeStatsChartEmpty = 'home_stats_chart_empty', homeStatsTaskDetails = 'home_stats_task_details', homeStatsTaskDetailEmpty = 'home_stats_task_detail_empty';
+  static const String homeStatsNoTaskSelected = 'home_stats_no_task_selected', homeStatsExtensionsEmpty = 'home_stats_extensions_empty', homeStatsDuration = 'home_stats_duration';
+  static const String homeStatsTodayChartTitle = 'home_stats_today_chart_title', homeStatsHistoryChartTitle = 'home_stats_history_chart_title', homeStatsTodayChartEmpty = 'home_stats_today_chart_empty';
+  static const String homeStatsHistoryDateEmpty = 'home_stats_history_date_empty', homeStatsLatestTask = 'home_stats_latest_task', homeStatsLatestTime = 'home_stats_latest_time';
+  static const String homeStatsCurrentTask = 'home_stats_current_task', homeStatsCurrentTime = 'home_stats_current_time', homeStatsIdle = 'home_stats_idle';
+  static const String homeStatsStartTime = 'home_stats_start_time', homeStatsTaskFilter = 'home_stats_task_filter', homeStatsAllTasks = 'home_stats_all_tasks', homeStatsRunDetails = 'home_stats_run_details';
+  static const String homeStatsSelectedBlock = 'home_stats_selected_block', homeStatsLoadingMessage = 'home_stats_loading_message';
+  static const String homeStatsSummaryRunDuration = 'home_stats_summary_run_duration', homeStatsSummaryRunTaskCount = 'home_stats_summary_run_task_count', homeStatsSummaryTotalBattleCount = 'home_stats_summary_total_battle_count';
+  static const String homeStatsSortByData = 'home_stats_sort_by_data', homeStatsSortByTime = 'home_stats_sort_by_time', homeStatsNoBattle = 'home_stats_no_battle';
   static const String homeTaskFilterAll = 'home_task_filter_all', homeTaskFilterEnabled = 'home_task_filter_enabled', homeTaskFilterDisabled = 'home_task_filter_disabled';
   static const String homeTaskEnabled = 'home_task_enabled', homeTaskDisabled = 'home_task_disabled', homeQuickRun = 'home_quick_run';
   static const String homeQuickWait = 'home_quick_wait', homeOpenTaskParams = 'home_open_task_params', homeTaskConfigureAndEnable = 'home_task_configure_and_enable';
@@ -105,6 +121,9 @@ class I18n {
   static const String passwordHelp = 'password_help', password = 'password', executeUpdate = 'execute_update';
   static const String goOasxRelease = 'Click to download', tip = 'Tip', copySuccess = 'Copy success';
 }
+
+
+
 
 
 
