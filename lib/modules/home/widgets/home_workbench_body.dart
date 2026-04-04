@@ -99,64 +99,12 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
           );
           final canExpandRightSidebar = _forceTwoPane &&
               unrestrictedLayout.mode == HomeWorkbenchLayoutMode.threePane;
-          if (layoutMode == HomeWorkbenchLayoutMode.threePane) {
-            return Row(
-              key: const ValueKey<String>('home-workbench-three-pane'),
-              children: [
-                SizedBox(width: layout.collectionWidth, child: collection),
-                _WorkbenchDivider(
-                  key: const ValueKey<String>('home-workbench-left-divider'),
-                  onDragStart: () => _handleLeftDragStart(layout),
-                  onDragUpdate: (details) =>
-                      _handleLeftDragUpdate(details, layout),
-                  onDragEnd: _handleLeftDragEnd,
-                  collapseSide: null,
-                  collapseProgress: 0,
-                ),
-                SizedBox(width: layout.detailsWidth, child: details),
-                _WorkbenchDivider(
-                  key: const ValueKey<String>('home-workbench-right-divider'),
-                  onDragStart: () => _handleRightDragStart(layout),
-                  onDragUpdate: (details) =>
-                      _handleRightDragUpdate(details, layout),
-                  onDragEnd: _handleRightDragEnd,
-                  collapseSide: _pendingCollapseSide,
-                  collapseProgress: _pendingCollapseProgress,
-                ),
-                SizedBox(
-                  width: layout.logWidth,
-                  child: _buildPaneFrame(
-                    child: widget.sidebar,
-                    highlighted:
-                        _pendingCollapseSide == HomeWorkbenchCollapseSide.logs,
-                    progress: _pendingCollapseProgress,
-                  ),
-                ),
-              ],
-            );
-          }
-          if (layoutMode == HomeWorkbenchLayoutMode.twoPane) {
-            return Row(
-              key: const ValueKey<String>('home-workbench-two-pane'),
-              children: [
-                SizedBox(width: layout.collectionWidth, child: collection),
-                _WorkbenchDivider(
-                  key: const ValueKey<String>('home-workbench-left-divider'),
-                  onDragStart: () => _handleLeftDragStart(layout),
-                  onDragUpdate: (details) =>
-                      _handleLeftDragUpdate(details, layout),
-                  onDragEnd: _handleLeftDragEnd,
-                  collapseSide: null,
-                  collapseProgress: 0,
-                ),
-                SizedBox(
-                  width: layout.detailsWidth,
-                  child: _buildTwoPaneDetails(
-                    details: details,
-                    canExpandRightSidebar: canExpandRightSidebar,
-                  ),
-                ),
-              ],
+          if (layoutMode != HomeWorkbenchLayoutMode.singlePane) {
+            return _buildDesktopLayout(
+              layout: layout,
+              collection: collection,
+              details: details,
+              canExpandRightSidebar: canExpandRightSidebar,
             );
           }
           return Obx(() {
@@ -168,6 +116,56 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
         },
       );
     });
+  }
+
+  /// Builds the shared desktop skeleton so left-divider drags survive layout changes.
+  Widget _buildDesktopLayout({
+    required HomeWorkbenchLayout layout,
+    required Widget collection,
+    required Widget details,
+    required bool canExpandRightSidebar,
+  }) {
+    final isThreePane = layout.mode == HomeWorkbenchLayoutMode.threePane;
+    final desktopDetails = isThreePane
+        ? details
+        : _buildTwoPaneDetails(
+            details: details,
+            canExpandRightSidebar: canExpandRightSidebar,
+          );
+    return Row(
+      key: const ValueKey<String>('home-workbench-desktop'),
+      children: [
+        SizedBox(width: layout.collectionWidth, child: collection),
+        _WorkbenchDivider(
+          key: const ValueKey<String>('home-workbench-left-divider'),
+          onDragStart: () => _handleLeftDragStart(layout),
+          onDragUpdate: (details) => _handleLeftDragUpdate(details, layout),
+          onDragEnd: _handleLeftDragEnd,
+          collapseSide: null,
+          collapseProgress: 0,
+        ),
+        SizedBox(width: layout.detailsWidth, child: desktopDetails),
+        if (isThreePane) ...[
+          _WorkbenchDivider(
+            key: const ValueKey<String>('home-workbench-right-divider'),
+            onDragStart: () => _handleRightDragStart(layout),
+            onDragUpdate: (details) => _handleRightDragUpdate(details, layout),
+            onDragEnd: _handleRightDragEnd,
+            collapseSide: _pendingCollapseSide,
+            collapseProgress: _pendingCollapseProgress,
+          ),
+          SizedBox(
+            width: layout.logWidth,
+            child: _buildPaneFrame(
+              child: widget.sidebar,
+              highlighted:
+                  _pendingCollapseSide == HomeWorkbenchCollapseSide.logs,
+              progress: _pendingCollapseProgress,
+            ),
+          ),
+        ],
+      ],
+    );
   }
 
   /// Resolves the active layout and restores three-pane mode when legal again.
