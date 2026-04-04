@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/home/models/script_statistics_models.dart';
+import 'package:oasx/modules/home/widgets/statistics_history_axis_layout.dart';
 import 'package:oasx/modules/home/widgets/statistics_formatters.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
@@ -144,6 +145,7 @@ class _HistoryAxisHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final labelStyle = Theme.of(context).textTheme.labelSmall;
     return Row(
       children: [
         const SizedBox(width: 116),
@@ -151,6 +153,16 @@ class _HistoryAxisHeader extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final width = constraints.maxWidth;
+              final visibleTickLayouts = resolveStatisticsHistoryAxisLabels(
+                ticks: ticks,
+                labels: ticks
+                    .map((tick) => formatStatisticsMetricByType(tick, metric))
+                    .toList(growable: false),
+                axisMax: axisMax,
+                availableWidth: width,
+                style: labelStyle,
+                textDirection: Directionality.of(context),
+              );
               return SizedBox(
                 height: 34,
                 child: Stack(
@@ -168,25 +180,18 @@ class _HistoryAxisHeader extends StatelessWidget {
                             .withValues(alpha: 0.7),
                       ),
                     ),
-                    ...ticks.map((tick) {
-                      final ratio = axisMax <= 0 ? 0.0 : tick / axisMax;
-                      final left = math
-                          .min(math.max(ratio * width, 0.0), width)
-                          .toDouble();
-                      final resolvedLeft = math
-                          .min(
-                            math.max(left - 24.0, 0.0),
-                            math.max(width - 48.0, 0.0),
-                          )
-                          .toDouble();
+                    ...visibleTickLayouts.map((layout) {
                       return Positioned(
-                        left: resolvedLeft,
+                        left: layout.left,
                         child: SizedBox(
-                          width: 48,
-                          child: Text(
-                            formatStatisticsMetricByType(tick, metric),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.labelSmall,
+                          width: layout.width,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              layout.label,
+                              textAlign: TextAlign.center,
+                              style: labelStyle,
+                            ),
                           ),
                         ),
                       );
