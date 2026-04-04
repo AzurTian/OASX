@@ -41,6 +41,7 @@ class WindowsUpdateInstaller implements AppUpdateInstaller {
     final installDirectory = File(executablePath).parent.path;
     final executableName = File(executablePath).uri.pathSegments.last;
     final scriptFile = File('${package.filePath}.ps1');
+    final launcherFile = File('${package.filePath}.cmd');
     final powershellPath = _resolvePowerShellPath();
     final scriptContent = _buildScript(
       currentProcessId: currentProcessId,
@@ -48,18 +49,25 @@ class WindowsUpdateInstaller implements AppUpdateInstaller {
       zipPath: package.filePath,
       executableName: executableName,
     );
+    final launcherContent = _buildLauncherScript(
+      powershellPath: powershellPath,
+      scriptPath: scriptFile.path,
+    );
     await scriptFile.writeAsString(scriptContent, encoding: utf8);
+    await launcherFile.writeAsString(launcherContent, encoding: utf8);
     await Process.start(
-      powershellPath,
+      'cmd.exe',
       [
-        '-NoLogo',
-        '-NoProfile',
-        '-ExecutionPolicy',
-        'Bypass',
-        '-File',
-        scriptFile.path,
+        '/c',
+        'start',
+        '',
+        'cmd.exe',
+        '/c',
+        'call',
+        launcherFile.path,
       ],
       runInShell: false,
+      workingDirectory: scriptFile.parent.path,
     );
     Future<void>.delayed(const Duration(milliseconds: 300), () {
       exit(0);
@@ -169,6 +177,27 @@ exit 0
   String _psLiteral(String value) {
     final escaped = value.replaceAll("'", "''");
     return "'$escaped'";
+  }
+
+  /// Builds the visible launcher command script that hosts the updater window.
+  String _buildLauncherScript({
+    required String powershellPath,
+    required String scriptPath,
+  }) {
+    final escapedPowerShellPath = _cmdEscape(powershellPath);
+    final escapedScriptPath = _cmdEscape(scriptPath);
+    return '''
+@echo off
+title OASX Updater
+setlocal
+"$escapedPowerShellPath" -NoLogo -NoProfile -ExecutionPolicy Bypass -File "$escapedScriptPath"
+exit /b %errorlevel%
+''';
+  }
+
+  /// Escapes a Windows command argument for use inside a batch file.
+  String _cmdEscape(String value) {
+    return value.replaceAll('"', '""');
   }
 
   /// Resolves the full PowerShell executable path for Windows.
