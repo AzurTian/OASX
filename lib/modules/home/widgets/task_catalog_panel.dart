@@ -91,7 +91,8 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(child: Text('${I18n.error.tr}: ${snapshot.error}'));
+                return Center(
+                    child: Text('${I18n.error.tr}: ${snapshot.error}'));
               }
               final enabledTaskNames =
                   widget.controller.enabledTaskNamesFor(widget.scriptModel);
@@ -132,9 +133,9 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
                   onQuickWait: widget.onQuickWait,
                   canQuickScheduleTask: (taskName) =>
                       widget.controller.canQuickScheduleTask(
-                        widget.scriptModel,
-                        taskName,
-                      ),
+                    widget.scriptModel,
+                    taskName,
+                  ),
                 ),
               );
             },
@@ -198,7 +199,8 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
         if (taskName.isEmpty) {
           continue;
         }
-        final enabled = _enabledOverrides[taskName] ?? enabledTaskNames.contains(taskName);
+        final enabled =
+            _enabledOverrides[taskName] ?? enabledTaskNames.contains(taskName);
         if (!_matchesFilter(taskName, enabled)) {
           continue;
         }
@@ -277,7 +279,8 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
     });
   }
 
-  Future<void> _handleToggleTaskEnabled(_CatalogTaskData task, bool enable) async {
+  Future<void> _handleToggleTaskEnabled(
+      _CatalogTaskData task, bool enable) async {
     if (_togglingTasks.contains(task.name)) {
       return;
     }
@@ -354,8 +357,10 @@ class _CatalogTaskRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rowBackground =
-        Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.18);
+    final rowBackground = Theme.of(context)
+        .colorScheme
+        .secondaryContainer
+        .withValues(alpha: 0.18);
     final isScriptGroup = task.groupName == I18n.script;
     final supportsEnable = !isScriptGroup || task.name == I18n.restart;
     return Padding(
@@ -425,7 +430,9 @@ class _EnableIcon extends StatelessWidget {
       );
     }
     final scheme = Theme.of(context).colorScheme;
-    final icon = enabled ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded;
+    final icon = enabled
+        ? Icons.check_circle_rounded
+        : Icons.radio_button_unchecked_rounded;
     final color = enabled ? scheme.onSurface : scheme.onSurfaceVariant;
     return InkWell(
       borderRadius: BorderRadius.circular(999),
@@ -454,7 +461,8 @@ class _CatalogSectionCard extends StatelessWidget {
   final bool forceExpanded;
   final Set<String> togglingTasks;
   final VoidCallback onToggleExpanded;
-  final Future<void> Function(_CatalogTaskData task, bool enable) onToggleEnabled;
+  final Future<void> Function(_CatalogTaskData task, bool enable)
+      onToggleEnabled;
   final Future<void> Function(String taskName) onOpenTask;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
@@ -502,11 +510,14 @@ class _CatalogSectionCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Column(
                 children: [
-                  for (int index = 0; index < section.tasks.length; index++) ...[
+                  for (int index = 0;
+                      index < section.tasks.length;
+                      index++) ...[
                     if (index > 0) const Divider(height: 1),
                     _CatalogTaskRow(
                       task: section.tasks[index],
-                      loading: togglingTasks.contains(section.tasks[index].name),
+                      loading:
+                          togglingTasks.contains(section.tasks[index].name),
                       onToggleEnabled: (value) =>
                           onToggleEnabled(section.tasks[index], value),
                       onOpenTask: onOpenTask,
@@ -616,4 +627,3 @@ class _CatalogTaskData {
   final String groupName;
   bool enabled;
 }
-

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_secret_config = {
@@ -11,5 +11,3 @@ final Map<String, String> _cn_secret_config = {
   'layer_10_help': '考虑到练度，这将不是默认打开的',
   'layer_9': '挑战九层',
 };
-
-

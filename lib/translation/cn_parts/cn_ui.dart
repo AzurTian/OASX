@@ -65,7 +65,7 @@ final Map<String, String> _cn_ui = {
   I18n.rootPathServer: 'OAS根目录',
   I18n.selectRootPathServer: '选择文件夹',
   I18n.rootPathServerHelp:
-  'OASX跟OAS是两个不同的东西, 不要搞混，不要放在同一个目录下, 不要有空格的, 不要有中文的, 也不要路径过长的',
+      'OASX跟OAS是两个不同的东西, 不要搞混，不要放在同一个目录下, 不要有空格的, 不要有中文的, 也不要路径过长的',
   I18n.rootPathCorrect: '正确识别为OAS的根目录',
   I18n.rootPathIncorrect: '无法识别的根目录，你可能没有正确安装OAS',
   I18n.installOasNow: '现在安装OAS',
@@ -234,11 +234,3 @@ final Map<String, String> _cn_ui = {
   I18n.argsUnsavedPrompt: '当前有未保存的修改，是否放弃？',
   I18n.success: '成功',
 };
-
-
-
-
-
-
-
-

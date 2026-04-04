@@ -66,7 +66,8 @@ class ScriptStatisticsHistoryChart extends StatelessWidget {
         ...List.generate(entries.length, (index) {
           final entry = entries[index];
           return Padding(
-            padding: EdgeInsets.only(bottom: index == entries.length - 1 ? 0 : 10),
+            padding:
+                EdgeInsets.only(bottom: index == entries.length - 1 ? 0 : 10),
             child: _HistoryBarRow(
               entry: entry,
               metric: metric,
@@ -98,7 +99,9 @@ class ScriptStatisticsHistoryChart extends StatelessWidget {
     if (interval <= 0) {
       return 1.0;
     }
-    return math.max(interval, (maxValue / interval).ceil() * interval).toDouble();
+    return math
+        .max(interval, (maxValue / interval).ceil() * interval)
+        .toDouble();
   }
 
   /// Resolves a stable axis interval for the current metric family.
@@ -167,8 +170,9 @@ class _HistoryAxisHeader extends StatelessWidget {
                     ),
                     ...ticks.map((tick) {
                       final ratio = axisMax <= 0 ? 0.0 : tick / axisMax;
-                      final left =
-                          math.min(math.max(ratio * width, 0.0), width).toDouble();
+                      final left = math
+                          .min(math.max(ratio * width, 0.0), width)
+                          .toDouble();
                       final resolvedLeft = math
                           .min(
                             math.max(left - 24.0, 0.0),
@@ -241,7 +245,8 @@ class _HistoryBarRow extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final ratio = axisMax <= 0 ? 0.0 : value / axisMax;
-              final barWidth = math.max(constraints.maxWidth * ratio, 8.0).toDouble();
+              final barWidth =
+                  math.max(constraints.maxWidth * ratio, 8.0).toDouble();
               final scheme = Theme.of(context).colorScheme;
               return Tooltip(
                 preferBelow: false,
@@ -258,7 +263,8 @@ class _HistoryBarRow extends StatelessWidget {
                         Container(
                           height: 20,
                           decoration: BoxDecoration(
-                            color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                            color: scheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),
@@ -268,7 +274,8 @@ class _HistoryBarRow extends StatelessWidget {
                           width: barWidth,
                           height: focused ? 28 : 24,
                           decoration: BoxDecoration(
-                            color: color.withValues(alpha: focused ? 0.92 : 0.76),
+                            color:
+                                color.withValues(alpha: focused ? 0.92 : 0.76),
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(
                               color: focused ? scheme.onSurface : color,
@@ -374,4 +381,3 @@ class _HistoryValueBadge extends StatelessWidget {
     );
   }
 }
-

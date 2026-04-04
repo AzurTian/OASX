@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_find_jade_config = {
@@ -6,10 +6,10 @@ final Map<String, String> _cn_find_jade_config = {
   'find_jade_config': '寻找协作配置',
   'invite_info_count': '被邀请账号数量',
   'invite_info_count_help':
-  '此处填写被邀请账号数量，正整数，用于生成用于填写的配置列表。在此处填写数字后，切换到其他配置项（例如：探索、觉醒等），然后切换回来，会自动生成对应数量的配置项。',
+      '此处填写被邀请账号数量，正整数，用于生成用于填写的配置列表。在此处填写数字后，切换到其他配置项（例如：探索、觉醒等），然后切换回来，会自动生成对应数量的配置项。',
   'sup_account_count': '小号账号数量',
   'sup_account_count_help':
-  '仅支持官服，渠道服无法使用。同上。更多详情见代码目录tasks/FindJade/README.md',
+      '仅支持官服，渠道服无法使用。同上。更多详情见代码目录tasks/FindJade/README.md',
   'name': '角色名',
   'name_help': '庭院左上角显示的那个',
   'default_invite_type': '协作任务类型',
@@ -27,13 +27,12 @@ final Map<String, String> _cn_find_jade_config = {
   'character_help': '小号-庭院左上角显示的那个，鉴于文字识别准确性不足，角色名搞点容易识别的',
   'svr': '服务器',
   'svr_help':
-  '服务器名，例如春之樱，乾坤行之类的。只有在找不到角色名时才会用到。同样，鉴于文字识别。。。，另外代码中做了模糊匹配，字数匹配达到50%，就算那个服务器',
+      '服务器名，例如春之樱，乾坤行之类的。只有在找不到角色名时才会用到。同样，鉴于文字识别。。。，另外代码中做了模糊匹配，字数匹配达到50%，就算那个服务器',
   'account': '账号',
-  'account_help':
-  '登录时使用的手机号/邮箱等，在登录时，界面显示什么，就填什么。例如手机账号显示“188****8888",就填带星号的',
+  'account_help': '登录时使用的手机号/邮箱等，在登录时，界面显示什么，就填什么。例如手机账号显示“188****8888",就填带星号的',
   'account_alias': '账号别名',
   'account_alias_help':
-  '防止文字识别出错的产物,多个别名用#分隔.例如188****8888，被识别为1BB****BBBB或被识别为188****BBBB等等，就填“1BB****BBBB#188****BBBB",更多详情请见代码目录FindJade下的README.md',
+      '防止文字识别出错的产物,多个别名用#分隔.例如188****8888，被识别为1BB****BBBB或被识别为188****BBBB等等，就填“1BB****BBBB#188****BBBB",更多详情请见代码目录FindJade下的README.md',
   'apple_or_android': '苹果/安卓',
   'apple_or_android_help': '勾选为安卓，不勾选苹果',
   'last_complete_time': '上次登录时间',
@@ -93,5 +92,3 @@ final Map<String, String> _cn_find_jade_config = {
   'sup_account_list_49': '小号-49',
   'sup_account_list_50': '小号-50',
 };
-
-

@@ -121,7 +121,6 @@ class AutoStartService extends GetxService {
   }
 
   String get _windowsTaskName {
-    final normalized = _appName.replaceAll(RegExp(r'\s+'), '');
     return 'OASX';
   }
 

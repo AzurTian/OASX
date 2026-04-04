@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_general_battle_config = {
@@ -16,8 +16,5 @@ final Map<String, String> _cn_general_battle_config = {
   'green_mark': '设置第 X 个式神为绿标',
   'green_mark_help': '可选[左一, 左二, 左三, 左四, 左五, 主阴阳师]',
   'random_click_swipt_enable': '战斗时随机点击或者随机滑动',
-  'random_click_swipt_enable_help':
-  '防封优化，每三分钟的战斗可能触发0~8次，请注意这个与绿标功能冲突，可能会乱点绿标',
+  'random_click_swipt_enable_help': '防封优化，每三分钟的战斗可能触发0~8次，请注意这个与绿标功能冲突，可能会乱点绿标',
 };
-
-

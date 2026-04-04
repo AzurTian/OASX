@@ -137,37 +137,35 @@ class ApiSseClient {
     var currentId = '';
     var currentEvent = '';
     var dataBuffer = StringBuffer();
-    _lineSubscription = response
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(
-      (line) {
-        if (!_isActive(generation)) {
-          return;
-        }
-        if (line.isEmpty) {
-          _emitEvent(currentId, currentEvent, dataBuffer);
-          currentId = '';
-          currentEvent = '';
-          dataBuffer = StringBuffer();
-          return;
-        }
-        if (line.startsWith(':')) {
-          return;
-        }
-        _consumeLine(
-          line,
-          onId: (value) => currentId = value,
-          onEvent: (value) => currentEvent = value,
-          onData: (value) => dataBuffer.writeln(value),
-        );
-      },
-      onDone: () => _handleFailure(generation, 'stream_closed'),
-      onError: (Object error, StackTrace stackTrace) {
-        _handleFailure(generation, error.toString());
-      },
-      cancelOnError: true,
-    );
+    _lineSubscription =
+        response.transform(utf8.decoder).transform(const LineSplitter()).listen(
+              (line) {
+                if (!_isActive(generation)) {
+                  return;
+                }
+                if (line.isEmpty) {
+                  _emitEvent(currentId, currentEvent, dataBuffer);
+                  currentId = '';
+                  currentEvent = '';
+                  dataBuffer = StringBuffer();
+                  return;
+                }
+                if (line.startsWith(':')) {
+                  return;
+                }
+                _consumeLine(
+                  line,
+                  onId: (value) => currentId = value,
+                  onEvent: (value) => currentEvent = value,
+                  onData: (value) => dataBuffer.writeln(value),
+                );
+              },
+              onDone: () => _handleFailure(generation, 'stream_closed'),
+              onError: (Object error, StackTrace stackTrace) {
+                _handleFailure(generation, error.toString());
+              },
+              cancelOnError: true,
+            );
   }
 
   void _consumeLine(

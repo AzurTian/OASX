@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:oasx/modules/settings/widgets/setting_item.dart';
 import 'package:styled_widget/styled_widget.dart';
 
@@ -31,11 +31,10 @@ class SettingCard extends StatelessWidget {
           ...items
               .map(
                 (item) => item.padding(bottom: 5),
-          )
+              )
               .toList(),
         ].toColumn(crossAxisAlignment: CrossAxisAlignment.start),
       ),
     );
   }
 }
-

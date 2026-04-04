@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/service/script_service.dart';
@@ -120,4 +120,3 @@ Future<bool> showAddConfigDialog(
 
   return result == true;
 }
-

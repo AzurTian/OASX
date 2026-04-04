@@ -127,7 +127,7 @@ class ActiveConfigPanel extends StatelessWidget {
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
         ),
-      HomeWorkbenchTab.stats => ScriptStatisticsPanel(),
+      HomeWorkbenchTab.stats => const ScriptStatisticsPanel(),
       HomeWorkbenchTab.logs => LogCenterPanel(scriptName: script.name),
     };
   }
@@ -141,4 +141,3 @@ class ActiveConfigPanel extends StatelessWidget {
     };
   }
 }
-

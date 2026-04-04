@@ -19,13 +19,15 @@ class ScriptStatisticsPanel extends StatelessWidget {
   const ScriptStatisticsPanel({super.key});
 
   /// Controller that owns statistics state.
-  HomeStatisticsController get controller => Get.find<HomeStatisticsController>();
+  HomeStatisticsController get controller =>
+      Get.find<HomeStatisticsController>();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final statistics = controller.statistics.value;
-      final availableDates = controller.availableDateKeys.toList(growable: false);
+      final availableDates =
+          controller.availableDateKeys.toList(growable: false);
       if (statistics == null) {
         return _StatisticsPlaceholder(
           label: _placeholderLabel(),
@@ -92,7 +94,8 @@ class ScriptStatisticsPanel extends StatelessWidget {
       return true;
     }
     return controller.isTodaySelected &&
-        controller.connectionState.value != ScriptStatisticsConnectionState.error &&
+        controller.connectionState.value !=
+            ScriptStatisticsConnectionState.error &&
         controller.availableDateKeys.isNotEmpty;
   }
 }
@@ -117,7 +120,10 @@ class _HeaderSection extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.45),
+            color: Theme.of(context)
+                .colorScheme
+                .outlineVariant
+                .withValues(alpha: 0.45),
           ),
         ),
       ),
@@ -245,12 +251,15 @@ class _StatusIcon extends StatelessWidget {
       return I18n.homeStatsLoadingMessage.tr;
     }
     if (!controller.isTodaySelected) {
-      return controller.lastErrorMessage.value.isEmpty ? '' : I18n.homeStatsStreamError.tr;
+      return controller.lastErrorMessage.value.isEmpty
+          ? ''
+          : I18n.homeStatsStreamError.tr;
     }
     return switch (controller.connectionState.value) {
       ScriptStatisticsConnectionState.connecting => '',
       ScriptStatisticsConnectionState.connected => '',
-      ScriptStatisticsConnectionState.reconnecting => I18n.homeStatsReconnecting.tr,
+      ScriptStatisticsConnectionState.reconnecting =>
+        I18n.homeStatsReconnecting.tr,
       ScriptStatisticsConnectionState.error => I18n.homeStatsStreamError.tr,
       ScriptStatisticsConnectionState.idle => '',
     };
@@ -277,11 +286,13 @@ class _StatusIcon extends StatelessWidget {
   Color _statusTone(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     if (controller.lastErrorMessage.value.isNotEmpty ||
-        controller.connectionState.value == ScriptStatisticsConnectionState.error) {
+        controller.connectionState.value ==
+            ScriptStatisticsConnectionState.error) {
       return scheme.error;
     }
     if (controller.isTodaySelected &&
-        controller.connectionState.value == ScriptStatisticsConnectionState.connected) {
+        controller.connectionState.value ==
+            ScriptStatisticsConnectionState.connected) {
       return Colors.teal;
     }
     return scheme.primary;
@@ -488,7 +499,8 @@ class _MetricDropdown extends StatelessWidget {
   /// Resolves the dropdown label for one metric.
   String _labelForMetric(ScriptStatisticsChartMetric metric) {
     return switch (metric) {
-      ScriptStatisticsChartMetric.totalDuration => I18n.homeStatsTotalDuration.tr,
+      ScriptStatisticsChartMetric.totalDuration =>
+        I18n.homeStatsTotalDuration.tr,
       ScriptStatisticsChartMetric.runCount => I18n.homeStatsMetricRunCount.tr,
       ScriptStatisticsChartMetric.battleCount =>
         I18n.homeStatsMetricBattleCount.tr,
@@ -565,9 +577,10 @@ class _HistoryDateDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedValue = values.contains(selectedValue) && selectedValue.isNotEmpty
-        ? selectedValue
-        : values.firstOrNull;
+    final resolvedValue =
+        values.contains(selectedValue) && selectedValue.isNotEmpty
+            ? selectedValue
+            : values.firstOrNull;
     if (resolvedValue == null) {
       return const SizedBox.shrink();
     }

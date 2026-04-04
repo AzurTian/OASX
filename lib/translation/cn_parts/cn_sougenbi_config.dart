@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_sougenbi_config = {
@@ -10,5 +10,3 @@ final Map<String, String> _cn_sougenbi_config = {
   'buff_exp_50_click': '开启经验加成50%',
   'buff_exp_100_click': '开启经验加成100%',
 };
-
-

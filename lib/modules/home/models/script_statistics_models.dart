@@ -39,7 +39,10 @@ class ScriptStatisticsDateList {
   factory ScriptStatisticsDateList.fromJson(Map<String, dynamic> json) {
     final rawDates = json['dates'];
     final dates = rawDates is List
-        ? rawDates.map((item) => item.toString().trim()).where((item) => item.isNotEmpty).toList()
+        ? rawDates
+            .map((item) => item.toString().trim())
+            .where((item) => item.isNotEmpty)
+            .toList()
         : <String>[];
     return ScriptStatisticsDateList(
       scriptName: _readString(json['script_name']),
@@ -250,7 +253,6 @@ class ScriptTaskStatistics {
       ScriptStatisticsChartMetric.avgRunDuration => avgRunDurationSeconds,
     };
   }
-
 }
 
 /// Statistics for one selected day.
@@ -373,7 +375,10 @@ class ScriptStatisticsUpdate {
       totalBattleCount: _readInt(json['total_battle_count']),
       changedTasks: _readTasks(json['changed_tasks']),
       removedTasks: removedTasks is List
-          ? removedTasks.map((item) => item.toString().trim()).where((item) => item.isNotEmpty).toList()
+          ? removedTasks
+              .map((item) => item.toString().trim())
+              .where((item) => item.isNotEmpty)
+              .toList()
           : <String>[],
     );
   }
@@ -444,9 +449,11 @@ bool statisticsMetricUsesDuration(ScriptStatisticsChartMetric metric) {
   return switch (metric) {
     ScriptStatisticsChartMetric.totalDuration ||
     ScriptStatisticsChartMetric.battleAvgDuration ||
-    ScriptStatisticsChartMetric.avgRunDuration => true,
+    ScriptStatisticsChartMetric.avgRunDuration =>
+      true,
     ScriptStatisticsChartMetric.runCount ||
-    ScriptStatisticsChartMetric.battleCount => false,
+    ScriptStatisticsChartMetric.battleCount =>
+      false,
   };
 }
 
@@ -454,10 +461,12 @@ bool statisticsMetricUsesDuration(ScriptStatisticsChartMetric metric) {
 bool statisticsMetricUsesBattleFilter(ScriptStatisticsChartMetric metric) {
   return switch (metric) {
     ScriptStatisticsChartMetric.battleCount ||
-    ScriptStatisticsChartMetric.battleAvgDuration => true,
+    ScriptStatisticsChartMetric.battleAvgDuration =>
+      true,
     ScriptStatisticsChartMetric.totalDuration ||
     ScriptStatisticsChartMetric.runCount ||
-    ScriptStatisticsChartMetric.avgRunDuration => false,
+    ScriptStatisticsChartMetric.avgRunDuration =>
+      false,
   };
 }
 
@@ -527,9 +536,8 @@ DateTime? _tryParseDateTime(String value) {
   if (normalized.isEmpty) {
     return null;
   }
-  final isoText = normalized.contains('T')
-      ? normalized
-      : normalized.replaceFirst(' ', 'T');
+  final isoText =
+      normalized.contains('T') ? normalized : normalized.replaceFirst(' ', 'T');
   return DateTime.tryParse(isoText);
 }
 

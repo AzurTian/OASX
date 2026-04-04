@@ -1,4 +1,4 @@
-﻿// ignore_for_file: no_leading_underscores_for_local_identifiers, prefer_conditional_assignment, avoid_print
+// ignore_for_file: no_leading_underscores_for_local_identifiers, prefer_conditional_assignment, avoid_print
 part of 'manager_dio.dart';
 
 Response _managerBuildResponse(
@@ -74,4 +74,3 @@ void _managerTryParseHead(
   }
   callback(_maxAge, maxStale);
 }
-

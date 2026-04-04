@@ -1,4 +1,4 @@
-﻿// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable
 part of args;
 
 class TimeDeltaPicker extends DateTimePickerBase {
@@ -47,4 +47,3 @@ class TimeDeltaPickerState extends DateTimePickerBaseState {
     return result;
   }
 }
-

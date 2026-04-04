@@ -1,129 +1,359 @@
 class I18n {
   static const String logOut = 'Log out', zhCn = 'zh-CN', enUs = 'en-US';
-  static const String changeTheme = 'Change Theme', changeLanguage = 'Change Language', projectStatement = 'Project Statement';
+  static const String changeTheme = 'Change Theme',
+      changeLanguage = 'Change Language',
+      projectStatement = 'Project Statement';
   static const String year = 'Years', month = 'Months', day = 'Days';
   static const String week = 'Weeks', hour = 'Hours', minute = 'Minutes';
-  static const String seconds = 'Seconds', networkError = 'Network Error', networkUnknownError = 'Network Unknown Error';
-  static const String noData = 'No Data', networkErrorMessage = 'Please check your network connection.', networkErrorCode = 'Network Error Code';
-  static const String networkConnectTimeout = 'Network Connect Timeout', networkNotFound = 'Network Not Found', networkServerError = 'OAS internal server error';
-  static const String scheduler = 'scheduler', run = 'Run', pending = 'Pendings';
+  static const String seconds = 'Seconds',
+      networkError = 'Network Error',
+      networkUnknownError = 'Network Unknown Error';
+  static const String noData = 'No Data',
+      networkErrorMessage = 'Please check your network connection.',
+      networkErrorCode = 'Network Error Code';
+  static const String networkConnectTimeout = 'Network Connect Timeout',
+      networkNotFound = 'Network Not Found',
+      networkServerError = 'OAS internal server error';
+  static const String scheduler = 'scheduler',
+      run = 'Run',
+      pending = 'Pendings';
   static const String waiting = 'Waitings', stop = 'Stop', warning = 'Warning';
-  static const String connecting = 'Connecting', taskSetting = 'Task Setting', log = 'Log';
-  static const String clearLog = 'Clear Log', copy = 'Copy', login = 'Login', setting = 'Setting';
-  static const String notifyTest = 'Notify Test', autoLoginAfterDeploy = 'Auto login after deploy', notifyTestConfig = 'Notify Config';
-  static const String notifyTestHelp = 'Notify Help', notifyTestTitle = 'Notify Title', notifyTestContent = 'Notify Content';
-  static const String notifyTestSend = 'Notify Send', notifyTestSuccess = 'Notify Success', notifyTestFailed = 'Notify Failed';
-  static const String currentVersion = 'Current Version', latestVersion = 'Latest Version', findNewVersion = 'Find New Version';
-  static const String killOasServer = 'Kill OAS server', areYouSureKill = 'Are you sure kill OAS server', killServerSuccess = 'Kill server success';
-  static const String killServerFailure = 'Kill server failure', killServerFailureMsg = 'Please check if the OAS service is turned off and then manually log out', findOasNewVersion = 'Find OAS new version';
-  static const String oasLatestVersion = 'OAS latest version', currentBranch = 'Current branch', detailedSubmissionHistory = 'Detailed submission history';
-  static const String author = 'Author', submitTime = 'Submit time', submitInfo = 'Submit info';
-  static const String localRepo = 'Local repo', remoteRepo = 'Remote repo', rootPathServer = 'Service root path';
-  static const String selectRootPathServer = 'Select root path server', rootPathServerHelp = 'Service root path help', rootPathIncorrect = 'Root path incorrect';
-  static const String rootPathCorrect = 'Root path incorrect help', installOasNow = 'Now install OAS', installOasSuccess = 'Install OAS success';
-  static const String installOasFailure = 'Install OAS failure', installOasFromGithub = 'Install OAS from GitHub', installOasHelp = 'Install OAS from local';
-  static const String setupDeploy = 'Setup deploy', setupLog = 'Setup log', rename = 'Rename';
+  static const String connecting = 'Connecting',
+      taskSetting = 'Task Setting',
+      log = 'Log';
+  static const String clearLog = 'Clear Log',
+      copy = 'Copy',
+      login = 'Login',
+      setting = 'Setting';
+  static const String notifyTest = 'Notify Test',
+      autoLoginAfterDeploy = 'Auto login after deploy',
+      notifyTestConfig = 'Notify Config';
+  static const String notifyTestHelp = 'Notify Help',
+      notifyTestTitle = 'Notify Title',
+      notifyTestContent = 'Notify Content';
+  static const String notifyTestSend = 'Notify Send',
+      notifyTestSuccess = 'Notify Success',
+      notifyTestFailed = 'Notify Failed';
+  static const String currentVersion = 'Current Version',
+      latestVersion = 'Latest Version',
+      findNewVersion = 'Find New Version';
+  static const String killOasServer = 'Kill OAS server',
+      areYouSureKill = 'Are you sure kill OAS server',
+      killServerSuccess = 'Kill server success';
+  static const String killServerFailure = 'Kill server failure',
+      killServerFailureMsg =
+          'Please check if the OAS service is turned off and then manually log out',
+      findOasNewVersion = 'Find OAS new version';
+  static const String oasLatestVersion = 'OAS latest version',
+      currentBranch = 'Current branch',
+      detailedSubmissionHistory = 'Detailed submission history';
+  static const String author = 'Author',
+      submitTime = 'Submit time',
+      submitInfo = 'Submit info';
+  static const String localRepo = 'Local repo',
+      remoteRepo = 'Remote repo',
+      rootPathServer = 'Service root path';
+  static const String selectRootPathServer = 'Select root path server',
+      rootPathServerHelp = 'Service root path help',
+      rootPathIncorrect = 'Root path incorrect';
+  static const String rootPathCorrect = 'Root path incorrect help',
+      installOasNow = 'Now install OAS',
+      installOasSuccess = 'Install OAS success';
+  static const String installOasFailure = 'Install OAS failure',
+      installOasFromGithub = 'Install OAS from GitHub',
+      installOasHelp = 'Install OAS from local';
+  static const String setupDeploy = 'Setup deploy',
+      setupLog = 'Setup log',
+      rename = 'Rename';
   static const String delete = 'Delete', cancel = 'Cancel', confirm = 'Confirm';
-  static const String retry = 'Retry', selectAll = 'Select all', clear = 'Clear';
-  static const String selectedCount = 'Selected count', time = 'Time', newName = 'New name';
-  static const String deleteConfirm = 'Are you sure to delete', nameCannotEmpty = 'Name cannot be empty', nameInvalid = 'Name cannot be Home';
-  static const String nameDuplicate = 'Name already exists', configUpdateTip = 'Config update tip', configAdd = 'Add new config';
-  static const String configCopyFromExist = 'Copy from existing config', settingSaved = 'Setting saved', rememberWindowPositionSize = 'Remember window positon and size';
-  static const String minimizeToSystemTray = 'Minimize to system tray', minimizeToSystemTrayHelp = 'Minimize to system tray help', launchAtStartup = 'Launch at startup';
-  static const String launchAtStartupHelp = 'Launch at startup help', launchAtStartupUpdateFailed = 'Launch at startup update failed', scriptList = 'Script list';
-  static const String showWindow = 'Show window', exit = 'Exit', empty = 'Empty';
-  static const String systemSetting = 'System setting', userSetting = 'User setting', noNewVersion = 'No new version';
-  static const String autoRunScriptList = 'Auto run script list', autoRunScript = 'Auto run script', startSuccess = 'Start success';
-  static const String autoDeploy = 'Auto deploy', loginAddress = 'login_address', homeSelectControlScript = 'home_select_control_script';
-  static const String homeOverviewControl = 'home_overview_control', homeMasterSwitch = 'home_master_switch', homeRunningCount = 'home_running_count';
-  static const String homeTotalScripts = 'home_total_scripts', homeControlScriptCount = 'home_control_script_count', turnOnTheLinker = 'turn_on_the_linker';
-  static const String closeTheLinker = 'close_the_linker', homeNoTask = 'home_no_task', homeNoLog = 'home_no_log', homeUnconfiguredTask = 'home_unconfigured_task';
-  static const String homeRunningTask = 'home_running_task', homePendingTask = 'home_pending_task', homeWaitingTask = 'home_waiting_task';
-  static const String homeConnectionRetryHint = 'home_connection_retry_hint', homeConnectionRetryAction = 'home_connection_retry_action', homeEmptyScriptHint = 'home_empty_script_hint';
-  static const String homeLoadingAutoDeploying = 'home_loading_auto_deploying', homeLoadingAutoLogin = 'home_loading_auto_login', homeLoadingConfigDetail = 'home_loading_config_detail';
-  static const String homeScriptAbnormal = 'home_script_abnormal', homeScriptOffline = 'home_script_offline', homeScriptSearchHint = 'home_script_search_hint';
-  static const String homeSortByStatus = 'home_sort_by_status', homeSortByName = 'home_sort_by_name', homeNoScriptSelected = 'home_no_script_selected';
-  static const String homeStatusTab = 'home_status_tab', homeTasksTab = 'home_tasks_tab', homeParamsTab = 'home_params_tab';
-  static const String homeStatsTab = 'home_stats_tab', homeStatsGeneratedAt = 'home_stats_generated_at', homeStatsRetentionDays = 'home_stats_retention_days';
-  static const String homeStatsToday = 'home_stats_today', homeStatsSelectedDate = 'home_stats_selected_date', homeStatsTasks = 'home_stats_tasks', homeStatsRunCount = 'home_stats_run_count';
-  static const String homeStatsTotalDuration = 'home_stats_total_duration', homeStatsBattleCount = 'home_stats_battle_count', homeStatsBattleTotalDuration = 'home_stats_battle_total_duration', homeStatsBattleAvgDuration = 'home_stats_battle_avg_duration';
-  static const String homeStatsAvgRunDuration = 'home_stats_avg_run_duration', homeStatsMetricRunCount = 'home_stats_metric_run_count', homeStatsMetricBattleCount = 'home_stats_metric_battle_count';
-  static const String homeStatsMetricBattleAvgDuration = 'home_stats_metric_battle_avg_duration', homeStatsMetricAvgRunDuration = 'home_stats_metric_avg_run_duration';
-  static const String homeStatsWaitingSnapshot = 'home_stats_waiting_snapshot', homeStatsConnected = 'home_stats_connected', homeStatsDisconnected = 'home_stats_disconnected';
-  static const String homeStatsReconnecting = 'home_stats_reconnecting', homeStatsStreamError = 'home_stats_stream_error', homeStatsTimelineEmpty = 'home_stats_timeline_empty';
-  static const String homeStatsChartEmpty = 'home_stats_chart_empty', homeStatsTaskDetails = 'home_stats_task_details', homeStatsTaskDetailEmpty = 'home_stats_task_detail_empty';
-  static const String homeStatsNoTaskSelected = 'home_stats_no_task_selected', homeStatsExtensionsEmpty = 'home_stats_extensions_empty', homeStatsDuration = 'home_stats_duration';
-  static const String homeStatsTodayChartTitle = 'home_stats_today_chart_title', homeStatsHistoryChartTitle = 'home_stats_history_chart_title', homeStatsTodayChartEmpty = 'home_stats_today_chart_empty';
-  static const String homeStatsHistoryDateEmpty = 'home_stats_history_date_empty', homeStatsLatestTask = 'home_stats_latest_task', homeStatsLatestTime = 'home_stats_latest_time';
-  static const String homeStatsCurrentTask = 'home_stats_current_task', homeStatsCurrentTime = 'home_stats_current_time', homeStatsIdle = 'home_stats_idle';
-  static const String homeStatsStartTime = 'home_stats_start_time', homeStatsTaskFilter = 'home_stats_task_filter', homeStatsAllTasks = 'home_stats_all_tasks', homeStatsRunDetails = 'home_stats_run_details';
-  static const String homeStatsSelectedBlock = 'home_stats_selected_block', homeStatsLoadingMessage = 'home_stats_loading_message';
-  static const String homeStatsSummaryRunDuration = 'home_stats_summary_run_duration', homeStatsSummaryRunTaskCount = 'home_stats_summary_run_task_count', homeStatsSummaryTotalBattleCount = 'home_stats_summary_total_battle_count';
-  static const String homeStatsSortByData = 'home_stats_sort_by_data', homeStatsSortByTime = 'home_stats_sort_by_time', homeStatsNoBattle = 'home_stats_no_battle';
-  static const String homeTaskFilterAll = 'home_task_filter_all', homeTaskFilterEnabled = 'home_task_filter_enabled', homeTaskFilterDisabled = 'home_task_filter_disabled';
-  static const String homeTaskEnabled = 'home_task_enabled', homeTaskDisabled = 'home_task_disabled', homeQuickRun = 'home_quick_run';
-  static const String homeQuickWait = 'home_quick_wait', homeOpenTaskParams = 'home_open_task_params', homeTaskConfigureAndEnable = 'home_task_configure_and_enable';
-  static const String homeTaskSelectPrompt = 'home_task_select_prompt', homeRealtimeLog = 'home_realtime_log', homeHistoryLog = 'home_history_log';
-  static const String homeLogSearchHint = 'home_log_search_hint', homeLogUseRegex = 'home_log_use_regex', homeLogWrapLines = 'home_log_wrap_lines';
-  static const String homeLogAutoScroll = 'home_log_auto_scroll', homeLogLoadOlder = 'home_log_load_older', homeLogEmptyFiltered = 'home_log_empty_filtered';
-  static const String taskManage = 'task_manage', taskManageTitle = 'task_manage_title', taskSearchHint = 'task_search_hint';
-  static const String taskNotFound = 'task_not_found', taskMenuLoadFailed = 'task_menu_load_failed', loginError = 'Login error';
-  static const String loginErrorMsg = 'The OAS connection fails, confirm that OAS is running', success = 'Success', overview = 'Overview';
-  static const String argsDraftDirty = 'args_draft_dirty', argsMixedValue = 'args_mixed_value', argsDiscardChanges = 'args_discard_changes';
-  static const String argsSaveChanges = 'args_save_changes', argsValidationFailed = 'args_validation_failed', argsInvalidInteger = 'args_invalid_integer';
-  static const String argsInvalidNumber = 'args_invalid_number', argsInvalidTime = 'args_invalid_time', argsInvalidTimeDelta = 'args_invalid_time_delta';
-  static const String argsInvalidDateTime = 'args_invalid_date_time', argsInvalidEnum = 'args_invalid_enum', argsMinValue = 'args_min_value';
-  static const String argsMaxValue = 'args_max_value', argsUnsavedPrompt = 'args_unsaved_prompt';
+  static const String retry = 'Retry',
+      selectAll = 'Select all',
+      clear = 'Clear';
+  static const String selectedCount = 'Selected count',
+      time = 'Time',
+      newName = 'New name';
+  static const String deleteConfirm = 'Are you sure to delete',
+      nameCannotEmpty = 'Name cannot be empty',
+      nameInvalid = 'Name cannot be Home';
+  static const String nameDuplicate = 'Name already exists',
+      configUpdateTip = 'Config update tip',
+      configAdd = 'Add new config';
+  static const String configCopyFromExist = 'Copy from existing config',
+      settingSaved = 'Setting saved',
+      rememberWindowPositionSize = 'Remember window positon and size';
+  static const String minimizeToSystemTray = 'Minimize to system tray',
+      minimizeToSystemTrayHelp = 'Minimize to system tray help',
+      launchAtStartup = 'Launch at startup';
+  static const String launchAtStartupHelp = 'Launch at startup help',
+      launchAtStartupUpdateFailed = 'Launch at startup update failed',
+      scriptList = 'Script list';
+  static const String showWindow = 'Show window',
+      exit = 'Exit',
+      empty = 'Empty';
+  static const String systemSetting = 'System setting',
+      userSetting = 'User setting',
+      noNewVersion = 'No new version';
+  static const String autoRunScriptList = 'Auto run script list',
+      autoRunScript = 'Auto run script',
+      startSuccess = 'Start success';
+  static const String autoDeploy = 'Auto deploy',
+      loginAddress = 'login_address',
+      homeSelectControlScript = 'home_select_control_script';
+  static const String homeOverviewControl = 'home_overview_control',
+      homeMasterSwitch = 'home_master_switch',
+      homeRunningCount = 'home_running_count';
+  static const String homeTotalScripts = 'home_total_scripts',
+      homeControlScriptCount = 'home_control_script_count',
+      turnOnTheLinker = 'turn_on_the_linker';
+  static const String closeTheLinker = 'close_the_linker',
+      homeNoTask = 'home_no_task',
+      homeNoLog = 'home_no_log',
+      homeUnconfiguredTask = 'home_unconfigured_task';
+  static const String homeRunningTask = 'home_running_task',
+      homePendingTask = 'home_pending_task',
+      homeWaitingTask = 'home_waiting_task';
+  static const String homeConnectionRetryHint = 'home_connection_retry_hint',
+      homeConnectionRetryAction = 'home_connection_retry_action',
+      homeEmptyScriptHint = 'home_empty_script_hint';
+  static const String homeLoadingAutoDeploying = 'home_loading_auto_deploying',
+      homeLoadingAutoLogin = 'home_loading_auto_login',
+      homeLoadingConfigDetail = 'home_loading_config_detail';
+  static const String homeScriptAbnormal = 'home_script_abnormal',
+      homeScriptOffline = 'home_script_offline',
+      homeScriptSearchHint = 'home_script_search_hint';
+  static const String homeSortByStatus = 'home_sort_by_status',
+      homeSortByName = 'home_sort_by_name',
+      homeNoScriptSelected = 'home_no_script_selected';
+  static const String homeStatusTab = 'home_status_tab',
+      homeTasksTab = 'home_tasks_tab',
+      homeParamsTab = 'home_params_tab';
+  static const String homeStatsTab = 'home_stats_tab',
+      homeStatsGeneratedAt = 'home_stats_generated_at',
+      homeStatsRetentionDays = 'home_stats_retention_days';
+  static const String homeStatsToday = 'home_stats_today',
+      homeStatsSelectedDate = 'home_stats_selected_date',
+      homeStatsTasks = 'home_stats_tasks',
+      homeStatsRunCount = 'home_stats_run_count';
+  static const String homeStatsTotalDuration = 'home_stats_total_duration',
+      homeStatsBattleCount = 'home_stats_battle_count',
+      homeStatsBattleTotalDuration = 'home_stats_battle_total_duration',
+      homeStatsBattleAvgDuration = 'home_stats_battle_avg_duration';
+  static const String homeStatsAvgRunDuration = 'home_stats_avg_run_duration',
+      homeStatsMetricRunCount = 'home_stats_metric_run_count',
+      homeStatsMetricBattleCount = 'home_stats_metric_battle_count';
+  static const String homeStatsMetricBattleAvgDuration =
+          'home_stats_metric_battle_avg_duration',
+      homeStatsMetricAvgRunDuration = 'home_stats_metric_avg_run_duration';
+  static const String homeStatsWaitingSnapshot = 'home_stats_waiting_snapshot',
+      homeStatsConnected = 'home_stats_connected',
+      homeStatsDisconnected = 'home_stats_disconnected';
+  static const String homeStatsReconnecting = 'home_stats_reconnecting',
+      homeStatsStreamError = 'home_stats_stream_error',
+      homeStatsTimelineEmpty = 'home_stats_timeline_empty';
+  static const String homeStatsChartEmpty = 'home_stats_chart_empty',
+      homeStatsTaskDetails = 'home_stats_task_details',
+      homeStatsTaskDetailEmpty = 'home_stats_task_detail_empty';
+  static const String homeStatsNoTaskSelected = 'home_stats_no_task_selected',
+      homeStatsExtensionsEmpty = 'home_stats_extensions_empty',
+      homeStatsDuration = 'home_stats_duration';
+  static const String homeStatsTodayChartTitle = 'home_stats_today_chart_title',
+      homeStatsHistoryChartTitle = 'home_stats_history_chart_title',
+      homeStatsTodayChartEmpty = 'home_stats_today_chart_empty';
+  static const String homeStatsHistoryDateEmpty =
+          'home_stats_history_date_empty',
+      homeStatsLatestTask = 'home_stats_latest_task',
+      homeStatsLatestTime = 'home_stats_latest_time';
+  static const String homeStatsCurrentTask = 'home_stats_current_task',
+      homeStatsCurrentTime = 'home_stats_current_time',
+      homeStatsIdle = 'home_stats_idle';
+  static const String homeStatsStartTime = 'home_stats_start_time',
+      homeStatsTaskFilter = 'home_stats_task_filter',
+      homeStatsAllTasks = 'home_stats_all_tasks',
+      homeStatsRunDetails = 'home_stats_run_details';
+  static const String homeStatsSelectedBlock = 'home_stats_selected_block',
+      homeStatsLoadingMessage = 'home_stats_loading_message';
+  static const String homeStatsSummaryRunDuration =
+          'home_stats_summary_run_duration',
+      homeStatsSummaryRunTaskCount = 'home_stats_summary_run_task_count',
+      homeStatsSummaryTotalBattleCount =
+          'home_stats_summary_total_battle_count';
+  static const String homeStatsSortByData = 'home_stats_sort_by_data',
+      homeStatsSortByTime = 'home_stats_sort_by_time',
+      homeStatsNoBattle = 'home_stats_no_battle';
+  static const String homeTaskFilterAll = 'home_task_filter_all',
+      homeTaskFilterEnabled = 'home_task_filter_enabled',
+      homeTaskFilterDisabled = 'home_task_filter_disabled';
+  static const String homeTaskEnabled = 'home_task_enabled',
+      homeTaskDisabled = 'home_task_disabled',
+      homeQuickRun = 'home_quick_run';
+  static const String homeQuickWait = 'home_quick_wait',
+      homeOpenTaskParams = 'home_open_task_params',
+      homeTaskConfigureAndEnable = 'home_task_configure_and_enable';
+  static const String homeTaskSelectPrompt = 'home_task_select_prompt',
+      homeRealtimeLog = 'home_realtime_log',
+      homeHistoryLog = 'home_history_log';
+  static const String homeLogSearchHint = 'home_log_search_hint',
+      homeLogUseRegex = 'home_log_use_regex',
+      homeLogWrapLines = 'home_log_wrap_lines';
+  static const String homeLogAutoScroll = 'home_log_auto_scroll',
+      homeLogLoadOlder = 'home_log_load_older',
+      homeLogEmptyFiltered = 'home_log_empty_filtered';
+  static const String taskManage = 'task_manage',
+      taskManageTitle = 'task_manage_title',
+      taskSearchHint = 'task_search_hint';
+  static const String taskNotFound = 'task_not_found',
+      taskMenuLoadFailed = 'task_menu_load_failed',
+      loginError = 'Login error';
+  static const String loginErrorMsg =
+          'The OAS connection fails, confirm that OAS is running',
+      success = 'Success',
+      overview = 'Overview';
+  static const String argsDraftDirty = 'args_draft_dirty',
+      argsMixedValue = 'args_mixed_value',
+      argsDiscardChanges = 'args_discard_changes';
+  static const String argsSaveChanges = 'args_save_changes',
+      argsValidationFailed = 'args_validation_failed',
+      argsInvalidInteger = 'args_invalid_integer';
+  static const String argsInvalidNumber = 'args_invalid_number',
+      argsInvalidTime = 'args_invalid_time',
+      argsInvalidTimeDelta = 'args_invalid_time_delta';
+  static const String argsInvalidDateTime = 'args_invalid_date_time',
+      argsInvalidEnum = 'args_invalid_enum',
+      argsMinValue = 'args_min_value';
+  static const String argsMaxValue = 'args_max_value',
+      argsUnsavedPrompt = 'args_unsaved_prompt';
   static const String home = 'Home', about = 'About', updater = 'Updater';
   static const String tool = 'Tool', taskList = 'TaskList', script = 'Script';
-  static const String restart = 'Restart', globalGame = 'GlobalGame', soulZones = 'Soul Zones';
-  static const String orochi = 'Orochi', sougenbi = 'Sougenbi', fallenSun = 'FallenSun';
-  static const String eternitySea = 'EternitySea', dailyTask = 'Daily Task', dailyTrifles = 'DailyTrifles';
-  static const String areaBoss = 'AreaBoss', goldYoukai = 'GoldYoukai', experienceYoukai = 'ExperienceYoukai';
-  static const String nian = 'Nian', talismanPass = 'TalismanPass', demonEncounter = 'DemonEncounter';
-  static const String pets = 'Pets', soulsTidy = 'SoulsTidy', delegation = 'Delegation';
-  static const String wantedQuests = 'WantedQuests', tako = 'Tako', liverEmperorExclusive = 'Liver Emperor Exclusive';
-  static const String guild = 'Guild', weeklyTask = 'Weekly Task', activityTask = 'Activity Task';
-  static const String tools = 'Tools', bondlingFairyland = 'BondlingFairyland', evoZone = 'EvoZone';
-  static const String goryouRealm = 'GoryouRealm', exploration = 'Exploration', kekkaiUtilize = 'KekkaiUtilize';
-  static const String kekkaiActivation = 'KekkaiActivation', realmRaid = 'RealmRaid', ryouToppa = 'RyouToppa';
-  static const String collectiveMissions = 'CollectiveMissions', hunt = 'Hunt', trueOrochi = 'TrueOrochi';
-  static const String richMan = 'RichMan', secret = 'Secret', weeklyTrifles = 'WeeklyTrifles';
-  static const String mysteryShop = 'MysteryShop', duel = 'Duel', activityShikigami = 'ActivityShikigami';
-  static const String metaDemon = 'MetaDemon', memoryScrolls = 'MemoryScrolls', demonRetreat = 'DemonRetreat';
-  static const String dyeTrials = 'DyeTrials', device = 'device', error = 'error';
-  static const String optimization = 'optimization', serial = 'serial', serialHelp = 'serial_help';
-  static const String handle = 'handle', handleHelp = 'handle_help', packageName = 'package_name';
-  static const String packageNameHelp = 'package_name_help', screenshotMethod = 'screenshot_method', screenshotMethodHelp = 'screenshot_method_help';
-  static const String controlMethod = 'control_method', controlMethodHelp = 'control_method_help', emulatorinfoType = 'emulatorinfo_type';
-  static const String emulatorinfoTypeHelp = 'emulatorinfo_type_help', emulatorinfoName = 'emulatorinfo_name', emulatorinfoNameHelp = 'emulatorinfo_name_help';
-  static const String emulatorWindowMinimize = 'emulator_window_minimize', runBackgroundOnly = 'run_background_only', adbRestart = 'adb_restart';
-  static const String adbRestartHelp = 'adb_restart_help', handleError = 'handle_error', handleErrorHelp = 'handle_error_help';
-  static const String saveError = 'save_error', screenshotLength = 'screenshot_length', notifyEnable = 'notify_enable';
-  static const String notifyConfig = 'notify_config', notifyConfigHelp = 'notify_config_help', screenshotInterval = 'screenshot_interval';
-  static const String screenshotIntervalHelp = 'screenshot_interval_help', combatScreenshotInterval = 'combat_screenshot_interval', combatScreenshotIntervalHelp = 'combat_screenshot_interval_help';
-  static const String taskHoardingDuration = 'task_hoarding_duration', taskHoardingDurationHelp = 'task_hoarding_duration_help', whenTaskQueueEmpty = 'when_task_queue_empty';
-  static const String whenTaskQueueEmptyHelp = 'when_task_queue_empty_help', scheduleRule = 'schedule_rule', scheduleRuleHelp = 'schedule_rule_help';
-  static const String harvestConfig = 'harvest_config', enable = 'enable', enableHelp = 'enable_help';
-  static const String nextRun = 'next_run', nextRunHelp = 'next_run_help', priority = 'priority';
-  static const String priorityHelp = 'priority_help', successInterval = 'success_interval', successIntervalHelp = 'success_interval_help';
-  static const String failureInterval = 'failure_interval', failureIntervalHelp = 'failure_interval_help', serverUpdate = 'server_update';
-  static const String serverUpdateHelp = 'server_update_help', harvestEnableHelp = 'harvest_enable_help', enableJade = 'enable_jade';
-  static const String enableSign = 'enable_sign', enableSign999 = 'enable_sign_999', enableMail = 'enable_mail';
-  static const String enableSoul = 'enable_soul', enableAp = 'enable_ap', emergency = 'emergency';
-  static const String teamFlow = 'team_flow', friendInvitation = 'friend_invitation', friendInvitationHelp = 'friend_invitation_help';
-  static const String invitationDetectInterval = 'invitation_detect_interval', invitationDetectIntervalHelp = 'invitation_detect_interval_help', whenNetworkAbnormal = 'when_network_abnormal';
-  static const String whenNetworkAbnormalHelp = 'when_network_abnormal_help', whenNetworkError = 'when_network_error', whenNetworkErrorHelp = 'when_network_error_help';
-  static const String homeClientClear = 'home_client_clear', homeClientClearHelp = 'home_client_clear_help', broker = 'broker';
-  static const String brokerHelp = 'broker_help', port = 'port', portHelp = 'port_help';
-  static const String transport = 'transport', transportHelp = 'transport_help', ca = 'ca';
-  static const String caHelp = 'ca_help', username = 'username', usernameHelp = 'username_help';
-  static const String passwordHelp = 'password_help', password = 'password', executeUpdate = 'execute_update';
-  static const String goOasxRelease = 'Click to download', tip = 'Tip', copySuccess = 'Copy success';
+  static const String restart = 'Restart',
+      globalGame = 'GlobalGame',
+      soulZones = 'Soul Zones';
+  static const String orochi = 'Orochi',
+      sougenbi = 'Sougenbi',
+      fallenSun = 'FallenSun';
+  static const String eternitySea = 'EternitySea',
+      dailyTask = 'Daily Task',
+      dailyTrifles = 'DailyTrifles';
+  static const String areaBoss = 'AreaBoss',
+      goldYoukai = 'GoldYoukai',
+      experienceYoukai = 'ExperienceYoukai';
+  static const String nian = 'Nian',
+      talismanPass = 'TalismanPass',
+      demonEncounter = 'DemonEncounter';
+  static const String pets = 'Pets',
+      soulsTidy = 'SoulsTidy',
+      delegation = 'Delegation';
+  static const String wantedQuests = 'WantedQuests',
+      tako = 'Tako',
+      liverEmperorExclusive = 'Liver Emperor Exclusive';
+  static const String guild = 'Guild',
+      weeklyTask = 'Weekly Task',
+      activityTask = 'Activity Task';
+  static const String tools = 'Tools',
+      bondlingFairyland = 'BondlingFairyland',
+      evoZone = 'EvoZone';
+  static const String goryouRealm = 'GoryouRealm',
+      exploration = 'Exploration',
+      kekkaiUtilize = 'KekkaiUtilize';
+  static const String kekkaiActivation = 'KekkaiActivation',
+      realmRaid = 'RealmRaid',
+      ryouToppa = 'RyouToppa';
+  static const String collectiveMissions = 'CollectiveMissions',
+      hunt = 'Hunt',
+      trueOrochi = 'TrueOrochi';
+  static const String richMan = 'RichMan',
+      secret = 'Secret',
+      weeklyTrifles = 'WeeklyTrifles';
+  static const String mysteryShop = 'MysteryShop',
+      duel = 'Duel',
+      activityShikigami = 'ActivityShikigami';
+  static const String metaDemon = 'MetaDemon',
+      memoryScrolls = 'MemoryScrolls',
+      demonRetreat = 'DemonRetreat';
+  static const String dyeTrials = 'DyeTrials',
+      device = 'device',
+      error = 'error';
+  static const String optimization = 'optimization',
+      serial = 'serial',
+      serialHelp = 'serial_help';
+  static const String handle = 'handle',
+      handleHelp = 'handle_help',
+      packageName = 'package_name';
+  static const String packageNameHelp = 'package_name_help',
+      screenshotMethod = 'screenshot_method',
+      screenshotMethodHelp = 'screenshot_method_help';
+  static const String controlMethod = 'control_method',
+      controlMethodHelp = 'control_method_help',
+      emulatorinfoType = 'emulatorinfo_type';
+  static const String emulatorinfoTypeHelp = 'emulatorinfo_type_help',
+      emulatorinfoName = 'emulatorinfo_name',
+      emulatorinfoNameHelp = 'emulatorinfo_name_help';
+  static const String emulatorWindowMinimize = 'emulator_window_minimize',
+      runBackgroundOnly = 'run_background_only',
+      adbRestart = 'adb_restart';
+  static const String adbRestartHelp = 'adb_restart_help',
+      handleError = 'handle_error',
+      handleErrorHelp = 'handle_error_help';
+  static const String saveError = 'save_error',
+      screenshotLength = 'screenshot_length',
+      notifyEnable = 'notify_enable';
+  static const String notifyConfig = 'notify_config',
+      notifyConfigHelp = 'notify_config_help',
+      screenshotInterval = 'screenshot_interval';
+  static const String screenshotIntervalHelp = 'screenshot_interval_help',
+      combatScreenshotInterval = 'combat_screenshot_interval',
+      combatScreenshotIntervalHelp = 'combat_screenshot_interval_help';
+  static const String taskHoardingDuration = 'task_hoarding_duration',
+      taskHoardingDurationHelp = 'task_hoarding_duration_help',
+      whenTaskQueueEmpty = 'when_task_queue_empty';
+  static const String whenTaskQueueEmptyHelp = 'when_task_queue_empty_help',
+      scheduleRule = 'schedule_rule',
+      scheduleRuleHelp = 'schedule_rule_help';
+  static const String harvestConfig = 'harvest_config',
+      enable = 'enable',
+      enableHelp = 'enable_help';
+  static const String nextRun = 'next_run',
+      nextRunHelp = 'next_run_help',
+      priority = 'priority';
+  static const String priorityHelp = 'priority_help',
+      successInterval = 'success_interval',
+      successIntervalHelp = 'success_interval_help';
+  static const String failureInterval = 'failure_interval',
+      failureIntervalHelp = 'failure_interval_help',
+      serverUpdate = 'server_update';
+  static const String serverUpdateHelp = 'server_update_help',
+      harvestEnableHelp = 'harvest_enable_help',
+      enableJade = 'enable_jade';
+  static const String enableSign = 'enable_sign',
+      enableSign999 = 'enable_sign_999',
+      enableMail = 'enable_mail';
+  static const String enableSoul = 'enable_soul',
+      enableAp = 'enable_ap',
+      emergency = 'emergency';
+  static const String teamFlow = 'team_flow',
+      friendInvitation = 'friend_invitation',
+      friendInvitationHelp = 'friend_invitation_help';
+  static const String invitationDetectInterval = 'invitation_detect_interval',
+      invitationDetectIntervalHelp = 'invitation_detect_interval_help',
+      whenNetworkAbnormal = 'when_network_abnormal';
+  static const String whenNetworkAbnormalHelp = 'when_network_abnormal_help',
+      whenNetworkError = 'when_network_error',
+      whenNetworkErrorHelp = 'when_network_error_help';
+  static const String homeClientClear = 'home_client_clear',
+      homeClientClearHelp = 'home_client_clear_help',
+      broker = 'broker';
+  static const String brokerHelp = 'broker_help',
+      port = 'port',
+      portHelp = 'port_help';
+  static const String transport = 'transport',
+      transportHelp = 'transport_help',
+      ca = 'ca';
+  static const String caHelp = 'ca_help',
+      username = 'username',
+      usernameHelp = 'username_help';
+  static const String passwordHelp = 'password_help',
+      password = 'password',
+      executeUpdate = 'execute_update';
+  static const String goOasxRelease = 'Click to download',
+      tip = 'Tip',
+      copySuccess = 'Copy success';
 }
-
-
-
-
-
-

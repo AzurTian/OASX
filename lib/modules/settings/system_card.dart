@@ -168,4 +168,3 @@ class CheckUpdateButton extends StatelessWidget {
     );
   }
 }
-

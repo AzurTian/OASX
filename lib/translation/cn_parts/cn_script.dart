@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_script = {
@@ -18,7 +18,7 @@ final Map<String, String> _cn_script = {
 如果你使用了模拟器的多开功能，它们的 Serial 将不是默认的，可以在 console.bat 中执行 `adb devices` 查询，或根据模拟器官方的教程填写''',
   I18n.handle: '句柄 Handle',
   I18n.handleHelp:
-  '''填 "auto" 自动检测模拟器，多个模拟器正在运行或使用不支持自动检测的模拟器时无法使用 "auto"，必须手动填写
+      '''填 "auto" 自动检测模拟器，多个模拟器正在运行或使用不支持自动检测的模拟器时无法使用 "auto"，必须手动填写
 输入为句柄标题或者是句柄号，每次启动模拟器时句柄号会变化。清空表示不使用window的操作方式。
 
 句柄标题 Handle:
@@ -38,7 +38,7 @@ window_background ~= nemu_ipc >>> DroidCast_raw >  ADB_nc >> DroidCast > uiautom
 nemu_ipc仅限mumu12模拟器且要求版本大于3.8.13，并且需要设置模拟器的执行路径''',
   I18n.controlMethod: '模拟器控制方案',
   I18n.controlMethodHelp:
-  '''速度: window_message ~= minitouch > Hermit >>> uiautomator2 ~= ADB
+      '''速度: window_message ~= minitouch > Hermit >>> uiautomator2 ~= ADB
 控制方式是模拟人类的速度，也不是越快越好 使用(window_message)会偶尔出现失效的情况''',
   I18n.emulatorinfoType: '模拟器类型',
   I18n.emulatorinfoTypeHelp: '''选择你使用的模拟器类型
@@ -58,14 +58,12 @@ nemu_ipc仅限mumu12模拟器且要求版本大于3.8.13，并且需要设置模
   I18n.notifyConfig: '消息推送配置',
   I18n.notifyConfigHelp: '输入为yaml格式，":"冒号后有一个空格，具体请翻阅文档[消息推送]',
   I18n.screenshotInterval: '放慢截图速度至 X 秒一张',
-  I18n.screenshotIntervalHelp:
-  '执行两次截图之间的最小间隔，限制在 0.1 ~ 0.3，对于高配置电脑能降低 CPU 占用',
+  I18n.screenshotIntervalHelp: '执行两次截图之间的最小间隔，限制在 0.1 ~ 0.3，对于高配置电脑能降低 CPU 占用',
   I18n.combatScreenshotInterval: '战斗中放慢截图速度至 X 秒一张',
   I18n.combatScreenshotIntervalHelp:
-  '执行两次截图之间的最小间隔，限制在 0.1 ~ 1.0，能降低战斗时的 CPU 占用',
+      '执行两次截图之间的最小间隔，限制在 0.1 ~ 1.0，能降低战斗时的 CPU 占用',
   I18n.taskHoardingDuration: '囤积任务 X 分钟',
-  I18n.taskHoardingDurationHelp:
-  '能在收菜期间降低操作游戏的频率,任务触发后，等待 X 分钟，再一次性执行囤积的任务',
+  I18n.taskHoardingDurationHelp: '能在收菜期间降低操作游戏的频率,任务触发后，等待 X 分钟，再一次性执行囤积的任务',
   I18n.whenTaskQueueEmpty: '当任务队列清空后',
   I18n.whenTaskQueueEmptyHelp: '无任务时关闭游戏，能在收菜期间降低 CPU 占用',
   I18n.scheduleRule: '选择任务调度规则',
@@ -75,8 +73,5 @@ nemu_ipc仅限mumu12模拟器且要求版本大于3.8.13，并且需要设置模
 基于优先级(Priority)的调度：高优先级先于低优先级执行，同优先级按照先来后到顺序''',
   'emulatorinfo_path': '模拟器路径',
   'emulatorinfo_path_help':
-  '举例："E:\\ProgramFiles\\MuMuPlayer-12.0\\shell\\MuMuPlayer.exe"',
+      '举例："E:\\ProgramFiles\\MuMuPlayer-12.0\\shell\\MuMuPlayer.exe"',
 };
-
-
-

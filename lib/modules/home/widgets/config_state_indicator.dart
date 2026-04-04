@@ -70,4 +70,3 @@ class _StatePalette {
   final Color color;
   final IconData icon;
 }
-

@@ -31,10 +31,10 @@ extension ApiClientStatisticsX on ApiClient {
 
   Uri buildScriptStatisticsSseUri(String scriptName, String dateKey) {
     final addressText = address.trim();
-    final baseAddress = addressText.startsWith('http://') ||
-            addressText.startsWith('https://')
-        ? addressText
-        : 'http://$addressText';
+    final baseAddress =
+        addressText.startsWith('http://') || addressText.startsWith('https://')
+            ? addressText
+            : 'http://$addressText';
     return Uri.parse(
       '$baseAddress/stats/${Uri.encodeComponent(scriptName)}/stream?date=$dateKey',
     );

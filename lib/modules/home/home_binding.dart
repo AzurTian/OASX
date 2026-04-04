@@ -19,6 +19,3 @@ class HomeBinding extends Bindings {
     }
   }
 }
-
-
-

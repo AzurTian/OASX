@@ -83,6 +83,3 @@ Future<void> initService() async {
     Get.putAsync(() async => ScriptService(), permanent: true),
   ]);
 }
-
-
-

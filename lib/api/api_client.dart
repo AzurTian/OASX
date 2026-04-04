@@ -186,7 +186,9 @@ class ApiClient {
 
   Future<UpdateInfoModel> getUpdateInfo() async {
     final res = await request(() => get('/home/update_info'));
-    return res.isSuccess ? UpdateInfoModel.fromJson(res.data) : UpdateInfoModel();
+    return res.isSuccess
+        ? UpdateInfoModel.fromJson(res.data)
+        : UpdateInfoModel();
   }
 
   Future<String?> getExecuteUpdate() async {
@@ -218,5 +220,3 @@ class ApiClient {
     return result;
   }
 }
-
-

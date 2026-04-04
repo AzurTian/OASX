@@ -69,7 +69,8 @@ class Args extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetX<ArgsController>(builder: (controller) {
-      final selectedScript = (scriptName ?? Get.parameters['script'] ?? '').trim();
+      final selectedScript =
+          (scriptName ?? Get.parameters['script'] ?? '').trim();
       final selectedTask = (taskName ?? Get.parameters['task'] ?? '').trim();
       final groupNames = controller.groupsName.value;
       final content = LayoutBuilder(
@@ -90,7 +91,8 @@ class Args extends StatelessWidget {
                             .colorScheme
                             .secondaryContainer
                             .withValues(alpha: 0.24),
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         title: <Widget>[
                           if (groupDraggable)
                             Draggable<Map<String, dynamic>>(

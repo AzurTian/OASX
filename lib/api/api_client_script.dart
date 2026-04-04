@@ -1,4 +1,4 @@
-﻿part of 'api_client.dart';
+part of 'api_client.dart';
 
 extension ApiClientScriptX on ApiClient {
   Future<Map<String, dynamic>> getScriptTask(

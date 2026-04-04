@@ -12,11 +12,11 @@ class WindowStateModel {
   });
 
   Map<String, dynamic> toJson() => {
-    'x': x,
-    'y': y,
-    'width': width,
-    'height': height,
-  };
+        'x': x,
+        'y': y,
+        'width': width,
+        'height': height,
+      };
 
   factory WindowStateModel.fromJson(Map<String, dynamic> json) {
     return WindowStateModel(

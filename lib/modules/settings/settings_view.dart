@@ -180,7 +180,9 @@ class _SettingsViewState extends State<SettingsView> {
       }
     }
 
-    return passedTopSectionIndex ?? upcomingSectionIndex ?? _selectedSectionIndex;
+    return passedTopSectionIndex ??
+        upcomingSectionIndex ??
+        _selectedSectionIndex;
   }
 
   Future<void> _scrollToSection(int index) async {
@@ -304,4 +306,3 @@ class _SettingsSection {
   final String Function() navTitleBuilder;
   final Widget Function() cardBuilder;
 }
-

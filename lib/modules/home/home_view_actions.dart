@@ -6,7 +6,8 @@ extension _HomeViewActions on _HomeViewState {
       if (controller.startupLoadingMessage.value.isNotEmpty) {
         return const SizedBox.expand();
       }
-      if (controller.isStartupConnectionFailed.value && scriptService.scriptOrderList.isEmpty) {
+      if (controller.isStartupConnectionFailed.value &&
+          scriptService.scriptOrderList.isEmpty) {
         return _buildConnectionFailedView();
       }
       return Padding(

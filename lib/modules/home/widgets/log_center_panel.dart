@@ -23,6 +23,7 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
   static final RegExp _logLevelPattern = RegExp(
     r'(^|\|)\s*(INFO|WARNING|ERROR|CRITICAL)\s*(\||$)',
   );
+
   /// Cached highlight patterns reused across log rendering.
   static final List<_LogHighlightPattern> _highlightPatterns = [
     _LogHighlightPattern(
@@ -84,6 +85,7 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
   ScriptLogController? _logController;
   ScrollController? _scrollController;
   String _level = 'ALL';
+
   /// Cache of parsed log entries for incremental rendering.
   final List<_CachedLogEntry> _cachedEntries = <_CachedLogEntry>[];
 
@@ -174,7 +176,8 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
                 PopupMenuItem<String>(value: 'INFO', child: Text('INFO')),
                 PopupMenuItem<String>(value: 'WARNING', child: Text('WARNING')),
                 PopupMenuItem<String>(value: 'ERROR', child: Text('ERROR')),
-                PopupMenuItem<String>(value: 'CRITICAL', child: Text('CRITICAL')),
+                PopupMenuItem<String>(
+                    value: 'CRITICAL', child: Text('CRITICAL')),
               ],
               icon: Icon(
                 Icons.filter_list_rounded,
@@ -431,9 +434,8 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
     }
     final sourceLogs = _sourceLogs(controller);
     _syncCache(sourceLogs);
-    final visibleLogs = _filterEntries(_cachedEntries)
-        .map(_resolveNormalized)
-        .join('\n');
+    final visibleLogs =
+        _filterEntries(_cachedEntries).map(_resolveNormalized).join('\n');
     Clipboard.setData(ClipboardData(text: visibleLogs));
     Get.snackbar(
       I18n.tip.tr,
@@ -457,7 +459,8 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
   }
 
   TextStyle _defaultTextStyle(BuildContext context) {
-    final baseStyle = Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
+    final baseStyle =
+        Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
     return baseStyle.copyWith(
       fontFeatures: const [FontFeature.tabularFigures()],
       height: 1.4,

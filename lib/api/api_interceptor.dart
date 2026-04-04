@@ -1,4 +1,4 @@
-﻿import 'package:flutter_nb_net/flutter_net.dart';
+import 'package:flutter_nb_net/flutter_net.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:oasx/translation/i18n_content.dart';
 
@@ -98,4 +98,3 @@ class ApiInterceptor extends Interceptor {
     Get.snackbar('$title | $code', msg, duration: const Duration(seconds: 5));
   }
 }
-

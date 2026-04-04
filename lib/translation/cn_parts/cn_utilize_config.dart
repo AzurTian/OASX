@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_utilize_config = {
@@ -22,7 +22,5 @@ final Map<String, String> _cn_utilize_config = {
   'box_exp_enable_help': '必选项',
   'box_exp_waste': '从盒子提取经验时浪费一部分',
   'box_exp_waste_help':
-  '某些时候寄养上存在满级的式神，收取经验盒子时会有提示，对于挂机玩家这点经验微不足道。如果不使能这一选项，将跳过收取经验盒子',
+      '某些时候寄养上存在满级的式神，收取经验盒子时会有提示，对于挂机玩家这点经验微不足道。如果不使能这一选项，将跳过收取经验盒子',
 };
-
-

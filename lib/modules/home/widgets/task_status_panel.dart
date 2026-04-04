@@ -144,8 +144,10 @@ class _StatusTaskRow extends StatelessWidget {
   Color _backgroundColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return switch (task.type) {
-      _StatusTaskType.running => colorScheme.tertiaryContainer.withValues(alpha: 0.24),
-      _StatusTaskType.pending => colorScheme.secondaryContainer.withValues(alpha: 0.2),
+      _StatusTaskType.running =>
+        colorScheme.tertiaryContainer.withValues(alpha: 0.24),
+      _StatusTaskType.pending =>
+        colorScheme.secondaryContainer.withValues(alpha: 0.2),
       _StatusTaskType.waiting => colorScheme.surfaceContainerHigh,
     };
   }
@@ -155,7 +157,8 @@ class _StatusTaskRow extends StatelessWidget {
     return switch (task.type) {
       _StatusTaskType.running => Colors.green.withValues(alpha: 0.28),
       _StatusTaskType.pending => Colors.orange.withValues(alpha: 0.3),
-      _StatusTaskType.waiting => colorScheme.outlineVariant.withValues(alpha: 0.7),
+      _StatusTaskType.waiting =>
+        colorScheme.outlineVariant.withValues(alpha: 0.7),
     };
   }
 }
@@ -188,8 +191,8 @@ class _TaskMeta extends StatelessWidget {
             value: task.timeText,
             notHoverStyle: Theme.of(context).textTheme.labelMedium,
             hoverStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
             onChange: (value) {
               unawaited(onSetNextRun(task.name, value));
             },
@@ -210,9 +213,12 @@ class _TaskTypeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = switch (type) {
-      _StatusTaskType.running => const Icon(Icons.bolt_rounded, color: Colors.green),
-      _StatusTaskType.pending => const Icon(Icons.layers_rounded, color: Colors.orange),
-      _StatusTaskType.waiting => const Icon(Icons.schedule_rounded, color: Colors.blueGrey),
+      _StatusTaskType.running =>
+        const Icon(Icons.bolt_rounded, color: Colors.green),
+      _StatusTaskType.pending =>
+        const Icon(Icons.layers_rounded, color: Colors.orange),
+      _StatusTaskType.waiting =>
+        const Icon(Icons.schedule_rounded, color: Colors.blueGrey),
     };
     return SizedBox(width: 28, height: 28, child: Center(child: icon));
   }

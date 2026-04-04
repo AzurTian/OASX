@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_demon_encounter_config = {
@@ -26,5 +26,3 @@ final Map<String, String> _cn_demon_encounter_config = {
   'best_demon_gashadokuro': '极荒骷髅',
   'best_demon_namazu': '极地震鲶'
 };
-
-

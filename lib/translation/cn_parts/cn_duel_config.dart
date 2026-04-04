@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_duel_config = {
@@ -10,5 +10,3 @@ final Map<String, String> _cn_duel_config = {
   'honor_full_exit': '刷满荣誉就退出',
   'honor_full_exit_help': '这无需关心本周荣誉的上限是什么',
 };
-
-

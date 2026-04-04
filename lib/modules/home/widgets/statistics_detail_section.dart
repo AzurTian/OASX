@@ -40,7 +40,8 @@ class ScriptStatisticsDetailSection extends StatelessWidget {
           ...List.generate(runs.length, (index) {
             final displayIndex = runs.length - index;
             return Padding(
-              padding: EdgeInsets.only(bottom: index == runs.length - 1 ? 0 : 8),
+              padding:
+                  EdgeInsets.only(bottom: index == runs.length - 1 ? 0 : 8),
               child: _RunCard(
                 taskName: taskName,
                 run: runs[index],

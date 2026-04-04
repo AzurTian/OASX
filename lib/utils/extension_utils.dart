@@ -21,21 +21,24 @@ extension WebSocketClientExtension on Future<WebSocketClient> {
   }
 
   Future<T?> sendAndWaitOnce<T>(
-    String data, {T Function(dynamic msg)? onResult,
+    String data, {
+    T Function(dynamic msg)? onResult,
     Duration timeout = const Duration(seconds: 5),
   }) async {
     final client = await this;
-    return await client.sendAndWaitOnce(data, onResult: onResult, timeout: timeout);
+    return await client.sendAndWaitOnce(data,
+        onResult: onResult, timeout: timeout);
   }
 
   Future<T?> sendAndWaitUntil<T>(
-      String data, {
-        required Future<bool> Function(dynamic msg) check,
-        T Function(dynamic msg)? onResult,
-        Duration timeout = const Duration(seconds: 5),
-      }) async {
+    String data, {
+    required Future<bool> Function(dynamic msg) check,
+    T Function(dynamic msg)? onResult,
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     final client = await this;
-    return await client.sendAndWaitUntil(data, check: check, onResult: onResult, timeout: timeout);
+    return await client.sendAndWaitUntil(data,
+        check: check, onResult: onResult, timeout: timeout);
   }
 }
 
@@ -53,4 +56,3 @@ extension WsStatusX on WsStatus {
     }
   }
 }
-

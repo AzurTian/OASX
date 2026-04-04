@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_activation_config = {
@@ -12,5 +12,3 @@ final Map<String, String> _cn_activation_config = {
   'shikigami_class': '寄养式神类型',
   'shikigami_class_help': '选择的式神类别（寄养默认选择N卡，且不建议选别的）',
 };
-
-

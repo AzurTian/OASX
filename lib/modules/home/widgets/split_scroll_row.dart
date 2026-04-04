@@ -113,7 +113,8 @@ class _SplitScrollRowState extends State<SplitScrollRow> {
               right: 0,
               bottom: backgroundBottomInset,
               child: DecoratedBox(
-                decoration: BoxDecoration(color: widget.trailingBackgroundColor),
+                decoration:
+                    BoxDecoration(color: widget.trailingBackgroundColor),
               ),
             ),
           Padding(

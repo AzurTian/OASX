@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_nb_net/flutter_net.dart';
 import 'package:get/get.dart';
@@ -104,4 +104,3 @@ Future<void> checkUpdate({
   }
   if (showTip) Get.snackbar(I18n.tip.tr, I18n.noNewVersion.tr);
 }
-

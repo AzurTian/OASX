@@ -71,7 +71,8 @@ void killServer() {
                 : () async {
                     isKilling.value = true;
                     var closedByTimeout = false;
-                    final autoCloseTimer = Timer(const Duration(seconds: 5), () {
+                    final autoCloseTimer =
+                        Timer(const Duration(seconds: 5), () {
                       closedByTimeout = true;
                       if (Get.isDialogOpen ?? false) {
                         Get.back();

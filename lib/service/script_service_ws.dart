@@ -1,4 +1,4 @@
-﻿part of 'script_service.dart';
+part of 'script_service.dart';
 
 extension ScriptServiceWsX on ScriptService {
   Future<void> connectScript(String name) async {
@@ -60,10 +60,12 @@ extension ScriptServiceWsX on ScriptService {
     final runningTask = run.isNotEmpty
         ? TaskItemModel(name, run['name'], run['next_run'])
         : TaskItemModel.empty();
-    final pendingList =
-        pending.map((e) => TaskItemModel(name, e['name'], e['next_run'])).toList();
-    final waitingList =
-        waiting.map((e) => TaskItemModel(name, e['name'], e['next_run'])).toList();
+    final pendingList = pending
+        .map((e) => TaskItemModel(name, e['name'], e['next_run']))
+        .toList();
+    final waitingList = waiting
+        .map((e) => TaskItemModel(name, e['name'], e['next_run']))
+        .toList();
     scriptModelMap[name]!.update(
       runningTask: runningTask,
       pendingTaskList: pendingList,

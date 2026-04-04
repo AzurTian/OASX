@@ -1,4 +1,4 @@
-﻿part of 'websocket_service.dart';
+part of 'websocket_service.dart';
 
 typedef MessageListener = void Function(dynamic message);
 
@@ -173,7 +173,8 @@ class WebSocketClient {
     }
     _reconnectCount++;
     if (_reconnectCount > maxReconnect) {
-      printError(info: "ws[$name] reconnect failed more than $maxReconnect times");
+      printError(
+          info: "ws[$name] reconnect failed more than $maxReconnect times");
       if (status.value != WsStatus.closed) {
         printError(info: 'ws[$name] try close and reconnect');
         await _close(

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_meta_demon_config = {
@@ -11,5 +11,3 @@ final Map<String, String> _cn_meta_demon_config = {
   'interval_help': '',
   'demon_soul_config': '御魂配置',
 };
-
-

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_rich_man_config = {
@@ -58,5 +58,3 @@ final Map<String, String> _cn_rich_man_config = {
   'skin_ticket': '皮肤券',
   'skin_ticket_help': '可选[0~5]',
 };
-
-

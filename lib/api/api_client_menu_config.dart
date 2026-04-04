@@ -1,17 +1,19 @@
-﻿part of 'api_client.dart';
+part of 'api_client.dart';
 
 extension ApiClientMenuConfigX on ApiClient {
   Future<Map<String, List<String>>> getScriptMenu() async {
     final res = await request(() => get('/script_menu'));
     return ((res.data ?? {}) as Map).map(
-      (k, v) => MapEntry(k.toString(), (v as List).map((e) => e.toString()).toList()),
+      (k, v) =>
+          MapEntry(k.toString(), (v as List).map((e) => e.toString()).toList()),
     );
   }
 
   Future<Map<String, List<String>>> getHomeMenu() async {
     final res = await request(() => get('/home/home_menu'));
     return ((res.data ?? {}) as Map).map(
-      (k, v) => MapEntry(k.toString(), (v as List).map((e) => e.toString()).toList()),
+      (k, v) =>
+          MapEntry(k.toString(), (v as List).map((e) => e.toString()).toList()),
     );
   }
 

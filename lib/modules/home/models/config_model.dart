@@ -1,13 +1,14 @@
-﻿import 'package:get/get.dart';
+import 'package:get/get.dart';
 import 'package:oasx/modules/home/models/taskitem_model.dart';
 
 enum ScriptState {
   inactive,
   running,
   warning,
-  updating,;
+  updating,
+  ;
 
-  static ScriptState getState(dynamic value){
+  static ScriptState getState(dynamic value) {
     return switch (value) {
       0 => inactive,
       1 => running,
@@ -48,4 +49,3 @@ class ScriptModel {
         'waitingTaskList': waitingTaskList.toJson()
       };
 }
-

@@ -78,10 +78,8 @@ class ScriptService extends GetxService {
   }
 
   void syncScriptOrder(Iterable<String> scripts) {
-    final normalized = scripts
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
+    final normalized =
+        scripts.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
     scriptOrderList.value = normalized;
     for (final name in normalized) {
       if (!scriptModelMap.containsKey(name)) {
@@ -89,7 +87,8 @@ class ScriptService extends GetxService {
       }
     }
     final validSet = normalized.toSet();
-    final stale = scriptModelMap.keys.where((e) => !validSet.contains(e)).toList();
+    final stale =
+        scriptModelMap.keys.where((e) => !validSet.contains(e)).toList();
     for (final name in stale) {
       deleteScriptModel(name);
     }
@@ -107,7 +106,8 @@ class ScriptService extends GetxService {
   Future<bool> tryCloseScriptWithReason(String scriptName) async {
     try {
       final scriptModel = findScriptModel(scriptName);
-      if (scriptModel != null && scriptModel.state.value == ScriptState.running) {
+      if (scriptModel != null &&
+          scriptModel.state.value == ScriptState.running) {
         Get.snackbar(
           I18n.tip.tr,
           I18n.configUpdateTip.tr,
@@ -182,5 +182,3 @@ class ScriptService extends GetxService {
     return true;
   }
 }
-
-

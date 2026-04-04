@@ -5,9 +5,9 @@ import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/config_actions.dart';
 import 'package:oasx/modules/home/models/home_workbench_layout.dart';
 import 'package:oasx/modules/home/widgets/active_config_panel.dart';
-import 'package:oasx/modules/home/widgets/log_center_panel.dart';
 import 'package:oasx/modules/home/widgets/config_collection_panel.dart';
 import 'package:oasx/modules/home/widgets/home_workbench_body.dart';
+import 'package:oasx/modules/home/widgets/workbench_sidebar_panel.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
@@ -43,7 +43,8 @@ class ConfigWorkbench extends StatelessWidget {
         onActivateScript: (scriptName) =>
             _activateScript(context, scriptName, layoutMode),
         onTogglePower: (scriptName, enable) =>
-            controller.applySelectionPowerToggle(sourceScript: scriptName, enable: enable),
+            controller.applySelectionPowerToggle(
+                sourceScript: scriptName, enable: enable),
         onRenameScript: (scriptName) => _renameScript(context, scriptName),
         onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
       ),
@@ -54,7 +55,8 @@ class ConfigWorkbench extends StatelessWidget {
         onOpenTask: (taskName, source) =>
             _openTaskFromSource(context, taskName, source),
         onTogglePower: (scriptName, enable) =>
-            controller.applySelectionPowerToggle(sourceScript: scriptName, enable: enable),
+            controller.applySelectionPowerToggle(
+                sourceScript: scriptName, enable: enable),
         onRenameScript: (scriptName) => _renameScript(context, scriptName),
         onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
         onSetNextRun: _setTaskNextRun,
@@ -64,8 +66,11 @@ class ConfigWorkbench extends StatelessWidget {
             ? () => _showScriptListPage(context)
             : null,
       ),
-      logs: Obx(() {
-        return LogCenterPanel(scriptName: controller.activeScriptName.value);
+      sidebar: Obx(() {
+        return WorkbenchSidebarPanel(
+          controller: controller,
+          scriptName: controller.activeScriptName.value,
+        );
       }),
     );
   }
@@ -204,4 +209,3 @@ class ConfigWorkbench extends StatelessWidget {
     return true;
   }
 }
-

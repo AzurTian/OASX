@@ -148,4 +148,3 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
     );
   }
 }
-

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 library i18n;
 
 import 'package:get/get.dart';
@@ -81,12 +81,12 @@ class Messages extends Translations {
   /// Extract the keys from the Chinese map, remove underscores, and capitalize the first letter of each word to use as the English translation
   Map<String, String> convertCnToUsMap() {
     return all_cn_translate.entries
-      .where((e) => !_us_base_map.containsKey(e.key))
-      .map((e) => MapEntry(
-            e.key,
-            e.key.replaceAll('_', ' ').upperFirstWord(),
-          ))
-      .toMap();
+        .where((e) => !_us_base_map.containsKey(e.key))
+        .map((e) => MapEntry(
+              e.key,
+              e.key.replaceAll('_', ' ').upperFirstWord(),
+            ))
+        .toMap();
   }
 
   late final Map<String, String> all_cn_translate = {

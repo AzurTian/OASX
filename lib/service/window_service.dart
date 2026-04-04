@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -199,4 +199,3 @@ class WindowService extends GetxService with WindowListener {
     await Get.find<SystemTrayService>().hideTray();
   }
 }
-

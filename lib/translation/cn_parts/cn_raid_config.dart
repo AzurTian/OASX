@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_raid_config = {
@@ -11,5 +11,3 @@ final Map<String, String> _cn_raid_config = {
   'random_delay': '随机延迟',
   'random_delay_help': '正式进攻会设定 2s - 10s 的随机延迟，避免攻击间隔极其相近被检测为脚本。',
 };
-
-

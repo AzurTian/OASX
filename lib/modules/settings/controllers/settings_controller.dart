@@ -121,8 +121,7 @@ class SettingsController extends GetxController {
         unawaited(_resetDashboardAfterKillServer());
       }
     } else if (showTip) {
-      Get.snackbar(
-          I18n.killServerFailure.tr, I18n.killServerFailureMsg.tr);
+      Get.snackbar(I18n.killServerFailure.tr, I18n.killServerFailureMsg.tr);
     }
     return success;
   }
@@ -140,4 +139,3 @@ class SettingsController extends GetxController {
     }
   }
 }
-

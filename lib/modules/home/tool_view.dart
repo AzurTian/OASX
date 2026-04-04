@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:styled_widget/styled_widget.dart';
 
@@ -21,7 +21,8 @@ class NotifyTestState extends State<NotifyTest> {
   Widget build(BuildContext context) {
     return <Widget>[
       Text(I18n.notifyTest.tr,
-          textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium),
       _config(),
       _title(),
       _content(),
@@ -94,4 +95,3 @@ class NotifyTestState extends State<NotifyTest> {
     ).constrained(width: 300);
   }
 }
-

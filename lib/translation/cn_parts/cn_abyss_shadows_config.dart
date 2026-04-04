@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_abyss_shadows_config = {
@@ -13,5 +13,3 @@ final Map<String, String> _cn_abyss_shadows_config = {
   'general_combat_time': '副将战斗时间',
   'elite_combat_time': '精英战斗时间',
 };
-
-

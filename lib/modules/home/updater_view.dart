@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:styled_widget/styled_widget.dart';
 
@@ -137,11 +137,9 @@ class UpdaterView extends StatelessWidget {
             .paddingAll(10),
         Text(I18n.author.tr, style: Theme.of(context).textTheme.titleMedium)
             .paddingAll(10),
-        Text(I18n.submitTime.tr,
-                style: Theme.of(context).textTheme.titleMedium)
+        Text(I18n.submitTime.tr, style: Theme.of(context).textTheme.titleMedium)
             .paddingAll(10),
-        Text(I18n.submitInfo.tr,
-                style: Theme.of(context).textTheme.titleMedium)
+        Text(I18n.submitInfo.tr, style: Theme.of(context).textTheme.titleMedium)
             .paddingAll(10),
         Text('Repo', style: Theme.of(context).textTheme.titleMedium)
             .paddingAll(10),
@@ -152,11 +150,9 @@ class UpdaterView extends StatelessWidget {
             .paddingAll(10),
         Text(I18n.author.tr, style: Theme.of(context).textTheme.titleMedium)
             .paddingAll(10),
-        Text(I18n.submitTime.tr,
-                style: Theme.of(context).textTheme.titleMedium)
+        Text(I18n.submitTime.tr, style: Theme.of(context).textTheme.titleMedium)
             .paddingAll(10),
-        Text(I18n.submitInfo.tr,
-                style: Theme.of(context).textTheme.titleMedium)
+        Text(I18n.submitInfo.tr, style: Theme.of(context).textTheme.titleMedium)
             .paddingAll(10),
       ]);
 
@@ -167,4 +163,3 @@ class UpdaterView extends StatelessWidget {
     return result;
   }
 }
-

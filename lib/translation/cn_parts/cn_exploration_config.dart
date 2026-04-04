@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_exploration_config = {
@@ -28,5 +28,3 @@ final Map<String, String> _cn_exploration_config = {
   'up_coin': '金币',
   'up_daruma': '达摩',
 };
-
-

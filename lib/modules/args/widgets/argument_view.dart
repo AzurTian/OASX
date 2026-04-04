@@ -101,7 +101,8 @@ class _ArgumentViewState extends State<ArgumentView> {
   }
 
   Widget _buildFormSection() {
-    final errorText = _argsController.fieldError(widget.getGroupName(), model.title);
+    final errorText =
+        _argsController.fieldError(widget.getGroupName(), model.title);
     final isLocked = _isProtectedImmediateScheduleField;
     final child = switch (model.type) {
       'boolean' => Checkbox(
@@ -251,16 +252,19 @@ class _ArgumentViewState extends State<ArgumentView> {
 
   void _scheduleStringChange(String value) {
     timer?.cancel();
-    timer = Timer(const Duration(milliseconds: 150), () => onStringChanged(value));
+    timer =
+        Timer(const Duration(milliseconds: 150), () => onStringChanged(value));
   }
 
   void _scheduleNumberChange(String value) {
     timer?.cancel();
-    timer = Timer(const Duration(milliseconds: 150), () => onNumberChanged(value));
+    timer =
+        Timer(const Duration(milliseconds: 150), () => onNumberChanged(value));
   }
 
   void _scheduleIntegerChange(String value) {
     timer?.cancel();
-    timer = Timer(const Duration(milliseconds: 150), () => onIntegerChanged(value));
+    timer =
+        Timer(const Duration(milliseconds: 150), () => onIntegerChanged(value));
   }
 }

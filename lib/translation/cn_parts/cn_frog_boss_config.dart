@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_frog_boss_config = {
@@ -9,5 +9,3 @@ final Map<String, String> _cn_frog_boss_config = {
   'strategy_frog': '下注策略',
   'strategy_frog_help': '',
 };
-
-

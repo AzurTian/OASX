@@ -15,8 +15,7 @@ class ArgsController extends GetxController {
   static final RegExp _dateTimePattern =
       RegExp(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$');
   static final RegExp _timePattern = RegExp(r'^\d{2}:\d{2}:\d{2}$');
-  static final RegExp _timeDeltaPattern =
-      RegExp(r'^\d{2,} \d{2}:\d{2}:\d{2}$');
+  static final RegExp _timeDeltaPattern = RegExp(r'^\d{2,} \d{2}:\d{2}:\d{2}$');
 
   final Map<String, dynamic> _originalValues = {};
   String _loadedConfig = '';
@@ -140,7 +139,9 @@ class ArgsController extends GetxController {
     final model = findArgument(group, argument);
     final hasOriginal = _originalValues.containsKey(key);
     var shouldRefreshModel = false;
-    if (model != null && hasOriginal && !_isEqualValue(model.value, _originalValues[key])) {
+    if (model != null &&
+        hasOriginal &&
+        !_isEqualValue(model.value, _originalValues[key])) {
       model.value = _originalValues[key];
       shouldRefreshModel = true;
     }
@@ -265,11 +266,9 @@ class ArgsController extends GetxController {
     return switch (model.type) {
       'integer' => _validateInteger(model, current),
       'number' => _validateNumber(model, current),
-      'date_time' => _dateTimePattern.hasMatch(current)
-          ? null
-          : I18n.argsInvalidDateTime.tr,
-      'time' =>
-        _timePattern.hasMatch(current) ? null : I18n.argsInvalidTime.tr,
+      'date_time' =>
+        _dateTimePattern.hasMatch(current) ? null : I18n.argsInvalidDateTime.tr,
+      'time' => _timePattern.hasMatch(current) ? null : I18n.argsInvalidTime.tr,
       'time_delta' => _timeDeltaPattern.hasMatch(current)
           ? null
           : I18n.argsInvalidTimeDelta.tr,

@@ -114,5 +114,3 @@ class SystemTrayService extends GetxService {
     return '${scriptModel.name} - ${scriptModel.runningTask.value.taskName.value.tr}';
   }
 }
-
-
