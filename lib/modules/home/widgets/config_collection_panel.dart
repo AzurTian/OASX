@@ -182,7 +182,6 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
           child: ConfigCollectionTile(
             controller: widget.controller,
             script: script,
-            state: widget.controller.scriptCollectionStateFor(script),
             onTap: () => widget.onActivateScript(script.name),
             onTogglePower: () => widget.onTogglePower(
               script.name,

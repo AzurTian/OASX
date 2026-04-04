@@ -11,7 +11,6 @@ class ConfigCollectionTile extends StatelessWidget {
     super.key,
     required this.controller,
     required this.script,
-    required this.state,
     required this.onTap,
     required this.onTogglePower,
     required this.onRename,
@@ -22,7 +21,6 @@ class ConfigCollectionTile extends StatelessWidget {
   static const _compactLayoutThreshold = 200.0;
   final HomeDashboardController controller;
   final ScriptModel script;
-  final HomeScriptStateFilter state;
   final VoidCallback onTap;
   final VoidCallback onTogglePower;
   final VoidCallback onRename;
@@ -46,7 +44,10 @@ class ConfigCollectionTile extends StatelessWidget {
           final rowColor = isActive
               ? theme.colorScheme.primaryContainer.withValues(alpha: 0.24)
               : theme.cardColor;
-          final accentColor = _accentColor(context, state);
+          final accentColor = _accentColor(
+            context,
+            controller.scriptCollectionStateFor(script),
+          );
           return Material(
             color: rowColor,
             child: InkWell(
@@ -143,7 +144,10 @@ class _ScriptMeta extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _RegularAccentBar(color: accentColor),
+            _RegularAccentBar(
+              key: ValueKey<String>('config-accent-bar-${script.name}'),
+              color: accentColor,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -176,7 +180,10 @@ class _ScriptMeta extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _RegularAccentBar(color: accentColor),
+          _RegularAccentBar(
+            key: ValueKey<String>('config-accent-bar-${script.name}'),
+            color: accentColor,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -226,6 +233,7 @@ class _DragCopyLoadingMask extends StatelessWidget {
 
 class _RegularAccentBar extends StatelessWidget {
   const _RegularAccentBar({
+    super.key,
     required this.color,
   });
 
