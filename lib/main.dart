@@ -7,6 +7,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:oasx/config/theme.dart' show darkTheme, lightTheme;
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/service/autostart_service.dart';
+import 'package:oasx/service/app_update_service.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/service/system_tray_service.dart';
@@ -79,6 +80,7 @@ Future<void> initService() async {
     Get.putAsync(() async => LocaleService()),
     Get.putAsync(() async => ThemeService()),
     Get.putAsync(() async => AutoStartService(), permanent: true),
+    Get.putAsync(() async => AppUpdateService(), permanent: true),
     windowService.ready,
     Get.putAsync(() async => ScriptService(), permanent: true),
   ]);

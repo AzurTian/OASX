@@ -354,6 +354,16 @@ class I18n {
       password = 'password',
       executeUpdate = 'execute_update';
   static const String goOasxRelease = 'Click to download',
+      openReleasePage = 'open_release_page',
+      downloadAndUpdate = 'download_and_update',
+      downloadAndInstall = 'download_and_install',
+      updateReleasePageOnly = 'update_release_page_only',
+      updateDownloading = 'update_downloading',
+      updatePreparing = 'update_preparing',
+      updateDownloadFailed = 'update_download_failed',
+      updateInvalidPackage = 'update_invalid_package',
+      updateInstallStarted = 'update_install_started',
+      updateAllowUnknownApps = 'update_allow_unknown_apps',
       tip = 'Tip',
       copySuccess = 'Copy success';
 }

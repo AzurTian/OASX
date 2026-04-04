@@ -44,6 +44,19 @@ final Map<String, String> _us_ui = {
       'Minimized to the system tray when closing a window',
   I18n.launchAtStartupHelp: 'Launch OASX when you sign in',
   I18n.launchAtStartupUpdateFailed: 'Failed to update launch at startup',
+  I18n.openReleasePage: 'Open release page',
+  I18n.downloadAndUpdate: 'Download and update',
+  I18n.downloadAndInstall: 'Download and install',
+  I18n.updateReleasePageOnly:
+      'This platform can only continue on the release page',
+  I18n.updateDownloading: 'Downloading update package',
+  I18n.updatePreparing: 'Preparing update install',
+  I18n.updateDownloadFailed: 'Failed to download the update package',
+  I18n.updateInvalidPackage:
+      'The downloaded package failed checksum validation',
+  I18n.updateInstallStarted: 'The platform installer has been opened',
+  I18n.updateAllowUnknownApps:
+      'Allow installs from this source first, then try again',
   I18n.scriptList: 'Configs',
   I18n.loginAddress: 'Login address',
   I18n.username: 'Username',

@@ -10,7 +10,7 @@ import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/modules/home/models/script_statistics_models.dart';
 import 'package:oasx/translation/i18n.dart';
 import 'package:oasx/translation/i18n_content.dart';
-import 'package:oasx/utils/check_version.dart';
+import 'package:oasx/api/github_release_model.dart';
 
 import './home_model.dart';
 import './update_info_model.dart';
@@ -42,6 +42,16 @@ class ApiResult<T> {
       error: json['error'],
       code: json['code'],
     );
+  }
+
+  factory ApiResult.fromResponse(dynamic value) {
+    if (value is Map<String, dynamic> &&
+        (value.containsKey('data') ||
+            value.containsKey('error') ||
+            value.containsKey('code'))) {
+      return ApiResult.fromJson(value);
+    }
+    return ApiResult.success(value as T?);
   }
 
   Map<String, dynamic> toJson() {
@@ -101,7 +111,7 @@ class ApiClient {
     try {
       final res = await apiFn();
       return res.when(
-        success: (data) => ApiResult.fromJson(data),
+        success: (data) => ApiResult.fromResponse(data),
         failure: (msg, code) {
           onError?.call(msg, code);
           return ApiResult.failure(msg, code);
@@ -143,14 +153,14 @@ class ApiClient {
     return false;
   }
 
-  Future<GithubVersionModel> getGithubVersion() async {
+  Future<GithubReleaseModel> getGithubRelease() async {
     final res = await request(
       () => get(
         updateUrlGithub,
-        decodeType: GithubVersionModel(),
+        decodeType: GithubReleaseModel(),
       ),
     );
-    return res.isSuccess ? res.data : GithubVersionModel();
+    return res.isSuccess ? res.data : GithubReleaseModel();
   }
 
   Future<ReadmeGithubModel> getGithubReadme() async {
