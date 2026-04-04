@@ -41,6 +41,7 @@ class WindowsUpdateInstaller implements AppUpdateInstaller {
     final installDirectory = File(executablePath).parent.path;
     final executableName = File(executablePath).uri.pathSegments.last;
     final scriptFile = File('${package.filePath}.ps1');
+    final powershellPath = _resolvePowerShellPath();
     final scriptContent = _buildScript(
       currentProcessId: currentProcessId,
       installDirectory: installDirectory,
@@ -49,12 +50,8 @@ class WindowsUpdateInstaller implements AppUpdateInstaller {
     );
     await scriptFile.writeAsString(scriptContent, encoding: utf8);
     await Process.start(
-      'cmd',
+      powershellPath,
       [
-        '/c',
-        'start',
-        '"OASX Updater"',
-        'powershell',
         '-NoLogo',
         '-NoProfile',
         '-ExecutionPolicy',
@@ -172,5 +169,14 @@ exit 0
   String _psLiteral(String value) {
     final escaped = value.replaceAll("'", "''");
     return "'$escaped'";
+  }
+
+  /// Resolves the full PowerShell executable path for Windows.
+  String _resolvePowerShellPath() {
+    final systemRoot = Platform.environment['SystemRoot'];
+    if (systemRoot == null || systemRoot.isEmpty) {
+      return 'powershell.exe';
+    }
+    return '$systemRoot\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
   }
 }
