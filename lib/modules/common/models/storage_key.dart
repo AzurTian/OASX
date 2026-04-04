@@ -3,6 +3,7 @@ enum StorageKey {
   language,
   username,
   password,
+  lastUpdateCheckAt,
   address,
   windowState,
   enableWindowState,

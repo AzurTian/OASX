@@ -153,7 +153,6 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     if (activeScriptName.value == normalized) {
       return;
     }
-    clearActiveTask();
     activeScriptName.value = normalized;
   }
 

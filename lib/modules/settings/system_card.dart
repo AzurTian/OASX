@@ -162,7 +162,7 @@ class CheckUpdateButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () async => await checkUpdate(
         showTip: true,
-        cachePolicy: UpdateCheckPolicy.manualNoCache,
+        forceCheck: true,
       ),
       child: Text(I18n.executeUpdate.tr),
     );

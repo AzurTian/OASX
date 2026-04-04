@@ -94,20 +94,6 @@ class ApiClient {
     NetOptions.instance.dio.options.baseUrl = address;
   }
 
-  Options _buildUpdateCheckOptions(UpdateCheckPolicy cachePolicy) {
-    final dioCacheOptions = cachePolicy == UpdateCheckPolicy.manualNoCache
-        ? _cacheOptions.copyWith(
-            policy: CachePolicy.refresh,
-            hitCacheOnErrorExcept: const Nullable<List<int>>(null),
-          )
-        : _cacheOptions;
-    return buildCacheOptions(
-      const Duration(days: 7),
-      options: dioCacheOptions.toOptions(),
-      forceRefresh: cachePolicy == UpdateCheckPolicy.manualNoCache,
-    );
-  }
-
   Future<ApiResult<T>> request<T>(
     Future<Result<dynamic>> Function() apiFn, {
     void Function(String msg, int code)? onError,
@@ -157,13 +143,10 @@ class ApiClient {
     return false;
   }
 
-  Future<GithubVersionModel> getGithubVersion({
-    UpdateCheckPolicy cachePolicy = UpdateCheckPolicy.autoCached,
-  }) async {
+  Future<GithubVersionModel> getGithubVersion() async {
     final res = await request(
       () => get(
         updateUrlGithub,
-        options: _buildUpdateCheckOptions(cachePolicy),
         decodeType: GithubVersionModel(),
       ),
     );
