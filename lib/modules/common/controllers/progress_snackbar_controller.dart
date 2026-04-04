@@ -35,6 +35,12 @@ class ProgressSnackbarController extends GetxController
     }
   }
 
+  // 主动关闭当前进度 snackbar，供完成态切换时调用。
+  void closeSnackbar() {
+    _snackbarController?.close();
+    _snackbarController = null;
+  }
+
   Future<void> show() async {
     Get.closeAllSnackbars();
     _snackbarController = null;

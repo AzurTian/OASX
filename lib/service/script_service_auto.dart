@@ -1,6 +1,7 @@
 ﻿part of 'script_service.dart';
 
 extension ScriptServiceAutoX on ScriptService {
+  // 自动启动脚本时，执行中使用常驻进度提示，完成后切换为普通成功提示。
   Future<void> autoRunScript() async {
     if (autoScriptList.isEmpty) return;
     final scriptList = List.of(autoScriptList);
@@ -38,9 +39,20 @@ extension ScriptServiceAutoX on ScriptService {
       }
       if (success) successScriptList.add(scriptName);
     }
-    psController.updateMessage('$successScriptList ${I18n.startSuccess.tr}');
+    psController.closeSnackbar();
+    _showAutoRunSuccessSnackbar(successScriptList);
   }
 
+  // 只有存在成功结果时，才展示默认时长的成功反馈。
+  void _showAutoRunSuccessSnackbar(List<String> successScriptList) {
+    if (successScriptList.isEmpty) return;
+    Get.snackbar(
+      I18n.autoRunScript.tr,
+      '$successScriptList ${I18n.startSuccess.tr}',
+    );
+  }
+
+  // 同时满足脚本运行中和最小展示时长，才认定自动启动成功。
   bool _checkStartSuccess(
     String scriptName,
     DateTime taskStartTime,
