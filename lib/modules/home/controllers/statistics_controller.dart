@@ -92,6 +92,8 @@ class HomeStatisticsController extends GetxController {
     _dashboardWorker = everAll([
       dashboardController.activeScriptName,
       dashboardController.activeWorkbenchTab,
+      dashboardController.activeWorkbenchSidebarTab,
+      dashboardController.workbenchLayoutMode,
     ], (_) {
       unawaited(syncStatisticsBinding());
     });
@@ -189,9 +191,8 @@ class HomeStatisticsController extends GetxController {
   /// Rebinds the statistics transport to the currently visible script context.
   Future<void> syncStatisticsBinding() async {
     final scriptName = dashboardController.activeScriptName.value.trim();
-    final isStatsTabVisible =
-        dashboardController.activeWorkbenchTab.value == HomeWorkbenchTab.stats;
-    if (!isStatsTabVisible || scriptName.isEmpty) {
+    if (!dashboardController.isStatsVisibleInCurrentLayout ||
+        scriptName.isEmpty) {
       await _resetBindingState(clearSelection: false);
       return;
     }
@@ -219,9 +220,10 @@ class HomeStatisticsController extends GetxController {
 
   /// Updates the chart sort field.
   void selectHistorySortField(ScriptStatisticsChartSortField field) {
-    final resolvedField = field == ScriptStatisticsChartSortField.time && !canSortByTime
-        ? ScriptStatisticsChartSortField.data
-        : field;
+    final resolvedField =
+        field == ScriptStatisticsChartSortField.time && !canSortByTime
+            ? ScriptStatisticsChartSortField.data
+            : field;
     if (historySortField.value == resolvedField) {
       return;
     }
@@ -289,7 +291,8 @@ class HomeStatisticsController extends GetxController {
 
   /// Loads the currently selected date using either SSE or one-shot HTTP.
   Future<void> _loadSelectedDate(String scriptName, String dateKey) async {
-    if (_boundScriptName != scriptName || !availableDateKeys.contains(dateKey)) {
+    if (_boundScriptName != scriptName ||
+        !availableDateKeys.contains(dateKey)) {
       return;
     }
     final statsRevision = ++_statsRevision;
@@ -462,7 +465,8 @@ class HomeStatisticsController extends GetxController {
             return;
           }
           final currentStatistics = statistics.value;
-          if (currentStatistics == null || currentStatistics.dateKey != dateKey) {
+          if (currentStatistics == null ||
+              currentStatistics.dateKey != dateKey) {
             return;
           }
           statistics.value = currentStatistics.applyUpdate(update);
@@ -489,12 +493,14 @@ class HomeStatisticsController extends GetxController {
       selectedTaskName.value = '';
       return;
     }
-    if (!canSortByTime && historySortField.value == ScriptStatisticsChartSortField.time) {
+    if (!canSortByTime &&
+        historySortField.value == ScriptStatisticsChartSortField.time) {
       historySortField.value = ScriptStatisticsChartSortField.data;
     }
     final preferredTask = selectedTaskName.value.trim();
     final hasPreferredTask = entries.any((entry) => entry.key == preferredTask);
-    selectedTaskName.value = hasPreferredTask ? preferredTask : entries.first.key;
+    selectedTaskName.value =
+        hasPreferredTask ? preferredTask : entries.first.key;
   }
 
   /// Clears cached derived lists used by the chart.
@@ -529,10 +535,8 @@ class HomeStatisticsController extends GetxController {
 
   /// Returns whether one bootstrap run is still active.
   bool _isBindingActive(int revision, String scriptName) {
-    final isStatsTabVisible =
-        dashboardController.activeWorkbenchTab.value == HomeWorkbenchTab.stats;
     return revision == _bindingRevision &&
-        isStatsTabVisible &&
+        dashboardController.isStatsVisibleInCurrentLayout &&
         _boundScriptName == scriptName &&
         dashboardController.activeScriptName.value.trim() == scriptName;
   }
@@ -543,10 +547,8 @@ class HomeStatisticsController extends GetxController {
     String scriptName,
     String dateKey,
   ) {
-    final isStatsTabVisible =
-        dashboardController.activeWorkbenchTab.value == HomeWorkbenchTab.stats;
     return revision == _statsRevision &&
-        isStatsTabVisible &&
+        dashboardController.isStatsVisibleInCurrentLayout &&
         _boundScriptName == scriptName &&
         selectedDateKey.value == dateKey;
   }

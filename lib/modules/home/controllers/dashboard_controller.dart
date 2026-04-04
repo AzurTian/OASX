@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
+import 'package:oasx/modules/common/models/config_drag_payload.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/modules/home/models/home_workbench_layout.dart';
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
@@ -17,9 +18,38 @@ import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/server/index.dart';
 
 part 'dashboard_controller_linking.dart';
+part 'dashboard_controller_drag_copy.dart';
 part 'dashboard_controller_layout.dart';
 part 'dashboard_controller_startup.dart';
 part 'dashboard_controller_workspace.dart';
+
+/// Abstracts dashboard persistence so tests can avoid platform storage.
+abstract class HomeDashboardStorage {
+  /// Reads one persisted value.
+  dynamic read(String key);
+
+  /// Writes one persisted value.
+  void write(String key, dynamic value);
+}
+
+/// Default storage backed by GetStorage.
+class GetStorageHomeDashboardStorage implements HomeDashboardStorage {
+  /// Creates one GetStorage-backed adapter.
+  GetStorageHomeDashboardStorage() : _storage = GetStorage();
+
+  /// Underlying persistent store.
+  final GetStorage _storage;
+
+  @override
+  dynamic read(String key) {
+    return _storage.read(key);
+  }
+
+  @override
+  void write(String key, dynamic value) {
+    _storage.write(key, value);
+  }
+}
 
 /// Defines the visible dashboard health state for a script.
 enum HomeScriptStateFilter {
@@ -44,6 +74,11 @@ enum HomeWorkbenchTab {
   logs,
 }
 
+/// Returns whether the tab belongs to the right desktop sidebar.
+bool isHomeWorkbenchSidebarTab(HomeWorkbenchTab value) {
+  return value == HomeWorkbenchTab.stats || value == HomeWorkbenchTab.logs;
+}
+
 /// Records which workbench tab opened the task parameter editor.
 enum HomeTaskParameterEntrySource {
   overview,
@@ -65,14 +100,35 @@ List<HomeWorkbenchTab> resolveHomeWorkbenchTabs(
     return const [
       HomeWorkbenchTab.status,
       HomeWorkbenchTab.tasks,
-      HomeWorkbenchTab.stats,
     ];
   }
-  return HomeWorkbenchTab.values;
+  return const [
+    HomeWorkbenchTab.status,
+    HomeWorkbenchTab.tasks,
+    HomeWorkbenchTab.logs,
+    HomeWorkbenchTab.stats,
+  ];
+}
+
+/// Returns the visible right-sidebar tabs for the active layout mode.
+List<HomeWorkbenchTab> resolveHomeWorkbenchSidebarTabs(
+  HomeWorkbenchLayoutMode mode,
+) {
+  if (mode != HomeWorkbenchLayoutMode.threePane) {
+    return const [];
+  }
+  return const [
+    HomeWorkbenchTab.logs,
+    HomeWorkbenchTab.stats,
+  ];
 }
 
 class HomeDashboardController extends GetxController {
-  final _storage = GetStorage();
+  HomeDashboardController({
+    HomeDashboardStorage? storage,
+  }) : _storage = storage ?? GetStorageHomeDashboardStorage();
+
+  final HomeDashboardStorage _storage;
   static bool _hasCheckedStartupConnection = false;
   Worker? _workspaceSyncWorker;
   final controlScriptList = <String>[].obs;
@@ -88,11 +144,16 @@ class HomeDashboardController extends GetxController {
   final activeScriptName = ''.obs;
   final selectedScriptList = <String>[].obs;
   final workbenchPage = HomeWorkbenchPage.scripts.obs;
+  final workbenchCollectionWidth = kHomeWorkbenchDefaultCollectionWidth.obs;
   final workbenchSplitRatio = kHomeWorkbenchDefaultSplitRatio.obs;
+  final workbenchLayoutMode = HomeWorkbenchLayoutMode.singlePane.obs;
   final activeWorkbenchTab = HomeWorkbenchTab.status.obs;
   final _lastPrimaryWorkbenchTab = HomeWorkbenchTab.status.obs;
+  final activeWorkbenchSidebarTab = HomeWorkbenchTab.logs.obs;
   final taskCatalogFilter = HomeTaskCatalogFilter.all.obs;
   final activeTaskName = ''.obs;
+  final activeDragPayload = Rxn<ConfigDragPayload>();
+  final pendingDragCopyTargets = <String>[].obs;
   final _taskParameterEntrySource = Rxn<HomeTaskParameterEntrySource>();
   final _taskAvailabilityCache = <String, bool>{};
 
@@ -101,6 +162,7 @@ class HomeDashboardController extends GetxController {
   @override
   void onInit() {
     _loadSelection();
+    _loadWorkbenchCollectionWidth();
     _loadWorkbenchSplitRatio();
     syncWorkspaceState();
     _workspaceSyncWorker = everAll([
@@ -190,4 +252,3 @@ class HomeDashboardController extends GetxController {
 
   int get validControlScriptCount => validControlScripts.length;
 }
-

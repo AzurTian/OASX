@@ -7,9 +7,11 @@ class ConfigCollectionTaskPreview extends StatelessWidget {
   const ConfigCollectionTaskPreview({
     super.key,
     required this.script,
+    this.showWaitingTime = true,
   });
 
   final ScriptModel script;
+  final bool showWaitingTime;
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +21,12 @@ class ConfigCollectionTaskPreview extends StatelessWidget {
         return Text(
           I18n.homeNoTask.tr,
           maxLines: 1,
-          overflow: TextOverflow.visible,
+          overflow: TextOverflow.ellipsis,
           softWrap: false,
           style: Theme.of(context).textTheme.bodyMedium,
         );
       }
       return Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             preview.icon,
@@ -33,12 +34,14 @@ class ConfigCollectionTaskPreview extends StatelessWidget {
             color: preview.color,
           ),
           const SizedBox(width: 4),
-          Text(
-            preview.displayName,
-            maxLines: 1,
-            overflow: TextOverflow.visible,
-            softWrap: false,
-            style: Theme.of(context).textTheme.labelMedium,
+          Expanded(
+            child: Text(
+              preview.displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ),
         ],
       );
@@ -72,7 +75,7 @@ class ConfigCollectionTaskPreview extends StatelessWidget {
       return _TaskPreviewData(
         type: _PreviewTaskType.waiting,
         name: taskName,
-        timeText: task.nextRun.value.trim(),
+        timeText: showWaitingTime ? task.nextRun.value.trim() : '',
       );
     }
     return null;

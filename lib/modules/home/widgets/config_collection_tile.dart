@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
-import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
+import 'package:oasx/modules/home/widgets/config_collection_script_label.dart';
 import 'package:oasx/modules/home/widgets/config_collection_task_preview.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
@@ -18,7 +18,8 @@ class ConfigCollectionTile extends StatelessWidget {
     required this.onDelete,
   });
 
-  static const _actionExtent = 96.0;
+  static const _actionSpacing = 8.0;
+  static const _compactLayoutThreshold = 200.0;
   final HomeDashboardController controller;
   final ScriptModel script;
   final HomeScriptStateFilter state;
@@ -30,57 +31,82 @@ class ConfigCollectionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Obx(() {
-      final isActive = controller.activeScriptName.value == script.name;
-      final showLinkCheckbox = controller.isLinkModeEnabled.value;
-      final isLinked = controller.isScriptLinked(script.name);
-      final rowColor = isActive
-          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.24)
-          : theme.cardColor;
-      return Material(
-        color: rowColor,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-            child: Row(
-              children: [
-                if (showLinkCheckbox) ...[
-                  Checkbox(
-                    value: isLinked,
-                    onChanged: (value) =>
-                        controller.setScriptLinked(script.name, value ?? false),
-                  ),
-                  const SizedBox(width: 4),
-                ],
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 160),
-                  width: 4,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: _accentColor(context, state),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Obx(() {
+          final isActive = controller.activeScriptName.value == script.name;
+          final showLinkCheckbox = controller.isLinkModeEnabled.value;
+          final isLinked = controller.isScriptLinked(script.name);
+          final isDragCopyLoading =
+              controller.isDragCopyPendingFor(script.name);
+          final compactThreshold =
+              ConfigCollectionTile._compactLayoutThreshold +
+                  (showLinkCheckbox ? 64 : 0);
+          final isCompact = constraints.maxWidth < compactThreshold;
+          final rowColor = isActive
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.24)
+              : theme.cardColor;
+          final accentColor = _accentColor(context, state);
+          return Material(
+            color: rowColor,
+            child: InkWell(
+              onTap: isDragCopyLoading ? null : onTap,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: isCompact ? 8 : 10,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: SplitScrollRow(
-                    trailingExtent: _actionExtent,
-                    trailingBackgroundColor: rowColor,
-                    trailing: _ScriptActionBar(
-                      onTogglePower: onTogglePower,
-                      onRename: onRename,
-                      onDelete: onDelete,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (showLinkCheckbox) ...[
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Checkbox(
+                          value: isLinked,
+                          onChanged: (value) => controller.setScriptLinked(
+                            script.name,
+                            value ?? false,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                    ],
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          AbsorbPointer(
+                            absorbing: isDragCopyLoading,
+                            child: _ScriptMeta(
+                              script: script,
+                              compact: isCompact,
+                              accentColor: accentColor,
+                              powerButton: _PowerButton(
+                                onTogglePower: onTogglePower,
+                              ),
+                              popupButton: _ActionMenuButton(
+                                onRename: onRename,
+                                onDelete: onDelete,
+                              ),
+                            ),
+                          ),
+                          if (isDragCopyLoading)
+                            const Positioned.fill(
+                              child: _DragCopyLoadingMask(),
+                            ),
+                        ],
+                      ),
                     ),
-                    leading: _ScriptMeta(script: script),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      );
-    });
+          );
+        });
+      },
+    );
   }
 
   Color _accentColor(BuildContext context, HomeScriptStateFilter value) {
@@ -98,65 +124,183 @@ class ConfigCollectionTile extends StatelessWidget {
 class _ScriptMeta extends StatelessWidget {
   const _ScriptMeta({
     required this.script,
+    required this.compact,
+    required this.accentColor,
+    required this.powerButton,
+    required this.popupButton,
   });
 
   final ScriptModel script;
+  final bool compact;
+  final Color accentColor;
+  final Widget powerButton;
+  final Widget popupButton;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          script.name,
-          maxLines: 1,
-          overflow: TextOverflow.visible,
-          softWrap: false,
-          style: Theme.of(context).textTheme.bodyLarge,
+    if (compact) {
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _RegularAccentBar(color: accentColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 4,
+                    runSpacing: 2,
+                    children: [
+                      powerButton,
+                      popupButton,
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  ConfigCollectionScriptLabel(
+                    script: script,
+                    centered: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 2),
-        ConfigCollectionTaskPreview(script: script),
-      ],
+      );
+    }
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _RegularAccentBar(color: accentColor),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ConfigCollectionScriptLabel(
+                  script: script,
+                  centered: false,
+                ),
+                const SizedBox(height: 6),
+                ConfigCollectionTaskPreview(script: script),
+              ],
+            ),
+          ),
+          const SizedBox(width: ConfigCollectionTile._actionSpacing),
+          powerButton,
+          popupButton,
+        ],
+      ),
     );
   }
 }
 
-class _ScriptActionBar extends StatelessWidget {
-  const _ScriptActionBar({
+class _DragCopyLoadingMask extends StatelessWidget {
+  const _DragCopyLoadingMask();
+
+  @override
+  Widget build(BuildContext context) {
+    return AbsorbPointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.68),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RegularAccentBar extends StatelessWidget {
+  const _RegularAccentBar({
+    required this.color,
+  });
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 6,
+      height: double.infinity,
+      child: Center(
+        child: FractionallySizedBox(
+          heightFactor: 0.8,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PowerButton extends StatelessWidget {
+  const _PowerButton({
     required this.onTogglePower,
+  });
+
+  final VoidCallback onTogglePower;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onTogglePower,
+      visualDensity: VisualDensity.compact,
+      constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+      padding: EdgeInsets.zero,
+      iconSize: 23,
+      icon: const Icon(Icons.power_settings_new_rounded),
+    );
+  }
+}
+
+class _ActionMenuButton extends StatelessWidget {
+  const _ActionMenuButton({
     required this.onRename,
     required this.onDelete,
   });
 
-  final VoidCallback onTogglePower;
   final VoidCallback onRename;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          onPressed: onTogglePower,
-          icon: const Icon(Icons.power_settings_new_rounded),
-        ),
-        PopupMenuButton<String>(
-          onSelected: (value) async {
-            if (value == 'rename') {
-              onRename();
-              return;
-            }
-            onDelete();
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(value: 'rename', child: Text(I18n.rename.tr)),
-            PopupMenuItem(value: 'delete', child: Text(I18n.delete.tr)),
-          ],
-        ),
-      ],
+    return SizedBox.square(
+      dimension: 32,
+      child: PopupMenuButton<String>(
+        padding: EdgeInsets.zero,
+        tooltip: '',
+        icon: const Icon(Icons.more_vert_rounded, size: 18),
+        onSelected: (value) async {
+          if (value == 'rename') {
+            onRename();
+            return;
+          }
+          onDelete();
+        },
+        itemBuilder: (context) => [
+          PopupMenuItem(value: 'rename', child: Text(I18n.rename.tr)),
+          PopupMenuItem(value: 'delete', child: Text(I18n.delete.tr)),
+        ],
+      ),
     );
   }
 }
-

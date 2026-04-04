@@ -13,8 +13,8 @@ import 'package:flutter_pickers/time_picker/model/pduration.dart';
 import 'package:flutter_pickers/time_picker/model/suffix.dart';
 import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
-import 'package:oasx/modules/home/models/taskitem_model.dart';
-import 'package:oasx/service/theme_service.dart';
+import 'package:oasx/modules/common/models/config_drag_payload.dart';
+import 'package:oasx/modules/common/widgets/drag_copy_feedback.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:styled_widget/styled_widget.dart';
 
@@ -54,6 +54,10 @@ class Args extends StatelessWidget {
     this.groupDraggable = true,
     this.stagingMode = false,
     this.lockImmediateScheduling = false,
+    this.activeDragPayload,
+    this.groupDragPayloadBuilder,
+    this.onGroupDragStarted,
+    this.onGroupDragEnded,
     this.setArgumentOverride,
     this.onCancel,
   }) : super(key: key);
@@ -63,6 +67,10 @@ class Args extends StatelessWidget {
   final bool groupDraggable;
   final bool stagingMode;
   final bool lockImmediateScheduling;
+  final ConfigDragPayload? activeDragPayload;
+  final ConfigDragPayload Function(String groupName)? groupDragPayloadBuilder;
+  final ValueChanged<ConfigDragPayload>? onGroupDragStarted;
+  final VoidCallback? onGroupDragEnded;
   final SetArgumentCallback? setArgumentOverride;
   final Future<void> Function()? onCancel;
 
@@ -87,26 +95,21 @@ class Args extends StatelessWidget {
                         initiallyExpanded: true,
                         isHasTopBorder: false,
                         isHasBottomBorder: false,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .secondaryContainer
-                            .withValues(alpha: 0.24),
+                        backgroundColor: _groupBackgroundColor(
+                          context,
+                          selectedScript,
+                          selectedTask,
+                          name,
+                        ),
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10)),
                         title: <Widget>[
                           if (groupDraggable)
-                            Draggable<Map<String, dynamic>>(
-                              data: {
-                                'model': TaskItemModel(
-                                  scriptName ?? selectedScript,
-                                  taskName ?? selectedTask,
-                                  '',
-                                  groupName: name,
-                                ),
-                                'source': 'argsViewGroup',
-                              },
-                              feedback: _buildFeedback(context, name),
-                              child: const Icon(Icons.drag_indicator_outlined),
+                            _buildGroupDragHandle(
+                              context,
+                              selectedScript,
+                              selectedTask,
+                              name,
                             ),
                           Text(name.tr),
                         ].toRow(
@@ -158,28 +161,36 @@ class Args extends StatelessWidget {
     return result;
   }
 
-  Widget _buildFeedback(BuildContext context, String title) {
-    final themeService = Get.find<ThemeService>();
-    return Material(
-      color: Colors.transparent,
-      child: Text(title.tr, style: Theme.of(context).textTheme.titleMedium)
-          .decorated(
-            color: themeService.isDarkMode
-                ? Colors.blueGrey.shade700
-                : Colors.blueGrey.shade100,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 6,
-                offset: Offset(2, 2),
-              ),
-            ],
-          )
-          .width(150)
-          .height(30)
-          .paddingAll(8)
-          .opacity(0.8),
+  Color _groupBackgroundColor(
+    BuildContext context,
+    String selectedScript,
+    String selectedTask,
+    String groupName,
+  ) {
+    return Theme.of(context)
+        .colorScheme
+        .secondaryContainer
+        .withValues(alpha: 0.24);
+  }
+
+  Widget _buildGroupDragHandle(
+    BuildContext context,
+    String selectedScript,
+    String selectedTask,
+    String groupName,
+  ) {
+    final payload = groupDragPayloadBuilder?.call(groupName);
+    if (payload == null) {
+      return const Icon(Icons.drag_indicator_outlined);
+    }
+    return Draggable<ConfigDragPayload>(
+      data: payload,
+      feedback: DragCopyFeedback(label: payload.displayLabel),
+      onDragStarted: () => onGroupDragStarted?.call(payload),
+      onDragCompleted: () => onGroupDragEnded?.call(),
+      onDraggableCanceled: (_, __) => onGroupDragEnded?.call(),
+      onDragEnd: (_) => onGroupDragEnded?.call(),
+      child: const Icon(Icons.drag_indicator_outlined),
     );
   }
 }

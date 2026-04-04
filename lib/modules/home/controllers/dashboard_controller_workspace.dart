@@ -1,6 +1,14 @@
 part of 'dashboard_controller.dart';
 
 extension HomeDashboardWorkspaceX on HomeDashboardController {
+  /// Records the latest resolved workbench layout mode.
+  void setWorkbenchLayoutMode(HomeWorkbenchLayoutMode value) {
+    if (workbenchLayoutMode.value == value) {
+      return;
+    }
+    workbenchLayoutMode.value = value;
+  }
+
   bool canQuickScheduleTask(ScriptModel model, String taskName) {
     final normalized = taskName.trim();
     if (normalized.isEmpty) {
@@ -15,12 +23,32 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     return resolveHomeWorkbenchTabs(mode);
   }
 
+  List<HomeWorkbenchTab> workbenchSidebarTabsFor(
+    HomeWorkbenchLayoutMode mode,
+  ) {
+    return resolveHomeWorkbenchSidebarTabs(mode);
+  }
+
   HomeWorkbenchTab displayedWorkbenchTabFor(HomeWorkbenchLayoutMode mode) {
     if (mode == HomeWorkbenchLayoutMode.threePane &&
-        activeWorkbenchTab.value == HomeWorkbenchTab.logs) {
+        isHomeWorkbenchSidebarTab(activeWorkbenchTab.value)) {
       return _lastPrimaryWorkbenchTab.value;
     }
     return activeWorkbenchTab.value;
+  }
+
+  HomeWorkbenchTab displayedWorkbenchSidebarTabFor(
+    HomeWorkbenchLayoutMode mode,
+  ) {
+    return activeWorkbenchSidebarTab.value;
+  }
+
+  bool get isStatsVisibleInCurrentLayout {
+    if (workbenchLayoutMode.value == HomeWorkbenchLayoutMode.threePane) {
+      return displayedWorkbenchSidebarTabFor(workbenchLayoutMode.value) ==
+          HomeWorkbenchTab.stats;
+    }
+    return activeWorkbenchTab.value == HomeWorkbenchTab.stats;
   }
 
   List<ScriptModel> get orderedScripts {
@@ -167,13 +195,25 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
   }
 
   void setActiveWorkbenchTabValue(HomeWorkbenchTab value) {
-    if (value != HomeWorkbenchTab.logs) {
+    if (isHomeWorkbenchSidebarTab(value)) {
+      activeWorkbenchSidebarTab.value = value;
+    } else {
       _lastPrimaryWorkbenchTab.value = value;
     }
     if (value != HomeWorkbenchTab.tasks) {
       clearActiveTask();
     }
     activeWorkbenchTab.value = value;
+  }
+
+  void setActiveWorkbenchSidebarTabValue(HomeWorkbenchTab value) {
+    if (!isHomeWorkbenchSidebarTab(value)) {
+      return;
+    }
+    activeWorkbenchSidebarTab.value = value;
+    if (workbenchLayoutMode.value != HomeWorkbenchLayoutMode.threePane) {
+      setActiveWorkbenchTabValue(value);
+    }
   }
 
   void setTaskCatalogFilterValue(HomeTaskCatalogFilter value) {
@@ -416,4 +456,3 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     activeScriptName.value = candidates.isEmpty ? '' : candidates.first.name;
   }
 }
-

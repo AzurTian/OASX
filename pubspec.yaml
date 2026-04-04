@@ -71,6 +71,7 @@ dependencies:
   flutter_slidable: ^4.0.3 # 元素滑动
   logger: ^2.6.2 # 日志
   fl_chart: ^0.71.0 # 图表
+  intl: ^0.19.0
 
 flutter_launcher_icons:
   android: true

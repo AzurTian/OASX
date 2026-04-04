@@ -49,9 +49,9 @@ class PrimaryNavigationShell extends StatelessWidget {
   }
 
   bool _shouldShowRail(double maxWidth) {
-    const twoPaneShellWidth = kHomeWorkbenchScriptListWidth +
+    const twoPaneShellWidth = kHomeWorkbenchMinCollectionWidth +
         kHomeWorkbenchMinDetailsWidth +
-        kHomeWorkbenchPaneGap +
+        kHomeWorkbenchDividerWidth +
         kPrimaryNavigationRailWidth;
     return maxWidth >= twoPaneShellWidth;
   }

@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/args/index.dart';
+import 'package:oasx/modules/common/models/config_drag_payload.dart';
+import 'package:oasx/modules/common/widgets/drag_copy_feedback.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
 import 'package:oasx/translation/i18n_content.dart';
@@ -10,6 +13,7 @@ import 'package:oasx/translation/i18n_content.dart';
 class TaskStatusPanel extends StatelessWidget {
   const TaskStatusPanel({
     super.key,
+    required this.controller,
     required this.scriptModel,
     required this.canQuickScheduleTask,
     required this.onSetNextRun,
@@ -18,6 +22,7 @@ class TaskStatusPanel extends StatelessWidget {
     required this.onEditTask,
   });
 
+  final HomeDashboardController controller;
   final ScriptModel scriptModel;
   final bool Function(String taskName) canQuickScheduleTask;
   final Future<void> Function(String taskName, String nextRun) onSetNextRun;
@@ -29,6 +34,7 @@ class TaskStatusPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final tasks = _collectTasks();
+      final activeDragPayload = controller.activeDragPayload.value;
       if (tasks.isEmpty) {
         return Center(child: Text(I18n.homeNoTask.tr));
       }
@@ -38,12 +44,16 @@ class TaskStatusPanel extends StatelessWidget {
         itemCount: tasks.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) => _StatusTaskRow(
+          controller: controller,
+          sourceScriptName: scriptModel.name,
           task: tasks[index],
           canQuickSchedule: canQuickScheduleTask(tasks[index].name),
           onSetNextRun: onSetNextRun,
           onQuickRun: onQuickRun,
           onQuickWait: onQuickWait,
           onEditTask: onEditTask,
+          dragEnabled: controller.canUseDesktopDragCopy,
+          activeDragPayload: activeDragPayload,
         ),
       );
     });
@@ -88,29 +98,47 @@ class TaskStatusPanel extends StatelessWidget {
 
 class _StatusTaskRow extends StatelessWidget {
   const _StatusTaskRow({
+    required this.controller,
+    required this.sourceScriptName,
     required this.task,
     required this.canQuickSchedule,
     required this.onSetNextRun,
     required this.onQuickRun,
     required this.onQuickWait,
     required this.onEditTask,
+    required this.dragEnabled,
+    required this.activeDragPayload,
   });
 
+  final HomeDashboardController controller;
+  final String sourceScriptName;
   final _StatusTaskData task;
   final bool canQuickSchedule;
   final Future<void> Function(String taskName, String nextRun) onSetNextRun;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
   final Future<void> Function(String taskName) onEditTask;
+  final bool dragEnabled;
+  final ConfigDragPayload? activeDragPayload;
   static const _actionExtent = 132.0;
   static const _minRowHeight = 40.0;
 
   @override
   Widget build(BuildContext context) {
     final rowBackground = _backgroundColor(context);
+    final isDraggingTask = activeDragPayload?.matchesTask(
+          sourceScriptName,
+          task.name,
+        ) ??
+        false;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: rowBackground,
+        color: isDraggingTask
+            ? Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.42)
+            : rowBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _borderColor(context)),
       ),
@@ -131,8 +159,11 @@ class _StatusTaskRow extends StatelessWidget {
               _TaskTypeIcon(type: task.type),
               const SizedBox(width: 10),
               _TaskMeta(
+                controller: controller,
+                sourceScriptName: sourceScriptName,
                 task: task,
                 onSetNextRun: onSetNextRun,
+                dragEnabled: dragEnabled,
               ),
             ],
           ),
@@ -165,26 +196,47 @@ class _StatusTaskRow extends StatelessWidget {
 
 class _TaskMeta extends StatelessWidget {
   const _TaskMeta({
+    required this.controller,
+    required this.sourceScriptName,
     required this.task,
     required this.onSetNextRun,
+    required this.dragEnabled,
   });
 
+  final HomeDashboardController controller;
+  final String sourceScriptName;
   final _StatusTaskData task;
   final Future<void> Function(String taskName, String nextRun) onSetNextRun;
+  final bool dragEnabled;
 
   @override
   Widget build(BuildContext context) {
+    final payload = controller.buildTaskDragPayload(
+      sourceConfig: sourceScriptName,
+      taskName: task.name,
+    );
+    final title = Text(
+      task.name.tr,
+      maxLines: 1,
+      overflow: TextOverflow.visible,
+      softWrap: false,
+      style: Theme.of(context).textTheme.labelLarge,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          task.name.tr,
-          maxLines: 1,
-          overflow: TextOverflow.visible,
-          softWrap: false,
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
+        dragEnabled
+            ? Draggable<ConfigDragPayload>(
+                data: payload,
+                feedback: DragCopyFeedback(label: payload.displayLabel),
+                onDragStarted: () => controller.startConfigDrag(payload),
+                onDragCompleted: controller.clearConfigDrag,
+                onDraggableCanceled: (_, __) => controller.clearConfigDrag(),
+                onDragEnd: (_) => controller.clearConfigDrag(),
+                child: title,
+              )
+            : title,
         if (task.timeText.isNotEmpty) ...[
           const SizedBox(height: 2),
           DateTimePicker(

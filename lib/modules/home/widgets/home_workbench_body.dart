@@ -10,7 +10,7 @@ class HomeWorkbenchBody extends StatefulWidget {
     required this.controller,
     required this.collectionBuilder,
     required this.detailsBuilder,
-    required this.logs,
+    required this.sidebar,
   });
 
   /// Home dashboard controller providing persisted split state.
@@ -22,8 +22,8 @@ class HomeWorkbenchBody extends StatefulWidget {
   /// Builds the active workbench pane for the resolved layout.
   final Widget Function(HomeWorkbenchLayoutMode layoutMode) detailsBuilder;
 
-  /// Log center widget reused in three-pane mode.
-  final Widget logs;
+  /// Right sidebar widget reused in three-pane mode.
+  final Widget sidebar;
 
   @override
   State<HomeWorkbenchBody> createState() => _HomeWorkbenchBodyState();
@@ -33,8 +33,26 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
   /// Tracks whether drag collapse has temporarily merged the log pane.
   bool _forceTwoPane = false;
 
-  /// Remembers the last measured width to detect later resize expansions.
-  double? _lastMeasuredWidth;
+  /// Remembers the width at which the right-side collapse was committed.
+  double? _forcedTwoPaneWidth;
+
+  /// Remembers the collection width at which the right-side collapse was committed.
+  double? _forcedTwoPaneCollectionWidth;
+
+  /// Tracks whether the left divider is actively dragging.
+  bool _isDraggingLeftDivider = false;
+
+  /// Remembers the latest width resolved by the current layout pass.
+  double? _lastResolvedWidth;
+
+  /// Remembers the latest collection width resolved by the current layout pass.
+  double? _lastResolvedCollectionWidth;
+
+  /// Stores a live collection width while the left divider is actively dragging.
+  double? _dragCollectionWidth;
+
+  /// Stores the raw collection width target while the left divider is dragging.
+  double? _dragTargetCollectionWidth;
 
   /// Stores a live split ratio while the divider is actively dragging.
   double? _dragSplitRatio;
@@ -54,39 +72,63 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final persistedCollectionWidth =
+          widget.controller.workbenchCollectionWidth.value;
       final persistedSplitRatio = widget.controller.workbenchSplitRatio.value;
       return LayoutBuilder(
         builder: (context, constraints) {
+          final unrestrictedLayout = resolveHomeWorkbenchLayout(
+            maxWidth: constraints.maxWidth,
+            collectionWidth: persistedCollectionWidth,
+            splitRatio: persistedSplitRatio,
+          );
           final layout = _resolveLayout(
             maxWidth: constraints.maxWidth,
+            persistedCollectionWidth: persistedCollectionWidth,
             persistedSplitRatio: persistedSplitRatio,
+            unrestrictedLayout: unrestrictedLayout,
           );
           final layoutMode = layout.mode;
+          widget.controller.setWorkbenchLayoutMode(layoutMode);
           final collection = widget.collectionBuilder(layoutMode);
           final details = _buildPaneFrame(
             child: widget.detailsBuilder(layoutMode),
-            highlighted: _pendingCollapseSide == HomeWorkbenchCollapseSide.workbench,
+            highlighted:
+                _pendingCollapseSide == HomeWorkbenchCollapseSide.workbench,
             progress: _pendingCollapseProgress,
           );
+          final canExpandRightSidebar = _forceTwoPane &&
+              unrestrictedLayout.mode == HomeWorkbenchLayoutMode.threePane;
           if (layoutMode == HomeWorkbenchLayoutMode.threePane) {
             return Row(
               key: const ValueKey<String>('home-workbench-three-pane'),
               children: [
-                SizedBox(width: kHomeWorkbenchScriptListWidth, child: collection),
-                const SizedBox(width: kHomeWorkbenchPaneGap),
+                SizedBox(width: layout.collectionWidth, child: collection),
+                _WorkbenchDivider(
+                  key: const ValueKey<String>('home-workbench-left-divider'),
+                  onDragStart: () => _handleLeftDragStart(layout),
+                  onDragUpdate: (details) =>
+                      _handleLeftDragUpdate(details, layout),
+                  onDragEnd: _handleLeftDragEnd,
+                  collapseSide: null,
+                  collapseProgress: 0,
+                ),
                 SizedBox(width: layout.detailsWidth, child: details),
                 _WorkbenchDivider(
-                  onDragStart: () => _handleDragStart(layout),
-                  onDragUpdate: (details) => _handleDragUpdate(details, layout),
-                  onDragEnd: _handleDragEnd,
+                  key: const ValueKey<String>('home-workbench-right-divider'),
+                  onDragStart: () => _handleRightDragStart(layout),
+                  onDragUpdate: (details) =>
+                      _handleRightDragUpdate(details, layout),
+                  onDragEnd: _handleRightDragEnd,
                   collapseSide: _pendingCollapseSide,
                   collapseProgress: _pendingCollapseProgress,
                 ),
                 SizedBox(
                   width: layout.logWidth,
                   child: _buildPaneFrame(
-                    child: widget.logs,
-                    highlighted: _pendingCollapseSide == HomeWorkbenchCollapseSide.logs,
+                    child: widget.sidebar,
+                    highlighted:
+                        _pendingCollapseSide == HomeWorkbenchCollapseSide.logs,
                     progress: _pendingCollapseProgress,
                   ),
                 ),
@@ -97,16 +139,30 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
             return Row(
               key: const ValueKey<String>('home-workbench-two-pane'),
               children: [
-                SizedBox(width: kHomeWorkbenchScriptListWidth, child: collection),
-                const SizedBox(width: kHomeWorkbenchPaneGap),
-                Expanded(child: details),
+                SizedBox(width: layout.collectionWidth, child: collection),
+                _WorkbenchDivider(
+                  key: const ValueKey<String>('home-workbench-left-divider'),
+                  onDragStart: () => _handleLeftDragStart(layout),
+                  onDragUpdate: (details) =>
+                      _handleLeftDragUpdate(details, layout),
+                  onDragEnd: _handleLeftDragEnd,
+                  collapseSide: null,
+                  collapseProgress: 0,
+                ),
+                SizedBox(
+                  width: layout.detailsWidth,
+                  child: _buildTwoPaneDetails(
+                    details: details,
+                    canExpandRightSidebar: canExpandRightSidebar,
+                  ),
+                ),
               ],
             );
           }
           return Obx(() {
-            final showWorkspace =
-                widget.controller.workbenchPage.value == HomeWorkbenchPage.workspace &&
-                    widget.controller.activeScriptName.value.trim().isNotEmpty;
+            final showWorkspace = widget.controller.workbenchPage.value ==
+                    HomeWorkbenchPage.workspace &&
+                widget.controller.activeScriptName.value.trim().isNotEmpty;
             return showWorkspace ? details : collection;
           });
         },
@@ -114,48 +170,134 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
     });
   }
 
-  /// Resolves the active layout and restores three-pane mode after a resize.
+  /// Resolves the active layout and restores three-pane mode when legal again.
   HomeWorkbenchLayout _resolveLayout({
     required double maxWidth,
+    required double persistedCollectionWidth,
     required double persistedSplitRatio,
+    required HomeWorkbenchLayout unrestrictedLayout,
   }) {
+    final currentCollectionWidth =
+        _dragCollectionWidth ?? persistedCollectionWidth;
     final currentSplitRatio = _dragSplitRatio ?? persistedSplitRatio;
-    final unrestrictedLayout = resolveHomeWorkbenchLayout(
-      maxWidth: maxWidth,
-      splitRatio: currentSplitRatio,
-    );
-    _scheduleThreePaneRestoreIfNeeded(maxWidth, unrestrictedLayout.mode);
-    _lastMeasuredWidth = maxWidth;
+    _lastResolvedWidth = maxWidth;
+    _lastResolvedCollectionWidth = currentCollectionWidth;
+    _scheduleThreePaneRestoreIfNeeded(unrestrictedLayout.mode);
     return resolveHomeWorkbenchLayout(
       maxWidth: maxWidth,
+      collectionWidth: currentCollectionWidth,
       splitRatio: currentSplitRatio,
       forceTwoPane: _forceTwoPane,
     );
   }
 
-  /// Schedules restoration when the user widens the window after a collapse.
+  /// Adds a restore action when the right sidebar was manually collapsed.
+  Widget _buildTwoPaneDetails({
+    required Widget details,
+    required bool canExpandRightSidebar,
+  }) {
+    if (!canExpandRightSidebar) {
+      return details;
+    }
+    return Stack(
+      children: [
+        Positioned.fill(child: details),
+        Positioned(
+          top: 12,
+          right: 12,
+          child: IconButton.filledTonal(
+            key: const ValueKey<String>('home-workbench-expand-right-sidebar'),
+            onPressed: _handleRightSidebarExpand,
+            icon: const Icon(Icons.keyboard_double_arrow_left_rounded),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Schedules three-pane restoration once the layout becomes legal again.
   void _scheduleThreePaneRestoreIfNeeded(
-    double maxWidth,
-    HomeWorkbenchLayoutMode unrestrictedMode,
-  ) {
-    final lastMeasuredWidth = _lastMeasuredWidth;
-    final widthChanged = lastMeasuredWidth == null ||
-        (maxWidth - lastMeasuredWidth).abs() > 0.5;
-    if (!_forceTwoPane || !widthChanged || unrestrictedMode != HomeWorkbenchLayoutMode.threePane) {
+      HomeWorkbenchLayoutMode unrestrictedMode) {
+    if (!_forceTwoPane ||
+        _isDraggingLeftDivider ||
+        !_hasRestoreTriggerChanged() ||
+        unrestrictedMode != HomeWorkbenchLayoutMode.threePane) {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_forceTwoPane) {
+      if (!mounted ||
+          !_forceTwoPane ||
+          _isDraggingLeftDivider ||
+          !_hasRestoreTriggerChanged()) {
         return;
       }
       setState(() {
         _forceTwoPane = false;
+        _forcedTwoPaneWidth = null;
+        _forcedTwoPaneCollectionWidth = null;
       });
     });
   }
 
-  /// Starts tracking divider movement from the current three-pane width.
-  void _handleDragStart(HomeWorkbenchLayout layout) {
+  /// Returns whether width or left-divider changes should restore three panes.
+  bool _hasRestoreTriggerChanged() {
+    final forcedWidth = _forcedTwoPaneWidth;
+    final forcedCollectionWidth = _forcedTwoPaneCollectionWidth;
+    final lastResolvedWidth = _lastResolvedWidth;
+    final lastResolvedCollectionWidth = _lastResolvedCollectionWidth;
+    if (forcedWidth == null ||
+        forcedCollectionWidth == null ||
+        lastResolvedWidth == null ||
+        lastResolvedCollectionWidth == null) {
+      return false;
+    }
+    final widthChanged = (lastResolvedWidth - forcedWidth).abs() > 0.5;
+    final collectionChanged =
+        (lastResolvedCollectionWidth - forcedCollectionWidth).abs() > 0.5;
+    return widthChanged || collectionChanged;
+  }
+
+  /// Starts tracking left-divider movement from the current desktop width.
+  void _handleLeftDragStart(HomeWorkbenchLayout layout) {
+    _isDraggingLeftDivider = true;
+    _dragCollectionWidth = layout.collectionWidth;
+    _dragTargetCollectionWidth = layout.collectionWidth;
+  }
+
+  /// Updates the live collection width while keeping at least a two-pane desktop.
+  void _handleLeftDragUpdate(
+      DragUpdateDetails details, HomeWorkbenchLayout layout) {
+    final currentTargetWidth =
+        _dragTargetCollectionWidth ?? layout.collectionWidth;
+    final nextTargetWidth = currentTargetWidth + details.delta.dx;
+    final nextCollectionWidth = clampHomeWorkbenchCollectionWidth(
+      layout: layout,
+      targetCollectionWidth: nextTargetWidth,
+    );
+    setState(() {
+      _dragTargetCollectionWidth = nextTargetWidth;
+      _dragCollectionWidth = nextCollectionWidth;
+    });
+  }
+
+  /// Persists the last valid collection width after dragging the left divider.
+  void _handleLeftDragEnd(DragEndDetails details) {
+    if (!mounted) {
+      return;
+    }
+    final dragCollectionWidth = _dragCollectionWidth;
+    if (dragCollectionWidth != null) {
+      widget.controller.setWorkbenchCollectionWidth(dragCollectionWidth);
+    }
+    setState(() {
+      _isDraggingLeftDivider = false;
+      _dragCollectionWidth = null;
+      _dragTargetCollectionWidth = null;
+    });
+  }
+
+  /// Starts tracking right-divider movement from the current three-pane width.
+  void _handleRightDragStart(HomeWorkbenchLayout layout) {
     _dragSplitRatio = layout.appliedSplitRatio;
     _dragTargetDetailsWidth = layout.detailsWidth;
     _pendingCollapseSide = null;
@@ -164,7 +306,8 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
   }
 
   /// Updates the live split ratio while exposing a buffered collapse state.
-  void _handleDragUpdate(DragUpdateDetails details, HomeWorkbenchLayout layout) {
+  void _handleRightDragUpdate(
+      DragUpdateDetails details, HomeWorkbenchLayout layout) {
     final currentTargetWidth = _dragTargetDetailsWidth ?? layout.detailsWidth;
     final nextTargetWidth = currentTargetWidth + details.delta.dx;
     final dragState = resolveHomeWorkbenchDragState(
@@ -182,21 +325,48 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
   }
 
   /// Persists the last valid split or commits a buffered collapse on release.
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleRightDragEnd(DragEndDetails details) {
     if (!mounted) {
       return;
     }
     final dragSplitRatio = _dragSplitRatio;
+    final collapseSide = _pendingCollapseSide;
     if (dragSplitRatio != null) {
       widget.controller.setWorkbenchSplitRatio(dragSplitRatio);
     }
+    if (_collapseOnRelease && collapseSide != null) {
+      final preservedTab = switch (collapseSide) {
+        HomeWorkbenchCollapseSide.workbench =>
+          widget.controller.displayedWorkbenchSidebarTabFor(
+            HomeWorkbenchLayoutMode.threePane,
+          ),
+        HomeWorkbenchCollapseSide.logs => widget.controller
+            .displayedWorkbenchTabFor(HomeWorkbenchLayoutMode.threePane),
+      };
+      widget.controller.setActiveWorkbenchTabValue(preservedTab);
+    }
     setState(() {
       _forceTwoPane = _collapseOnRelease;
+      _forcedTwoPaneWidth = _collapseOnRelease ? _lastResolvedWidth : null;
+      _forcedTwoPaneCollectionWidth =
+          _collapseOnRelease ? _lastResolvedCollectionWidth : null;
       _dragSplitRatio = null;
       _dragTargetDetailsWidth = null;
       _pendingCollapseSide = null;
       _pendingCollapseProgress = 0;
       _collapseOnRelease = false;
+    });
+  }
+
+  /// Restores the desktop right sidebar without changing window width.
+  void _handleRightSidebarExpand() {
+    if (!_forceTwoPane || !mounted) {
+      return;
+    }
+    setState(() {
+      _forceTwoPane = false;
+      _forcedTwoPaneWidth = null;
+      _forcedTwoPaneCollectionWidth = null;
     });
   }
 
@@ -227,6 +397,7 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
 
 class _WorkbenchDivider extends StatelessWidget {
   const _WorkbenchDivider({
+    super.key,
     required this.onDragStart,
     required this.onDragUpdate,
     required this.onDragEnd,
@@ -275,9 +446,10 @@ class _WorkbenchDivider extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: highlightColor,
                       borderRadius: BorderRadius.horizontal(
-                        left: collapseSide == HomeWorkbenchCollapseSide.workbench
-                            ? const Radius.circular(999)
-                            : Radius.zero,
+                        left:
+                            collapseSide == HomeWorkbenchCollapseSide.workbench
+                                ? const Radius.circular(999)
+                                : Radius.zero,
                         right: collapseSide == HomeWorkbenchCollapseSide.logs
                             ? const Radius.circular(999)
                             : Radius.zero,
@@ -289,9 +461,8 @@ class _WorkbenchDivider extends StatelessWidget {
                 child: Container(
                   width: 2,
                   decoration: BoxDecoration(
-                    color: collapseSide == null
-                        ? dividerColor
-                        : Colors.blueAccent,
+                    color:
+                        collapseSide == null ? dividerColor : Colors.blueAccent,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -303,4 +474,3 @@ class _WorkbenchDivider extends StatelessWidget {
     );
   }
 }
-

@@ -110,6 +110,7 @@ class ActiveConfigPanel extends StatelessWidget {
   Widget _buildTabContent(ScriptModel script, HomeWorkbenchTab currentTab) {
     return switch (currentTab) {
       HomeWorkbenchTab.status => TaskStatusPanel(
+          controller: controller,
           scriptModel: script,
           canQuickScheduleTask: (taskName) =>
               controller.canQuickScheduleTask(script, taskName),
