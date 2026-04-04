@@ -86,6 +86,8 @@ class I18n {
       launchAtStartup = 'Launch at startup';
   static const String launchAtStartupHelp = 'Launch at startup help',
       launchAtStartupUpdateFailed = 'Launch at startup update failed',
+      updateProxyUrl = 'update_proxy_url',
+      updateProxyUrlHelp = 'update_proxy_url_help',
       scriptList = 'Script list';
   static const String showWindow = 'Show window',
       exit = 'Exit',
@@ -360,7 +362,10 @@ class I18n {
       updateReleasePageOnly = 'update_release_page_only',
       updateDownloading = 'update_downloading',
       updatePreparing = 'update_preparing',
+      updateCheckFailed = 'update_check_failed',
       updateDownloadFailed = 'update_download_failed',
+      updateDownloadProgress = 'update_download_progress',
+      updateDownloadProgressUnknown = 'update_download_progress_unknown',
       updateInvalidPackage = 'update_invalid_package',
       updateInstallStarted = 'update_install_started',
       updateAllowUnknownApps = 'update_allow_unknown_apps',

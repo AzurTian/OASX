@@ -3,6 +3,7 @@ enum StorageKey {
   language,
   username,
   password,
+  updateProxyUrl,
   lastUpdateCheckAt,
   address,
   windowState,

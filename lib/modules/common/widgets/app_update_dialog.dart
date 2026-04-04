@@ -42,26 +42,53 @@ class AppUpdateDialog extends StatelessWidget {
     );
   }
 
+  /// Builds the download progress section shown above the action buttons.
+  Widget _buildProgressSection() {
+    if (!service.isInstalling.value) {
+      return const SizedBox.shrink();
+    }
+    final progress = service.downloadProgress.value;
+    final hasKnownTotal = progress >= 0;
+    return <Widget>[
+      LinearProgressIndicator(value: hasKnownTotal ? progress : null),
+      Text(service.downloadProgressLabel.value),
+    ].toColumn(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      separator: const SizedBox(height: 6),
+    );
+  }
+
   /// Builds the dialog actions for release-page and install flows.
   List<Widget> _buildActions() {
     return [
-      TextButton(
-        onPressed: () => service.openReleasePage(plan.release),
-        child: Text(I18n.openReleasePage.tr),
-      ),
-      if (plan.canInstallInApp)
-        Obx(() {
-          return FilledButton(
-            onPressed: service.isInstalling.value
-                ? null
-                : () => service.installUpdate(plan),
-            child: Text(
-              service.isInstalling.value
-                  ? I18n.updateDownloading.tr
-                  : plan.installActionKey.tr,
+      Obx(() {
+        return <Widget>[
+          _buildProgressSection(),
+          <Widget>[
+            TextButton(
+              onPressed: () => service.openReleasePage(plan.release),
+              child: Text(I18n.openReleasePage.tr),
             ),
-          );
-        }),
+            if (plan.canInstallInApp)
+              FilledButton(
+                onPressed: service.isInstalling.value
+                    ? null
+                    : () => service.installUpdate(plan),
+                child: Text(
+                  service.isInstalling.value
+                      ? I18n.updateDownloading.tr
+                      : plan.installActionKey.tr,
+                ),
+              ),
+          ].toRow(
+            mainAxisAlignment: MainAxisAlignment.end,
+            separator: const SizedBox(width: 8),
+          ),
+        ].toColumn(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          separator: const SizedBox(height: 12),
+        );
+      }),
     ];
   }
 }

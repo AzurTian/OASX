@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import 'package:oasx/config/global.dart';
+import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/modules/settings/widgets/setting_card.dart';
 import 'package:oasx/modules/settings/widgets/setting_item.dart';
 import 'package:oasx/service/autostart_service.dart';
+import 'package:oasx/service/app_update_service.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/theme_service.dart';
 import 'package:oasx/service/window_service.dart';
@@ -60,6 +62,18 @@ class SystemSettingsCard extends StatelessWidget {
             ),
             right: const LaunchAtStartupSwitch(),
           ),
+        SettingItem(
+          left: Row(
+            children: [
+              Text(I18n.updateProxyUrl.tr),
+              Tooltip(
+                message: I18n.updateProxyUrlHelp.tr,
+                child: const Icon(Icons.help_outline, size: 16),
+              ).paddingOnly(left: 5),
+            ],
+          ),
+          right: const UpdateProxyUrlField(),
+        ),
         SettingItem(
           left: Text('${I18n.currentVersion.tr}: ${GlobalVar.version}'),
           right: const CheckUpdateButton(),
@@ -154,17 +168,75 @@ class LaunchAtStartupSwitch extends StatelessWidget {
   }
 }
 
+class UpdateProxyUrlField extends StatefulWidget {
+  const UpdateProxyUrlField({super.key});
+
+  @override
+  State<UpdateProxyUrlField> createState() => _UpdateProxyUrlFieldState();
+}
+
+class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
+  late final TextEditingController _controller;
+  late final SettingsController _settingsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _settingsController = Get.find<SettingsController>();
+    _controller =
+        TextEditingController(text: _settingsController.updateProxyUrl.value);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final current = _settingsController.updateProxyUrl.value;
+      if (_controller.text != current) {
+        _controller.text = current;
+      }
+      return SizedBox(
+        width: 220,
+        child: TextField(
+          controller: _controller,
+          keyboardType: TextInputType.url,
+          decoration: const InputDecoration(
+            hintText: 'http://127.0.0.1:7897',
+          ),
+          onChanged: _settingsController.updateUpdateProxyUrl,
+        ),
+      );
+    });
+  }
+}
+
 class CheckUpdateButton extends StatelessWidget {
   const CheckUpdateButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () async => await checkUpdate(
-        showTip: true,
-        forceCheck: true,
-      ),
-      child: Text(I18n.executeUpdate.tr),
-    );
+    final appUpdateService = Get.find<AppUpdateService>();
+    return Obx(() {
+      return ElevatedButton(
+        onPressed: appUpdateService.isCheckingForUpdates.value
+            ? null
+            : () async => await checkUpdate(
+                  showTip: true,
+                  forceCheck: true,
+                ),
+        child: appUpdateService.isCheckingForUpdates.value
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(I18n.executeUpdate.tr),
+      );
+    });
   }
 }

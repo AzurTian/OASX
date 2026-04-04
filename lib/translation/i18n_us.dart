@@ -44,6 +44,9 @@ final Map<String, String> _us_ui = {
       'Minimized to the system tray when closing a window',
   I18n.launchAtStartupHelp: 'Launch OASX when you sign in',
   I18n.launchAtStartupUpdateFailed: 'Failed to update launch at startup',
+  I18n.updateProxyUrl: 'Proxy URL',
+  I18n.updateProxyUrlHelp:
+      'Used when downloading update packages, for example http://127.0.0.1:7897',
   I18n.openReleasePage: 'Open release page',
   I18n.downloadAndUpdate: 'Download and update',
   I18n.downloadAndInstall: 'Download and install',
@@ -51,7 +54,10 @@ final Map<String, String> _us_ui = {
       'This platform can only continue on the release page',
   I18n.updateDownloading: 'Downloading update package',
   I18n.updatePreparing: 'Preparing update install',
+  I18n.updateCheckFailed: 'Failed to check for updates',
   I18n.updateDownloadFailed: 'Failed to download the update package',
+  I18n.updateDownloadProgress: 'Downloaded @received / @total (@percent%)',
+  I18n.updateDownloadProgressUnknown: 'Downloaded @received',
   I18n.updateInvalidPackage:
       'The downloaded package failed checksum validation',
   I18n.updateInstallStarted: 'The platform installer has been opened',

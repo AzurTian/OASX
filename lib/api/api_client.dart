@@ -154,13 +154,18 @@ class ApiClient {
   }
 
   Future<GithubReleaseModel> getGithubRelease() async {
-    final res = await request(
+    final res = await getGithubReleaseResult();
+    return res.isSuccess && res.data != null ? res.data! : GithubReleaseModel();
+  }
+
+  Future<ApiResult<GithubReleaseModel>> getGithubReleaseResult() async {
+    final res = await request<GithubReleaseModel>(
       () => get(
         updateUrlGithub,
         decodeType: GithubReleaseModel(),
       ),
     );
-    return res.isSuccess ? res.data : GithubReleaseModel();
+    return res;
   }
 
   Future<ReadmeGithubModel> getGithubReadme() async {

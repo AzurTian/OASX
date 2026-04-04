@@ -22,6 +22,7 @@ class SettingsController extends GetxController {
   bool _loginConfigChanged = false;
 
   final address = ''.obs;
+  final updateProxyUrl = ''.obs;
   final username = ''.obs;
   final password = ''.obs;
 
@@ -32,6 +33,7 @@ class SettingsController extends GetxController {
     autoDeploy.value = (storage.read(StorageKey.autoDeploy.name) ?? false) &&
         PlatformUtils.isDesktop;
     address.value = storage.read(StorageKey.address.name) ?? '';
+    updateProxyUrl.value = storage.read(StorageKey.updateProxyUrl.name) ?? '';
     username.value = storage.read(StorageKey.username.name) ?? '';
     password.value = storage.read(StorageKey.password.name) ?? '';
 
@@ -73,6 +75,15 @@ class SettingsController extends GetxController {
     storage.write(StorageKey.address.name, address.value);
     _syncApiAddress();
     _loginConfigChanged = true;
+  }
+
+  void updateUpdateProxyUrl(String value) {
+    final next = value.trim();
+    if (updateProxyUrl.value == next) {
+      return;
+    }
+    updateProxyUrl.value = next;
+    storage.write(StorageKey.updateProxyUrl.name, next);
   }
 
   void updateUsername(String value) {

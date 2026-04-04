@@ -1,7 +1,4 @@
 import 'dart:io';
-
-import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
@@ -9,12 +6,14 @@ import 'package:oasx/api/github_release_model.dart';
 import 'package:oasx/config/constants.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/modules/common/widgets/app_update_dialog.dart';
+import 'package:oasx/service/app_update/app_update_progress_formatter.dart';
 import 'package:oasx/service/app_update/app_version_utils.dart';
 import 'package:oasx/service/app_update/installers/android_update_installer.dart';
 import 'package:oasx/service/app_update/installers/app_update_installer.dart';
 import 'package:oasx/service/app_update/installers/fallback_update_installer.dart';
 import 'package:oasx/service/app_update/installers/windows_update_installer.dart';
 import 'package:oasx/service/app_update/models/app_update_plan.dart';
+import 'package:oasx/service/app_update/update_package_io.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:path_provider/path_provider.dart';
@@ -28,6 +27,17 @@ class AppUpdateService extends GetxService {
   /// Tracks whether an in-app install flow is running.
   final RxBool isInstalling = false.obs;
 
+  /// Tracks whether a release check is currently running.
+  final RxBool isCheckingForUpdates = false.obs;
+
+  /// Tracks the current download progress ratio.
+  final RxDouble downloadProgress = (-1.0).obs;
+
+  /// Tracks the current download progress label.
+  final RxString downloadProgressLabel = ''.obs;
+
+  UpdateDownloadSession? _activeDownloadSession;
+
   /// Suppresses automatic remote checks for one week.
   static const Duration _updateCheckInterval = Duration(days: 7);
 
@@ -36,24 +46,38 @@ class AppUpdateService extends GetxService {
     bool showTip = false,
     bool forceCheck = false,
   }) async {
-    // if (!kReleaseMode || _shouldSkipRemoteCheck(forceCheck)) {
-    //   return;
-    // }
-    final release = await ApiClient().getGithubRelease();
-    if (!release.isValid) {
+    if (isCheckingForUpdates.value) {
       return;
     }
-    await _writeLastUpdateCheckAt();
-    final currentVersion = await AppVersionUtils.getCurrentVersion();
-    final latestVersion = release.version ?? 'v0.0.0';
-    if (!AppVersionUtils.compareVersion(currentVersion, latestVersion)) {
-      if (showTip) {
-        Get.snackbar(I18n.tip.tr, I18n.noNewVersion.tr);
+    isCheckingForUpdates.value = true;
+    try {
+      // if (!kReleaseMode || _shouldSkipRemoteCheck(forceCheck)) {
+      //   return;
+      // }
+      final releaseResult = await _fetchLatestReleaseResult();
+      final release = releaseResult.data;
+      if (!releaseResult.isSuccess || release == null || !release.isValid) {
+        if (showTip) {
+          Get.snackbar(
+              I18n.tip.tr, _buildUpdateCheckFailureMessage(releaseResult));
+        }
+        return;
       }
-      return;
+      await _writeLastUpdateCheckAt();
+      final currentVersion = await AppVersionUtils.getCurrentVersion();
+      final latestVersion = release.version ?? 'v0.0.0';
+      if (!AppVersionUtils.compareVersion(currentVersion, latestVersion)) {
+        if (showTip) {
+          Get.snackbar(I18n.tip.tr, I18n.noNewVersion.tr);
+        }
+        return;
+      }
+      final plan = await _createPlan(release, currentVersion);
+      Get.dialog(AppUpdateDialog(plan: plan, service: this))
+          .whenComplete(handleUpdateDialogClosed);
+    } finally {
+      isCheckingForUpdates.value = false;
     }
-    final plan = await _createPlan(release, currentVersion);
-    Get.dialog(AppUpdateDialog(plan: plan, service: this));
   }
 
   /// Opens the release page for the provided [release].
@@ -68,6 +92,7 @@ class AppUpdateService extends GetxService {
       return;
     }
     isInstalling.value = true;
+    _resetDownloadProgress();
     Get.snackbar(I18n.tip.tr, I18n.updateDownloading.tr);
     try {
       final package = await _downloadPackage(plan);
@@ -82,13 +107,25 @@ class AppUpdateService extends GetxService {
         Get.snackbar(I18n.tip.tr, I18n.updateInstallStarted.tr);
       }
     } catch (error) {
+      if (_isDownloadCancelled(error)) {
+        return;
+      }
       final message = error.toString().contains('permission_required')
           ? I18n.updateAllowUnknownApps.tr
           : I18n.updateDownloadFailed.tr;
       Get.snackbar(I18n.tip.tr, message);
     } finally {
+      _activeDownloadSession = null;
       isInstalling.value = false;
     }
+  }
+
+  /// Cancels any active download and clears dialog state when the dialog closes.
+  void handleUpdateDialogClosed() {
+    _activeDownloadSession?.cancel();
+    _activeDownloadSession = null;
+    isInstalling.value = false;
+    _resetDownloadProgress();
   }
 
   /// Builds the update plan shown in the shared update dialog.
@@ -122,6 +159,8 @@ class AppUpdateService extends GetxService {
   /// Downloads the selected update package into a temporary directory.
   Future<DownloadedUpdatePackage> _downloadPackage(AppUpdatePlan plan) async {
     final asset = plan.asset!;
+    final session = UpdateDownloadSession();
+    _activeDownloadSession = session;
     final tempDirectory = await getTemporaryDirectory();
     final updateDirectory = Directory(
       '${tempDirectory.path}${Platform.pathSeparator}oasx_updates${Platform.pathSeparator}${plan.release.version ?? 'latest'}',
@@ -130,7 +169,13 @@ class AppUpdateService extends GetxService {
     final assetName = asset.name ?? 'oasx_update_package';
     final filePath =
         '${updateDirectory.path}${Platform.pathSeparator}$assetName';
-    await _downloadToFile(asset.downloadUrl!, filePath);
+    await UpdatePackageIo.downloadToFile(
+      asset.downloadUrl!,
+      filePath,
+      proxyUrl: _readProxyUrl(),
+      session: session,
+      onProgress: _updateDownloadProgress,
+    );
     return DownloadedUpdatePackage(
       release: plan.release,
       asset: asset,
@@ -138,50 +183,77 @@ class AppUpdateService extends GetxService {
     );
   }
 
-  /// Downloads a remote asset to [filePath].
-  Future<void> _downloadToFile(String url, String filePath) async {
-    final httpClient = HttpClient();
-    IOSink? output;
-    try {
-      final request = await httpClient.getUrl(Uri.parse(url));
-      final response = await request.close();
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw HttpException('download_failed_${response.statusCode}');
-      }
-      output = File(filePath).openWrite();
-      await response.forEach(output.add);
-    } finally {
-      await output?.close();
-      httpClient.close();
-    }
-  }
-
   /// Validates the downloaded package checksum when GitHub exposes one.
   Future<bool> _validatePackage(DownloadedUpdatePackage package) async {
-    final expectedDigest = _normalizeDigest(package.asset.digest);
+    final expectedDigest =
+        UpdatePackageIo.normalizeDigest(package.asset.digest);
     if (expectedDigest == null) {
       return true;
     }
-    final actualDigest = await _computeSha256(package.filePath);
+    final actualDigest = await UpdatePackageIo.computeSha256(package.filePath);
     return expectedDigest == actualDigest;
   }
 
-  /// Computes a SHA-256 digest for the file at [filePath].
-  Future<String> _computeSha256(String filePath) async {
-    final fileBytes = await File(filePath).readAsBytes();
-    final digest = sha256.convert(fileBytes);
-    return digest.toString();
+  /// Updates the shared progress state for the download dialog.
+  void _updateDownloadProgress(int receivedBytes, int totalBytes) {
+    downloadProgress.value =
+        totalBytes > 0 ? (receivedBytes / totalBytes).clamp(0.0, 1.0) : -1;
+    downloadProgressLabel.value = AppUpdateProgressFormatter.formatProgress(
+      receivedBytes: receivedBytes,
+      totalBytes: totalBytes,
+    );
   }
 
-  /// Normalizes GitHub digest strings such as `sha256:<hash>`.
-  String? _normalizeDigest(String? digest) {
-    if (digest == null || digest.trim().isEmpty) {
-      return null;
+  /// Clears the shared progress state before a new install flow.
+  void _resetDownloadProgress() {
+    downloadProgress.value = -1;
+    downloadProgressLabel.value = '';
+  }
+
+  /// Returns true when the thrown [error] indicates a user-cancelled download.
+  bool _isDownloadCancelled(Object error) {
+    return error is UpdateDownloadCancelledException;
+  }
+
+  /// Builds the snackbar message shown when a manual update check fails.
+  String _buildUpdateCheckFailureMessage(
+    ApiResult<GithubReleaseModel> releaseResult,
+  ) {
+    final error = releaseResult.error?.trim() ?? '';
+    final code = releaseResult.code;
+    if (code != null && error.isNotEmpty) {
+      return '${I18n.updateCheckFailed.tr} ($code): $error';
     }
-    return digest.split(':').last.trim().toLowerCase();
+    if (code != null) {
+      return '${I18n.updateCheckFailed.tr} ($code)';
+    }
+    if (error.isNotEmpty) {
+      return '${I18n.updateCheckFailed.tr}: $error';
+    }
+    return I18n.updateCheckFailed.tr;
+  }
+
+  /// Fetches the latest release through proxy when configured, otherwise direct.
+  Future<ApiResult<GithubReleaseModel>> _fetchLatestReleaseResult() async {
+    final proxyUrl = _readProxyUrl();
+    if (proxyUrl.isEmpty) {
+      return ApiClient().getGithubReleaseResult();
+    }
+    try {
+      final json = await UpdatePackageIo.fetchJsonMap(
+        updateUrlGithub,
+        proxyUrl: proxyUrl,
+      );
+      final release = GithubReleaseModel.fromJson(json);
+      return ApiResult<GithubReleaseModel>.success(release);
+    } catch (error) {
+      final message = error is HttpException ? error.message : error.toString();
+      return ApiResult<GithubReleaseModel>.failure(message);
+    }
   }
 
   /// Returns true when the remote check should stay suppressed.
+  // ignore: unused_element
   bool _shouldSkipRemoteCheck(bool forceCheck) {
     if (forceCheck) {
       return false;
@@ -213,5 +285,11 @@ class AppUpdateService extends GetxService {
   Future<void> _writeLastUpdateCheckAt() async {
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
     await _storage.write(StorageKey.lastUpdateCheckAt.name, now);
+  }
+
+  /// Reads the optional update proxy URL from settings storage.
+  String _readProxyUrl() {
+    final raw = _storage.read(StorageKey.updateProxyUrl.name);
+    return raw is String ? raw.trim() : '';
   }
 }
