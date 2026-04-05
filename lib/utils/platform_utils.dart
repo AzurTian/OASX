@@ -47,6 +47,8 @@ class PlatformUtils {
     }
     try {
       final packageInfo = await PackageInfo.fromPlatform();
+      final String executablePath = Platform.resolvedExecutable;
+      final String executableDirectory = File(executablePath).parent.path;
       final packageName = packageInfo.packageName;
       final String currentPath = Directory.current.path;
       logger.i('Package Name: ${packageInfo.packageName}');
@@ -55,6 +57,9 @@ class PlatformUtils {
       logger.i('Build Number: ${packageInfo.buildNumber}');
       logger.i('Installer Store: ${packageInfo.installerStore}');
       logger.i('Build Signature: ${packageInfo.buildSignature}');
+      logger.i('Current Directory: $currentPath');
+      logger.i('Executable Path: $executablePath');
+      logger.i('Executable Directory: $executableDirectory');
 
       if (packageInfo.installerStore != null &&
           packageInfo.installerStore!.toLowerCase().contains('microsoft')) {
@@ -67,7 +72,9 @@ class PlatformUtils {
           packageName.contains('MSIX')) {
         return true;
       }
-      if (currentPath.contains('system32')) {
+      final normalizedExecutablePath = executablePath.toLowerCase();
+      if (normalizedExecutablePath.contains('\\windowsapps\\') ||
+          normalizedExecutablePath.endsWith('.msix')) {
         return true;
       }
       return false;
