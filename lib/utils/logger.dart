@@ -1,27 +1,35 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:logger/logger.dart';
 
 late Logger logger;
 
 Future<void> initLogger() async {
-  getApplicationCacheDirectory().then((appDocDir) {
-    String logPath = appDocDir.path;
-    Directory logDir = Directory('$logPath/logs');
-    if (!logDir.existsSync()) {
-      logDir.createSync(recursive: true);
-    }
-    String dateTime = DateTime.now().toIso8601String().substring(0, 10);
-    logger = _getLogger(logDir.path, dateTime);
-    logger.i('---------------------------------------------------------------');
-    logger.i('Logger initialized');
-    logger.i('log path: ${logDir.path}/$dateTime.txt');
-    logger.i('App path: ${Directory.current.path}');
+  final logDir = await _resolveLogDirectory();
+  if (!logDir.existsSync()) {
+    logDir.createSync(recursive: true);
+  }
+  final dateTime = DateTime.now().toIso8601String().substring(0, 10);
+  logger = _getLogger(logDir.path, dateTime);
+  logger.i('---------------------------------------------------------------');
+  logger.i('Logger initialized');
+  logger.i('log path: ${logDir.path}/$dateTime.txt');
+  logger.i('App path: ${Platform.resolvedExecutable}');
+  logger.i('Current Directory: ${Directory.current.path}');
 
-    _cleanupOldLogs(logDir.path);
-  });
+  unawaited(_cleanupOldLogs(logDir.path));
+}
+
+Future<Directory> _resolveLogDirectory() async {
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    final installDir = File(Platform.resolvedExecutable).parent.path;
+    return Directory('$installDir${Platform.pathSeparator}logs');
+  }
+  final appDocDir = await getApplicationCacheDirectory();
+  return Directory('${appDocDir.path}${Platform.pathSeparator}logs');
 }
 
 class CustomConsoleOutput extends LogOutput {
@@ -59,7 +67,7 @@ Future<void> _cleanupOldLogs(String logDirPath) async {
     final logDir = Directory(logDirPath);
     if (!logDir.existsSync()) return;
 
-    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+    final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
     final files = logDir.listSync();
     int deletedCount = 0;
     for (var file in files) {
@@ -70,7 +78,7 @@ Future<void> _cleanupOldLogs(String logDirPath) async {
           try {
             final dateStr = fileName.substring(0, 10);
             final fileDate = DateTime.parse(dateStr);
-            if (fileDate.isBefore(thirtyDaysAgo)) {
+            if (fileDate.isBefore(sevenDaysAgo)) {
               await file.delete();
               deletedCount++;
             }
