@@ -29,7 +29,6 @@ class AppVersionUtils {
     if (!kReleaseMode) {
       return 'v0.0.1';
     }
-    return 'v0.2.5';
     final packageInfo = await PackageInfo.fromPlatform();
     return 'v${packageInfo.version}'.split('-')[0];
   }

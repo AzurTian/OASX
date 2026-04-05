@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
@@ -51,9 +52,9 @@ class AppUpdateService extends GetxService {
     }
     isCheckingForUpdates.value = true;
     try {
-      // if (!kReleaseMode || _shouldSkipRemoteCheck(forceCheck)) {
-      //   return;
-      // }
+      if (!kReleaseMode || _shouldSkipRemoteCheck(forceCheck)) {
+        return;
+      }
       final releaseResult = await _fetchLatestReleaseResult();
       final release = releaseResult.data;
       if (!releaseResult.isSuccess || release == null || !release.isValid) {

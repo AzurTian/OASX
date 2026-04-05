@@ -153,7 +153,7 @@ if (-not (Test-Path $targetExe)) {
 }
 
 Write-Step 'Starting updated OASX...'
-Start-Process -FilePath $targetExe -WorkingDirectory $installDir | Out-Null
+Start-Process -FilePath $targetExe -ArgumentList '--skip-parent-console' -WorkingDirectory $installDir | Out-Null
 
 Write-Step 'Update complete. Closing updater window...'
 Start-Sleep -Milliseconds 800
