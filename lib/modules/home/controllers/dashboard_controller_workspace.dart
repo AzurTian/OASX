@@ -297,8 +297,14 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     required String taskName,
     required bool runNow,
   }) async {
+    if (!runNow) {
+      return syncTaskNextRun(
+        scriptName: scriptName,
+        taskName: taskName,
+      );
+    }
     final targetDt = formatDateTime(
-      DateTime.now().add(Duration(days: runNow ? -1 : 1)),
+      DateTime.now().add(const Duration(days: -1)),
     );
     return updateTaskNextRun(
       scriptName: scriptName,
@@ -327,6 +333,30 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
           target,
           resolvedTask,
           normalizedNextRun,
+        );
+      },
+    );
+  }
+
+  /// Routes one quick wait action through the dedicated sync endpoint.
+  Future<bool> syncTaskNextRun({
+    required String scriptName,
+    required String taskName,
+    String targetDt = '',
+  }) async {
+    final source = scriptName.trim();
+    final normalizedTask = taskName.trim();
+    if (source.isEmpty || normalizedTask.isEmpty) {
+      return false;
+    }
+    return _applyTaskActionAcrossLinkedScope(
+      sourceScript: source,
+      taskName: normalizedTask,
+      action: (target, resolvedTask) {
+        return ApiClient().syncScriptTaskNextRun(
+          scriptName,
+          taskName,
+          targetDt,
         );
       },
     );

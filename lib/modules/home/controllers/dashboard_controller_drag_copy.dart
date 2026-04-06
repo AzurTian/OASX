@@ -80,10 +80,7 @@ extension HomeDashboardDragCopyX on HomeDashboardController {
       if (!ret) {
         return false;
       }
-      await _refreshCopiedConfigs([
-        payload.sourceConfigName,
-        normalizedDestination,
-      ]);
+      await _refreshCopiedConfigs([normalizedDestination]);
       Get.snackbar(I18n.success.tr, payload.displayLabel.tr);
       return true;
     } finally {
@@ -151,7 +148,7 @@ extension HomeDashboardDragCopyX on HomeDashboardController {
     pendingDragCopyTargets.value = next.toList()..sort();
   }
 
-  /// Requests fresh schedule data for configs affected by one copy action.
+  /// Requests fresh schedule data for destination configs affected by one copy.
   Future<void> _refreshCopiedConfigs(Iterable<String> configNames) async {
     final targets = configNames
         .map((item) => item.trim())
@@ -159,13 +156,25 @@ extension HomeDashboardDragCopyX on HomeDashboardController {
         .toSet()
         .toList()
       ..sort();
-    _taskAvailabilityCache.clear();
     for (final name in targets) {
+      _invalidateTaskAvailabilityCache(name);
       if (_scriptService.findScriptModel(name) == null) {
         continue;
       }
       await _scriptService.wsService.send(name, 'get_schedule');
     }
     syncWorkspaceState();
+  }
+
+  /// Clears cached task-availability answers for one copied destination config.
+  void _invalidateTaskAvailabilityCache(String configName) {
+    final normalized = configName.trim();
+    if (normalized.isEmpty) {
+      return;
+    }
+    final cachePrefix = '$normalized::';
+    _taskAvailabilityCache.removeWhere(
+      (cacheKey, _) => cacheKey.startsWith(cachePrefix),
+    );
   }
 }
