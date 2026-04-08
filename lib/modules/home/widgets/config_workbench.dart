@@ -162,10 +162,14 @@ class ConfigWorkbench extends StatelessWidget {
     if (!await _confirmDiscardDraft(context)) {
       return;
     }
-    await ConfigActions.showRenameDialog(
+    final renamedScript = await ConfigActions.showRenameDialog(
       scriptService: scriptService,
       oldName: scriptName,
     );
+    if (renamedScript != null &&
+        controller.activeScriptName.value.trim() == scriptName.trim()) {
+      controller.setActiveScript(renamedScript);
+    }
     controller.syncWorkspaceState();
   }
 

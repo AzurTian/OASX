@@ -60,7 +60,7 @@ extension _HomeViewActions on _HomeViewState {
     if (_isAddingScript) {
       return;
     }
-    await showAddConfigDialog(
+    final createdConfig = await showAddConfigDialog(
       context,
       onSubmitting: () => _setAddingScript(true),
       onSubmitDone: () {
@@ -68,6 +68,10 @@ extension _HomeViewActions on _HomeViewState {
         controller.syncWorkspaceState();
       },
     );
+    if (createdConfig == null || createdConfig.isEmpty) {
+      return;
+    }
+    controller.setActiveScript(createdConfig);
   }
 
   Future<void> _onRefreshScriptsTap() async {

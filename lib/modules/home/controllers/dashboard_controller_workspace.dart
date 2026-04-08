@@ -367,12 +367,29 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     required String taskName,
     required bool enable,
   }) async {
+    return toggleTaskEnabled(
+      scriptName: scriptName,
+      taskName: taskName,
+      enable: enable,
+    );
+  }
+
+  /// Toggles one task enable flag, optionally across the linked scope.
+  Future<bool> toggleTaskEnabled({
+    required String scriptName,
+    required String taskName,
+    required bool enable,
+    bool applyLinkedScope = true,
+  }) async {
     final source = scriptName.trim();
     final normalizedTask = taskName.trim();
     if (source.isEmpty || normalizedTask.isEmpty) {
       return false;
     }
     final argsController = Get.find<ArgsController>();
+    if (!applyLinkedScope) {
+      return argsController.updateScriptTask(source, normalizedTask, enable);
+    }
     return _applyTaskActionAcrossLinkedScope(
       sourceScript: source,
       taskName: normalizedTask,

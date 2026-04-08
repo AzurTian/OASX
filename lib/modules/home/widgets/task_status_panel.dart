@@ -1,16 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oasx/modules/args/index.dart';
-import 'package:oasx/modules/common/models/config_drag_payload.dart';
-import 'package:oasx/modules/common/widgets/drag_copy_feedback.dart';
 import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
-import 'package:oasx/modules/home/widgets/split_scroll_row.dart';
+import 'package:oasx/modules/home/widgets/task_status_row.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-class TaskStatusPanel extends StatelessWidget {
+/// Renders the overview task list for the active config workbench.
+class TaskStatusPanel extends StatefulWidget {
   const TaskStatusPanel({
     super.key,
     required this.controller,
@@ -31,323 +27,194 @@ class TaskStatusPanel extends StatelessWidget {
   final Future<void> Function(String taskName) onEditTask;
 
   @override
+  State<TaskStatusPanel> createState() => _TaskStatusPanelState();
+}
+
+class _TaskStatusPanelState extends State<TaskStatusPanel> {
+  final TextEditingController _searchController = TextEditingController();
+  final Set<String> _hiddenTaskIds = <String>{};
+  String _searchQuery = '';
+
+  @override
+  void didUpdateWidget(covariant TaskStatusPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scriptModel.name == widget.scriptModel.name) {
+      return;
+    }
+    _clearSearchState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final tasks = _collectTasks();
-      final activeDragPayload = controller.activeDragPayload.value;
-      if (tasks.isEmpty) {
-        return Center(child: Text(I18n.homeNoTask.tr));
-      }
-      return ListView.separated(
-        key: const PageStorageKey<String>('home-task-status-list'),
-        padding: EdgeInsets.zero,
-        itemCount: tasks.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (context, index) => _StatusTaskRow(
-          controller: controller,
-          sourceScriptName: scriptModel.name,
-          task: tasks[index],
-          canQuickSchedule: canQuickScheduleTask(tasks[index].name),
-          onSetNextRun: onSetNextRun,
-          onQuickRun: onQuickRun,
-          onQuickWait: onQuickWait,
-          onEditTask: onEditTask,
-          dragEnabled: controller.canUseDesktopDragCopy,
-          activeDragPayload: activeDragPayload,
-        ),
+      final dragPayload = widget.controller.activeDragPayload.value;
+      final rawTasks = _collectTasks(widget.scriptModel);
+      _pruneHiddenTaskIds(rawTasks);
+      final visibleTasks = rawTasks
+          .where((task) => !_hiddenTaskIds.contains(task.rowId))
+          .where(_matchesTaskQuery)
+          .toList();
+      return Column(
+        children: [
+          _buildSearchField(),
+          const SizedBox(height: 12),
+          Expanded(
+            child: visibleTasks.isEmpty
+                ? Center(child: Text(_emptyMessage))
+                : ListView.separated(
+                    key: const PageStorageKey<String>('home-task-status-list'),
+                    padding: EdgeInsets.zero,
+                    itemCount: visibleTasks.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final task = visibleTasks[index];
+                      return TaskStatusRow(
+                        key: ValueKey(task.rowId),
+                        controller: widget.controller,
+                        sourceScriptName: widget.scriptModel.name,
+                        task: task,
+                        canQuickSchedule:
+                            widget.canQuickScheduleTask(task.name),
+                        onSetNextRun: widget.onSetNextRun,
+                        onQuickRun: widget.onQuickRun,
+                        onQuickWait: widget.onQuickWait,
+                        onEditTask: widget.onEditTask,
+                        onDisableTask: _disableTask,
+                        onDismissed: _markTaskHidden,
+                        dragEnabled: widget.controller.canUseDesktopDragCopy,
+                        swipeEnabled: !_isSwipeDisabled(task),
+                        activeDragPayload: dragPayload,
+                      );
+                    },
+                  ),
+          ),
+        ],
       );
     });
   }
 
-  List<_StatusTaskData> _collectTasks() {
-    final result = <_StatusTaskData>[];
-    final runningTask = scriptModel.runningTask.value;
-    if (runningTask.taskName.value.trim().isNotEmpty) {
-      result.add(
-        _StatusTaskData(
-          name: runningTask.taskName.value,
-          type: _StatusTaskType.running,
-        ),
-      );
+  /// Builds the local overview search field above the task list.
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      decoration: InputDecoration(
+        isDense: true,
+        prefixIcon: const Icon(Icons.search_rounded),
+        hintText: I18n.taskSearchHint.tr,
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: (value) => setState(() {
+        _searchQuery = value.trim().toLowerCase();
+      }),
+    );
+  }
+
+  /// Returns the placeholder message for the current filtered view.
+  String get _emptyMessage {
+    return _searchQuery.isEmpty ? I18n.homeNoTask.tr : I18n.taskNotFound.tr;
+  }
+
+  /// Collects the current overview task snapshot from the active script model.
+  List<TaskStatusViewData> _collectTasks(ScriptModel model) {
+    final tasks = <TaskStatusViewData>[];
+    final runningName = model.runningTask.value.taskName.value.trim();
+    if (runningName.isNotEmpty) {
+      tasks.add(TaskStatusViewData(
+        rowId: 'running::$runningName',
+        name: runningName,
+        type: TaskStatusType.running,
+      ));
     }
-    result.addAll(
-      scriptModel.pendingTaskList
-          .where((task) => task.taskName.value.trim().isNotEmpty)
-          .map(
-            (task) => _StatusTaskData(
-              name: task.taskName.value,
-              type: _StatusTaskType.pending,
-              timeText: task.nextRun.value.trim(),
-            ),
-          ),
-    );
-    result.addAll(
-      scriptModel.waitingTaskList
-          .where((task) => task.taskName.value.trim().isNotEmpty)
-          .map(
-            (task) => _StatusTaskData(
-              name: task.taskName.value,
-              type: _StatusTaskType.waiting,
-              timeText: task.nextRun.value.trim(),
-            ),
-          ),
-    );
-    return result;
+    for (final entry in model.pendingTaskList.indexed) {
+      final name = entry.$2.taskName.value.trim();
+      if (name.isEmpty) {
+        continue;
+      }
+      final timeText = entry.$2.nextRun.value.trim();
+      tasks.add(TaskStatusViewData(
+        rowId: 'pending::${entry.$1}::$name::$timeText',
+        name: name,
+        type: TaskStatusType.pending,
+        timeText: timeText,
+      ));
+    }
+    for (final entry in model.waitingTaskList.indexed) {
+      final name = entry.$2.taskName.value.trim();
+      if (name.isEmpty) {
+        continue;
+      }
+      final timeText = entry.$2.nextRun.value.trim();
+      tasks.add(TaskStatusViewData(
+        rowId: 'waiting::${entry.$1}::$name::$timeText',
+        name: name,
+        type: TaskStatusType.waiting,
+        timeText: timeText,
+      ));
+    }
+    return tasks;
   }
-}
 
-class _StatusTaskRow extends StatelessWidget {
-  const _StatusTaskRow({
-    required this.controller,
-    required this.sourceScriptName,
-    required this.task,
-    required this.canQuickSchedule,
-    required this.onSetNextRun,
-    required this.onQuickRun,
-    required this.onQuickWait,
-    required this.onEditTask,
-    required this.dragEnabled,
-    required this.activeDragPayload,
-  });
+  /// Returns whether one overview task matches the local search query.
+  bool _matchesTaskQuery(TaskStatusViewData task) {
+    if (_searchQuery.isEmpty) {
+      return true;
+    }
+    final localized = task.name.tr.toLowerCase();
+    final original = task.name.toLowerCase();
+    return localized.contains(_searchQuery) || original.contains(_searchQuery);
+  }
 
-  final HomeDashboardController controller;
-  final String sourceScriptName;
-  final _StatusTaskData task;
-  final bool canQuickSchedule;
-  final Future<void> Function(String taskName, String nextRun) onSetNextRun;
-  final Future<void> Function(String taskName) onQuickRun;
-  final Future<void> Function(String taskName) onQuickWait;
-  final Future<void> Function(String taskName) onEditTask;
-  final bool dragEnabled;
-  final ConfigDragPayload? activeDragPayload;
-  static const _actionExtent = 132.0;
-  static const _minRowHeight = 40.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final rowBackground = _backgroundColor(context);
-    final isDraggingTask = activeDragPayload?.matchesTask(
-          sourceScriptName,
-          task.name,
-        ) ??
-        false;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: isDraggingTask
-            ? Theme.of(context)
-                .colorScheme
-                .primaryContainer
-                .withValues(alpha: 0.42)
-            : rowBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _borderColor(context)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: SplitScrollRow(
-          minHeight: _minRowHeight,
-          trailingExtent: _actionExtent,
-          trailingBackgroundColor: rowBackground,
-          trailing: _TaskActionBar(
-            onQuickRun: canQuickSchedule ? () => onQuickRun(task.name) : null,
-            onQuickWait: canQuickSchedule ? () => onQuickWait(task.name) : null,
-            onEditTask: () => onEditTask(task.name),
-          ),
-          leading: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _TaskTypeIcon(type: task.type),
-              const SizedBox(width: 10),
-              _TaskMeta(
-                controller: controller,
-                sourceScriptName: sourceScriptName,
-                task: task,
-                onSetNextRun: onSetNextRun,
-                dragEnabled: dragEnabled,
-              ),
-            ],
-          ),
-        ),
-      ),
+  /// Requests disabling one overview task across the current linker scope.
+  Future<bool> _disableTask(String taskName) {
+    return widget.controller.toggleTaskEnabled(
+      scriptName: widget.scriptModel.name,
+      taskName: taskName,
+      enable: false,
     );
   }
 
-  Color _backgroundColor(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return switch (task.type) {
-      _StatusTaskType.running =>
-        colorScheme.tertiaryContainer.withValues(alpha: 0.24),
-      _StatusTaskType.pending =>
-        colorScheme.secondaryContainer.withValues(alpha: 0.2),
-      _StatusTaskType.waiting => colorScheme.surfaceContainerHigh,
-    };
+  /// Returns whether the overview row must reject left-swipe interaction.
+  bool _isSwipeDisabled(TaskStatusViewData task) {
+    return widget.scriptModel.state.value == ScriptState.running &&
+        task.type == TaskStatusType.running;
   }
 
-  Color _borderColor(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return switch (task.type) {
-      _StatusTaskType.running => Colors.green.withValues(alpha: 0.28),
-      _StatusTaskType.pending => Colors.orange.withValues(alpha: 0.3),
-      _StatusTaskType.waiting =>
-        colorScheme.outlineVariant.withValues(alpha: 0.7),
-    };
+  /// Records one task that already finished its left-slide removal animation.
+  void _markTaskHidden(String rowId) {
+    setState(() {
+      _hiddenTaskIds.add(rowId);
+    });
   }
-}
 
-class _TaskMeta extends StatelessWidget {
-  const _TaskMeta({
-    required this.controller,
-    required this.sourceScriptName,
-    required this.task,
-    required this.onSetNextRun,
-    required this.dragEnabled,
-  });
-
-  final HomeDashboardController controller;
-  final String sourceScriptName;
-  final _StatusTaskData task;
-  final Future<void> Function(String taskName, String nextRun) onSetNextRun;
-  final bool dragEnabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final payload = controller.buildTaskDragPayload(
-      sourceConfig: sourceScriptName,
-      taskName: task.name,
-    );
-    final title = Text(
-      task.name.tr,
-      maxLines: 1,
-      overflow: TextOverflow.visible,
-      softWrap: false,
-      style: Theme.of(context).textTheme.labelLarge,
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        dragEnabled
-            ? Draggable<ConfigDragPayload>(
-                data: payload,
-                feedback: DragCopyFeedback(label: payload.displayLabel),
-                onDragStarted: () => controller.startConfigDrag(payload),
-                onDragCompleted: controller.clearConfigDrag,
-                onDraggableCanceled: (_, __) => controller.clearConfigDrag(),
-                onDragEnd: (_) => controller.clearConfigDrag(),
-                child: title,
-              )
-            : title,
-        if (task.timeText.isNotEmpty) ...[
-          const SizedBox(height: 2),
-          DateTimePicker(
-            value: task.timeText,
-            notHoverStyle: Theme.of(context).textTheme.labelMedium,
-            hoverStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-            onChange: (value) {
-              unawaited(onSetNextRun(task.name, value));
-            },
-          ),
-        ],
-      ],
-    );
+  /// Clears local search and hidden-row state when the active config changes.
+  void _clearSearchState() {
+    _hiddenTaskIds.clear();
+    _searchController.clear();
+    _searchQuery = '';
   }
-}
 
-class _TaskTypeIcon extends StatelessWidget {
-  const _TaskTypeIcon({
-    required this.type,
-  });
-
-  final _StatusTaskType type;
-
-  @override
-  Widget build(BuildContext context) {
-    final icon = switch (type) {
-      _StatusTaskType.running =>
-        const Icon(Icons.bolt_rounded, color: Colors.green),
-      _StatusTaskType.pending =>
-        const Icon(Icons.layers_rounded, color: Colors.orange),
-      _StatusTaskType.waiting =>
-        const Icon(Icons.schedule_rounded, color: Colors.blueGrey),
-    };
-    return SizedBox(width: 28, height: 28, child: Center(child: icon));
+  /// Releases optimistic hidden rows once the backend snapshot no longer emits them.
+  void _pruneHiddenTaskIds(List<TaskStatusViewData> tasks) {
+    final activeIds = tasks.map((task) => task.rowId).toSet();
+    final staleIds = _hiddenTaskIds
+        .where((rowId) => !activeIds.contains(rowId))
+        .toList();
+    if (staleIds.isEmpty) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || staleIds.isEmpty) {
+        return;
+      }
+      setState(() {
+        _hiddenTaskIds.removeAll(staleIds);
+      });
+    });
   }
-}
-
-class _TaskActionBar extends StatelessWidget {
-  const _TaskActionBar({
-    required this.onQuickRun,
-    required this.onQuickWait,
-    required this.onEditTask,
-  });
-
-  final VoidCallback? onQuickRun;
-  final VoidCallback? onQuickWait;
-  final VoidCallback? onEditTask;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _TaskActionIcon(
-          icon: Icons.flash_on_rounded,
-          tooltip: I18n.homeQuickRun.tr,
-          onPressed: onQuickRun,
-        ),
-        _TaskActionIcon(
-          icon: Icons.schedule_rounded,
-          tooltip: I18n.homeQuickWait.tr,
-          onPressed: onQuickWait,
-        ),
-        _TaskActionIcon(
-          icon: Icons.tune_rounded,
-          tooltip: I18n.homeOpenTaskParams.tr,
-          onPressed: onEditTask,
-        ),
-      ],
-    );
-  }
-}
-
-class _TaskActionIcon extends StatelessWidget {
-  const _TaskActionIcon({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
-      onPressed: onPressed,
-      icon: Icon(icon),
-    );
-  }
-}
-
-class _StatusTaskData {
-  const _StatusTaskData({
-    required this.name,
-    required this.type,
-    this.timeText = '',
-  });
-
-  final String name;
-  final _StatusTaskType type;
-  final String timeText;
-}
-
-enum _StatusTaskType {
-  running,
-  pending,
-  waiting,
 }

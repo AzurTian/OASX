@@ -38,13 +38,13 @@ class ConfigActions {
     return success;
   }
 
-  static Future<void> showRenameDialog({
+  static Future<String?> showRenameDialog({
     required ScriptService scriptService,
     required String oldName,
   }) async {
     var newName = oldName;
     final formKey = GlobalKey<FormState>();
-    Get.defaultDialog(
+    final result = await Get.defaultDialog<String>(
       title: I18n.rename.tr,
       textConfirm: I18n.confirm.tr,
       textCancel: I18n.cancel.tr,
@@ -70,15 +70,19 @@ class ConfigActions {
         if (!(formKey.currentState?.validate() ?? false)) {
           return;
         }
-        Get.back();
-        await renameScript(
+        final renamed = await renameScript(
           scriptService: scriptService,
           oldName: oldName,
           newName: newName,
         );
+        if (!renamed) {
+          return;
+        }
+        Get.back(result: newName);
       },
       onCancel: () {},
     );
+    return result;
   }
 
   static Future<void> showDeleteDialog({

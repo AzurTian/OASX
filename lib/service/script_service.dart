@@ -16,6 +16,7 @@ import 'package:oasx/modules/log/script_log_controller.dart';
 
 part 'script_service_ws.dart';
 part 'script_service_auto.dart';
+part 'script_service_config.dart';
 
 class ScriptService extends GetxService {
   // ignore: unused_field
@@ -151,34 +152,5 @@ class ScriptService extends GetxService {
     }
     scriptModelMap.clear();
     scriptOrderList.clear();
-  }
-
-  Future<bool> renameConfig(String oldName, String newName) async {
-    final ret = await ApiClient().renameConfig(oldName, newName);
-    if (!ret) {
-      return false;
-    }
-    if (Get.isRegistered<ScriptLogController>(tag: oldName)) {
-      try {
-        Get.delete<ScriptLogController>(tag: oldName, force: true);
-      } catch (_) {}
-    }
-    await refreshScriptsFromServer();
-    return true;
-  }
-
-  Future<bool> deleteConfig(String name) async {
-    final ret = await ApiClient().deleteConfig(name);
-    if (!ret) {
-      return false;
-    }
-    if (Get.isRegistered<ScriptLogController>(tag: name)) {
-      try {
-        Get.delete<ScriptLogController>(tag: name, force: true);
-      } catch (_) {}
-    }
-    deleteScriptModel(name);
-    await refreshScriptsFromServer();
-    return true;
   }
 }
