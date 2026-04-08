@@ -7,6 +7,14 @@ import 'package:oasx/modules/home/widgets/statistics_history_axis_layout.dart';
 import 'package:oasx/modules/home/widgets/statistics_formatters.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
+const _kHistoryAxisLeadingWidth = 116.0;
+const _kHistoryTaskLabelWidth = 108.0;
+const _kHistoryTaskLabelSpacing = 8.0;
+const _kHistoryAxisSpacing = 8.0;
+const _kHistoryRowHeight = 44.0;
+const _kHistoryRowSpacing = 10.0;
+const _kHistoryMaxVisibleRows = 5;
+
 /// Task comparison chart with a fixed top axis.
 class ScriptStatisticsHistoryChart extends StatelessWidget {
   /// Creates a task comparison chart.
@@ -63,23 +71,33 @@ class ScriptStatisticsHistoryChart extends StatelessWidget {
           axisMax: axisMax,
           metric: metric,
         ),
-        const SizedBox(height: 8),
-        ...List.generate(entries.length, (index) {
-          final entry = entries[index];
-          return Padding(
-            padding:
-                EdgeInsets.only(bottom: index == entries.length - 1 ? 0 : 10),
-            child: _HistoryBarRow(
-              entry: entry,
-              metric: metric,
-              axisMax: axisMax,
-              focused: entry.key == focusedTaskName,
-              flashing: highlightRealtimeTask && flashingTaskName == entry.key,
-              flashToken: flashToken,
-              onTap: () => onSelectTask(entry.key),
-            ),
-          );
-        }),
+        const SizedBox(height: _kHistoryAxisSpacing),
+        SizedBox(
+          height: _resolveViewportHeight(),
+          child: ListView.separated(
+            primary: false,
+            padding: EdgeInsets.zero,
+            physics: entries.length > _kHistoryMaxVisibleRows
+                ? const ClampingScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
+            itemCount: entries.length,
+            separatorBuilder: (_, __) =>
+                const SizedBox(height: _kHistoryRowSpacing),
+            itemBuilder: (context, index) {
+              final entry = entries[index];
+              return _HistoryBarRow(
+                entry: entry,
+                metric: metric,
+                axisMax: axisMax,
+                focused: entry.key == focusedTaskName,
+                flashing:
+                    highlightRealtimeTask && flashingTaskName == entry.key,
+                flashToken: flashToken,
+                onTap: () => onSelectTask(entry.key),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -130,6 +148,20 @@ class ScriptStatisticsHistoryChart extends StatelessWidget {
     }
     return math.max((maxValue / 5).ceilToDouble(), 1.0).toDouble();
   }
+
+  /// Resolves the visible viewport height from the number of visible rows.
+  double _resolveViewportHeight() {
+    return _resolveRowsHeight(
+        math.min(entries.length, _kHistoryMaxVisibleRows));
+  }
+
+  /// Resolves the row stack height for the provided row count.
+  double _resolveRowsHeight(int rowCount) {
+    if (rowCount <= 0) {
+      return 0;
+    }
+    return rowCount * _kHistoryRowHeight + (rowCount - 1) * _kHistoryRowSpacing;
+  }
 }
 
 class _HistoryAxisHeader extends StatelessWidget {
@@ -148,7 +180,7 @@ class _HistoryAxisHeader extends StatelessWidget {
     final labelStyle = Theme.of(context).textTheme.labelSmall;
     return Row(
       children: [
-        const SizedBox(width: 116),
+        const SizedBox(width: _kHistoryAxisLeadingWidth),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -234,7 +266,7 @@ class _HistoryBarRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 108,
+          width: _kHistoryTaskLabelWidth,
           child: Text(
             entry.key.tr,
             maxLines: 2,
@@ -245,7 +277,7 @@ class _HistoryBarRow extends StatelessWidget {
                 ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: _kHistoryTaskLabelSpacing),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -261,7 +293,7 @@ class _HistoryBarRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   onTap: onTap,
                   child: SizedBox(
-                    height: 44,
+                    height: _kHistoryRowHeight,
                     child: Stack(
                       alignment: Alignment.centerLeft,
                       children: [

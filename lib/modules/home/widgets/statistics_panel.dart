@@ -10,8 +10,10 @@ import 'package:oasx/translation/i18n_content.dart';
 const _kStatisticsPanelHorizontalPadding = 12.0;
 const _kStatisticsPanelSectionSpacing = 12.0;
 const _kStatisticsSummarySpacing = 8.0;
-const _kStatisticsRuntimeCardMinWidth = 194.0;
-const _kStatisticsCountCardMinWidth = 108.0;
+const _kStatisticsDropdownBorderRadius = 10.0;
+const _kStatisticsDropdownHorizontalPadding = 10.0;
+const _kStatisticsDateDropdownMinWidth = 96.0;
+const _kStatisticsDateMenuMaxVisibleItems = 4;
 
 /// Main statistics tab content for the active script.
 class ScriptStatisticsPanel extends StatelessWidget {
@@ -131,11 +133,10 @@ class _HeaderSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _HeaderTopRow(
+            statistics: statistics,
             availableDateKeys: availableDateKeys,
             controller: controller,
           ),
-          const SizedBox(height: _kStatisticsPanelSectionSpacing),
-          _SummaryCards(day: statistics),
           const SizedBox(height: _kStatisticsPanelSectionSpacing),
           _HeaderFiltersRow(
             controller: controller,
@@ -149,26 +150,46 @@ class _HeaderSection extends StatelessWidget {
 
 class _HeaderTopRow extends StatelessWidget {
   const _HeaderTopRow({
+    required this.statistics,
     required this.availableDateKeys,
     required this.controller,
   });
 
+  final ScriptStatisticsDay statistics;
   final List<String> availableDateKeys;
   final HomeStatisticsController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.start,
-      spacing: _kStatisticsSummarySpacing,
-      runSpacing: _kStatisticsSummarySpacing,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _StatusIcon(controller: controller),
-        _HistoryDateDropdown(
-          values: availableDateKeys,
-          selectedValue: controller.selectedDateKey.value,
-          onChanged: controller.selectHistoryDate,
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _StatusIcon(controller: controller),
+                const SizedBox(width: _kStatisticsSummarySpacing),
+                _HistoryDateDropdown(
+                  values: availableDateKeys,
+                  selectedValue: controller.selectedDateKey.value,
+                  onChanged: controller.selectHistoryDate,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: _kStatisticsSummarySpacing),
+        Text(
+          formatStatisticsDuration(statistics.totalRuntimeSeconds),
+          textAlign: TextAlign.end,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
         ),
       ],
     );
@@ -299,105 +320,6 @@ class _StatusIcon extends StatelessWidget {
   }
 }
 
-class _SummaryCards extends StatelessWidget {
-  const _SummaryCards({required this.day});
-
-  final ScriptStatisticsDay day;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: _kStatisticsSummarySpacing,
-      runSpacing: _kStatisticsSummarySpacing,
-      children: [
-        SizedBox(
-          width: _kStatisticsRuntimeCardMinWidth,
-          child: _SummaryCard(
-            data: _SummaryCardData(
-              label: I18n.homeStatsSummaryRunDuration.tr,
-              value: formatStatisticsDuration(day.totalRuntimeSeconds),
-            ),
-          ),
-        ),
-        SizedBox(
-          width: _kStatisticsCountCardMinWidth,
-          child: _SummaryCard(
-            data: _SummaryCardData(
-              label: I18n.homeStatsSummaryRunTaskCount.tr,
-              value: day.taskCount.toString(),
-            ),
-          ),
-        ),
-        SizedBox(
-          width: _kStatisticsCountCardMinWidth,
-          child: _SummaryCard(
-            data: _SummaryCardData(
-              label: I18n.homeStatsSummaryTotalBattleCount.tr,
-              value: day.totalBattleCount.toString(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryCardData {
-  const _SummaryCardData({required this.label, required this.value});
-
-  final String label;
-  final String value;
-}
-
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({required this.data});
-
-  final _SummaryCardData data;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      color: scheme.brightness == Brightness.dark
-          ? scheme.surfaceContainerHigh
-          : scheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: scheme.brightness == Brightness.dark
-              ? scheme.outlineVariant.withValues(alpha: 0.9)
-              : scheme.outlineVariant.withValues(alpha: 0.55),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              data.label,
-              style: Theme.of(context).textTheme.labelMedium,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              data.value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ChartCard extends StatelessWidget {
   const _ChartCard({
     required this.controller,
@@ -467,32 +389,18 @@ class _MetricDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<ScriptStatisticsChartMetric>(
-            value: value,
-            onChanged: (next) {
-              if (next != null) {
-                onChanged(next);
-              }
-            },
-            items: ScriptStatisticsChartMetric.values.map((metric) {
-              return DropdownMenuItem(
-                value: metric,
-                child: Text(_labelForMetric(metric)),
-              );
-            }).toList(),
+    final options = ScriptStatisticsChartMetric.values
+        .map(
+          (metric) => _StatisticsMenuOption(
+            value: metric,
+            label: _labelForMetric(metric),
           ),
-        ),
-      ),
+        )
+        .toList(growable: false);
+    return _StatisticsPopupSelector<ScriptStatisticsChartMetric>(
+      options: options,
+      value: value,
+      onChanged: onChanged,
     );
   }
 
@@ -525,41 +433,166 @@ class _SortFieldDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = <DropdownMenuItem<ScriptStatisticsChartSortField>>[
-      DropdownMenuItem(
+    final options = <_StatisticsMenuOption<ScriptStatisticsChartSortField>>[
+      _StatisticsMenuOption(
         value: ScriptStatisticsChartSortField.data,
-        child: Text(I18n.homeStatsSortByData.tr),
+        label: I18n.homeStatsSortByData.tr,
       ),
       if (allowTime)
-        DropdownMenuItem(
+        _StatisticsMenuOption(
           value: ScriptStatisticsChartSortField.time,
-          child: Text(I18n.homeStatsSortByTime.tr),
+          label: I18n.homeStatsSortByTime.tr,
         ),
     ];
-    final resolvedValue = items.any((item) => item.value == value)
+    final resolvedValue = options.any((option) => option.value == value)
         ? value
         : ScriptStatisticsChartSortField.data;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<ScriptStatisticsChartSortField>(
-            value: resolvedValue,
-            onChanged: (next) {
-              if (next != null) {
-                onChanged(next);
-              }
-            },
-            items: items,
+    return _StatisticsPopupSelector<ScriptStatisticsChartSortField>(
+      options: options,
+      value: resolvedValue,
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _StatisticsMenuOption<T> {
+  const _StatisticsMenuOption({required this.value, required this.label});
+
+  final T value;
+  final String label;
+}
+
+class _StatisticsPopupSelector<T> extends StatelessWidget {
+  const _StatisticsPopupSelector({
+    required this.options,
+    required this.value,
+    required this.onChanged,
+    this.minWidth = 0,
+  });
+
+  final List<_StatisticsMenuOption<T>> options;
+  final T value;
+  final ValueChanged<T> onChanged;
+  final double minWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedOption =
+        options.where((option) => option.value == value).firstOrNull ??
+            options.firstOrNull;
+    if (resolvedOption == null) {
+      return const SizedBox.shrink();
+    }
+    return ConstrainedBox(
+      constraints: BoxConstraints(minWidth: minWidth),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(_kStatisticsDropdownBorderRadius),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(_kStatisticsDropdownBorderRadius),
+          onTap: () => _showMenu(context, resolvedOption),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                _kStatisticsDropdownBorderRadius,
+              ),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: _kStatisticsDropdownHorizontalPadding,
+                vertical: 10,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      resolvedOption.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(Icons.arrow_drop_down_rounded, size: 20),
+                ],
+              ),
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  /// Opens the anchored popup menu for the current selector.
+  Future<void> _showMenu(
+    BuildContext context,
+    _StatisticsMenuOption<T> resolvedOption,
+  ) async {
+    final position = _resolveMenuPosition(context);
+    if (position == null) {
+      return;
+    }
+    final selectedValue = await showMenu<T>(
+      context: context,
+      position: position,
+      initialValue: resolvedOption.value,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(_kStatisticsDropdownBorderRadius),
+      ),
+      constraints: const BoxConstraints(
+        maxHeight:
+            _kStatisticsDateMenuMaxVisibleItems * kMinInteractiveDimension,
+      ),
+      items: options.map((option) {
+        return PopupMenuItem<T>(
+          value: option.value,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  option.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (option.value == resolvedOption.value) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.check_rounded,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ],
+            ],
+          ),
+        );
+      }).toList(growable: false),
+    );
+    if (selectedValue != null && selectedValue != resolvedOption.value) {
+      onChanged(selectedValue);
+    }
+  }
+
+  /// Resolves the popup menu anchor from the selector render box.
+  RelativeRect? _resolveMenuPosition(BuildContext context) {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    if (renderBox == null || overlay == null) {
+      return null;
+    }
+    final topLeft = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
+    final bottomRight = renderBox.localToGlobal(
+      renderBox.size.bottomRight(Offset.zero),
+      ancestor: overlay,
+    );
+    return RelativeRect.fromRect(
+      Rect.fromPoints(topLeft, bottomRight),
+      Offset.zero & overlay.size,
     );
   }
 }
@@ -577,40 +610,19 @@ class _HistoryDateDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedValue =
-        values.contains(selectedValue) && selectedValue.isNotEmpty
-            ? selectedValue
-            : values.firstOrNull;
-    if (resolvedValue == null) {
-      return const SizedBox.shrink();
-    }
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: resolvedValue,
-            menuMaxHeight: kMinInteractiveDimension * 6,
-            onChanged: (next) {
-              if (next != null) {
-                onChanged(next);
-              }
-            },
-            items: values.map((dateKey) {
-              return DropdownMenuItem(
-                value: dateKey,
-                child: Text(formatStatisticsDayLabel(dateKey)),
-              );
-            }).toList(),
+    final options = values
+        .map(
+          (dateKey) => _StatisticsMenuOption(
+            value: dateKey,
+            label: formatStatisticsDayLabel(dateKey),
           ),
-        ),
-      ),
+        )
+        .toList(growable: false);
+    return _StatisticsPopupSelector<String>(
+      options: options,
+      value: selectedValue,
+      onChanged: onChanged,
+      minWidth: _kStatisticsDateDropdownMinWidth,
     );
   }
 }
