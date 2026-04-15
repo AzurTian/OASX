@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_menu = {
@@ -56,6 +56,3 @@ final Map<String, String> _cn_menu = {
   I18n.demonRetreat: '首领退治',
   I18n.dyeTrials: '灵染试炼',
 };
-
-
-

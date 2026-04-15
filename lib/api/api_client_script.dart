@@ -1,6 +1,7 @@
-﻿part of 'api_client.dart';
+part of 'api_client.dart';
 
 extension ApiClientScriptX on ApiClient {
+  /// Loads the full argument model for one task.
   Future<Map<String, dynamic>> getScriptTask(
     String scriptName,
     String taskName,
@@ -9,6 +10,7 @@ extension ApiClientScriptX on ApiClient {
     return res.data ?? {};
   }
 
+  /// Persists one task argument through the generic value endpoint.
   Future<bool> putScriptArg(
     String scriptName,
     String taskName,
@@ -26,11 +28,12 @@ extension ApiClientScriptX on ApiClient {
     return res.isSuccess && res.data == true;
   }
 
-  Future<bool> syncNextRun(
+  /// Synchronizes one task back into the waiting queue immediately.
+  Future<bool> syncScriptTaskNextRun(
     String scriptName,
-    String taskName, {
-    String? targetDt,
-  }) async {
+    String taskName,
+    String targetDt,
+  ) async {
     final res = await request(
       () => put(
         '/$scriptName/$taskName/sync_next_run',

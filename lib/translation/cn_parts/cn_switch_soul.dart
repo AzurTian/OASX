@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_switch_soul = {
@@ -11,9 +11,7 @@ final Map<String, String> _cn_switch_soul = {
 预设组支持[1-7], 预设队伍支持[1-4]''',
   'enable_switch_by_name': '通过OCR来切换御魂预设',
   'enable_switch_by_name_help':
-  '这是切换御魂的另一种方式，对比上方的方式而言支持更多的预设，但是同样的你还确保预设队伍是锁定状态的',
+      '这是切换御魂的另一种方式，对比上方的方式而言支持更多的预设，但是同样的你还确保预设队伍是锁定状态的',
   'group_name': '御魂分组名',
   'team_name': '队伍名',
 };
-
-

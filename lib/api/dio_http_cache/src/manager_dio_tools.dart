@@ -1,4 +1,4 @@
-﻿// ignore_for_file: prefer_is_empty
+// ignore_for_file: prefer_is_empty
 part of 'manager_dio.dart';
 
 extension DioCacheManagerToolsX on DioCacheManager {
@@ -38,7 +38,8 @@ extension DioCacheManagerToolsX on DioCacheManager {
     dynamic data,
   }) =>
       deleteByPrimaryKeyAndSubKeyWithUri(
-        _getUriByPath(_baseUrl, path, data: data, queryParameters: queryParameters),
+        _getUriByPath(_baseUrl, path,
+            data: data, queryParameters: queryParameters),
         requestMethod: requestMethod,
         subKey: subKey,
         data: data,
@@ -65,4 +66,3 @@ extension DioCacheManagerToolsX on DioCacheManager {
     ).uri;
   }
 }
-

@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/config/global.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
@@ -22,6 +22,7 @@ class SettingsController extends GetxController {
   bool _loginConfigChanged = false;
 
   final address = ''.obs;
+  final updateProxyUrl = ''.obs;
   final username = ''.obs;
   final password = ''.obs;
 
@@ -32,6 +33,7 @@ class SettingsController extends GetxController {
     autoDeploy.value = (storage.read(StorageKey.autoDeploy.name) ?? false) &&
         PlatformUtils.isDesktop;
     address.value = storage.read(StorageKey.address.name) ?? '';
+    updateProxyUrl.value = storage.read(StorageKey.updateProxyUrl.name) ?? '';
     username.value = storage.read(StorageKey.username.name) ?? '';
     password.value = storage.read(StorageKey.password.name) ?? '';
 
@@ -75,6 +77,15 @@ class SettingsController extends GetxController {
     _loginConfigChanged = true;
   }
 
+  void updateUpdateProxyUrl(String value) {
+    final next = value.trim();
+    if (updateProxyUrl.value == next) {
+      return;
+    }
+    updateProxyUrl.value = next;
+    storage.write(StorageKey.updateProxyUrl.name, next);
+  }
+
   void updateUsername(String value) {
     final next = value.trim();
     if (username.value == next) {
@@ -102,6 +113,11 @@ class SettingsController extends GetxController {
 
   void _syncApiAddress() {
     if (address.value.isEmpty) {
+      if (PlatformUtils.isWeb) {
+        ApiClient().clearAddress();
+        return;
+      }
+      ApiClient().resetAddress();
       return;
     }
     final normalized = address.value.startsWith('http://') ||
@@ -121,8 +137,7 @@ class SettingsController extends GetxController {
         unawaited(_resetDashboardAfterKillServer());
       }
     } else if (showTip) {
-      Get.snackbar(
-          I18n.killServerFailure.tr, I18n.killServerFailureMsg.tr);
+      Get.snackbar(I18n.killServerFailure.tr, I18n.killServerFailureMsg.tr);
     }
     return success;
   }

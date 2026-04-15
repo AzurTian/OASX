@@ -1,4 +1,4 @@
-﻿part of 'log_widget.dart';
+part of 'log_widget.dart';
 
 extension _LogWidgetScroll on _LogWidgetState {
   void _scrollLogs({isJump = false, force = false, scrollOffset = -1}) {
@@ -21,10 +21,10 @@ extension _LogWidgetScroll on _LogWidgetState {
       animateMs = animateMs.clamp(minAnimateMs, maxAnimateMs);
       _scrollController!
           .animateTo(
-            targetPos,
-            duration: Duration(milliseconds: animateMs),
-            curve: Curves.easeOut,
-          )
+        targetPos,
+        duration: Duration(milliseconds: animateMs),
+        curve: Curves.easeOut,
+      )
           .whenComplete(() {
         if (_scrollController == null || !_scrollController!.hasClients) return;
         final latestExtent = _scrollController!.position.maxScrollExtent;

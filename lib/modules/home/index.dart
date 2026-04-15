@@ -2,17 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oasx/modules/home/controllers/home_dashboard_controller.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
+import 'package:oasx/modules/common/widgets/add_config_dialog.dart';
+import 'package:oasx/modules/common/widgets/appbar.dart';
+import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
+import 'package:oasx/modules/home/widgets/config_workbench.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/check_version.dart';
-import 'package:oasx/modules/common/widgets/add_config_dialog.dart';
-import 'package:oasx/modules/home/widgets/home_constants.dart';
-import 'package:oasx/modules/home/widgets/home_overview_header.dart';
-import 'package:oasx/modules/home/widgets/home_script_grid.dart';
-import 'package:oasx/modules/home/widgets/home_task_settings_dialog.dart';
-import 'package:oasx/modules/common/widgets/appbar.dart';
+import 'package:oasx/utils/platform_utils.dart';
 
 part 'home_view_actions.dart';
 
@@ -31,12 +28,32 @@ class _HomeViewState extends State<HomeView> {
   bool _isAddingScript = false;
   bool _isRefreshingScripts = false;
 
+  void _setAddingScript(bool value) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isAddingScript = value;
+    });
+  }
+
+  void _setRefreshingScripts(bool value) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isRefreshingScripts = value;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      checkUpdate();
-    });
+    if (!PlatformUtils.isWeb) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        checkUpdate();
+      });
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.checkStartupConnection();
     });
@@ -86,14 +103,20 @@ class _HomeViewState extends State<HomeView> {
     }
 
     return Scaffold(
-      appBar: buildPlatformAppBar(context, routePath: '/home'),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/settings'),
-        child: const Icon(Icons.settings_rounded),
+      appBar: buildPlatformAppBar(
+        context,
+        routePath: '/home',
+        trailingActions: PlatformUtils.usesDesktopLayout
+            ? [
+                IconButton(
+                  tooltip: I18n.setting.tr,
+                  onPressed: () => Get.toNamed('/settings'),
+                  icon: const Icon(Icons.settings_rounded),
+                ),
+              ]
+            : const [],
       ),
       body: body,
     );
   }
 }
-
-

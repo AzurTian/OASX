@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_kitty_shop_config = {
@@ -9,5 +9,3 @@ final Map<String, String> _cn_kitty_shop_config = {
   'kitty_quit_when_finished': '达成目标后退出',
   'kitty_quit_when_finished_help': '',
 };
-
-

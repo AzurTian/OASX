@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/config/theme.dart' show darkTheme, lightTheme;
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
+import 'package:oasx/service/autostart_service.dart';
+import 'package:oasx/service/app_update_service.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/service/system_tray_service.dart';
@@ -13,6 +15,7 @@ import 'package:oasx/service/theme_service.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:oasx/service/window_service.dart';
 import 'package:oasx/translation/i18n.dart';
+import 'package:oasx/utils/logger.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:oasx/routes.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -68,16 +71,19 @@ Future<void> initService() async {
   await GetStorage.init();
 
   Get.put(SettingsController(), permanent: true);
-  Get.put(SystemTrayService(), permanent: true);
+  if (PlatformUtils.isDesktop) {
+    Get.put(SystemTrayService(), permanent: true);
+  }
   Get.lazyPut<WebSocketService>(() => WebSocketService(), fenix: true);
+  final windowService = Get.put(WindowService());
 
   await Future.wait([
+    initLogger(),
     Get.putAsync(() async => LocaleService()),
     Get.putAsync(() async => ThemeService()),
-    Get.putAsync(() async => WindowService()),
+    Get.putAsync(() async => AutoStartService(), permanent: true),
+    Get.putAsync(() async => AppUpdateService(), permanent: true),
+    windowService.ready,
     Get.putAsync(() async => ScriptService(), permanent: true),
   ]);
 }
-
-
-

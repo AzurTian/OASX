@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_global_game = {
@@ -92,6 +92,3 @@ final Map<String, String> _cn_global_game = {
   'costume_battle_8': '藏金台阁',
   'costume_battle_9': '莲华圣域',
 };
-
-
-

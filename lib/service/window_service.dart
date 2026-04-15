@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,8 +10,17 @@ import 'package:oasx/service/system_tray_service.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:window_manager/window_manager.dart';
 
+const Size _defaultDesktopWindowSize = Size(1200, 800);
+const Size _minimumWindowsWindowSize = Size(260, 420);
+
 class WindowService extends GetxService with WindowListener {
+  // ignore: unused_field
   final _storage = GetStorage();
+  final Completer<void> _readyCompleter = Completer<void>();
+  Future<void> get ready => _readyCompleter.future;
+
+  bool _didInitDesktop = false;
+  int _trayInitToken = 0;
 
   Timer? _debounceTimer;
   DateTime? _lastSaveTime;
@@ -20,41 +29,107 @@ class WindowService extends GetxService with WindowListener {
 
   @override
   Future<void> onInit() async {
-    if (PlatformUtils.isDesktop) {
-      await windowManager.ensureInitialized();
-      enableWindowState.value =
-          _storage.read(StorageKey.enableWindowState.name) ?? false;
-      enableSystemTray.value =
-          _storage.read(StorageKey.enableSystemTray.name) ?? false;
-      WindowStateModel? lastState = await initWindowState();
-      await initSystemTray();
-      windowManager.waitUntilReadyToShow(buildWindowOptions(lastState),
-          () async {
-        await windowManager.show();
-        await windowManager.focus();
-      });
-      windowManager.addListener(this);
+    try {
+      await _initDesktopIfNeeded();
+    } catch (e) {
+      printError(info: 'window init failed: $e');
+    } finally {
+      if (!_readyCompleter.isCompleted) {
+        _readyCompleter.complete();
+      }
     }
     super.onInit();
   }
 
-  Future<void> initSystemTray() async {
-    if (enableSystemTray.value) {
-      // 取消系统关闭事件
-      await windowManager.setPreventClose(true);
-      await Get.find<SystemTrayService>().showTray();
+  Future<void> _initDesktopIfNeeded() async {
+    if (_didInitDesktop || !PlatformUtils.isDesktop) return;
+    _didInitDesktop = true;
+
+    await windowManager.ensureInitialized();
+
+    enableWindowState.value =
+        _storage.read(StorageKey.enableWindowState.name) ?? false;
+    enableSystemTray.value =
+        _storage.read(StorageKey.enableSystemTray.name) ?? false;
+
+    final lastState = await initWindowState();
+
+    await windowManager.waitUntilReadyToShow(buildWindowOptions(lastState));
+    windowManager.addListener(this);
+
+    _kickoffSystemTrayInit();
+  }
+
+  void _kickoffSystemTrayInit() {
+    if (!PlatformUtils.isDesktop) return;
+
+    if (!enableSystemTray.value) {
+      unawaited(windowManager.setPreventClose(false));
+      return;
     }
+
+    // 托盘启用时，先保证可关闭；待托盘创建成功后再拦截关闭事件，避免开机登录时托盘未就绪导致“无法退出”。
+    unawaited(windowManager.setPreventClose(false));
+
+    final token = ++_trayInitToken;
+    unawaited(_ensureSystemTrayReady(token));
+  }
+
+  Future<void> _ensureSystemTrayReady(int token) async {
+    const maxAttempts = 30;
+    const retryDelay = Duration(seconds: 1);
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      if (!PlatformUtils.isDesktop) return;
+      if (!enableSystemTray.value) return;
+      if (token != _trayInitToken) return;
+      if (!Get.isRegistered<SystemTrayService>()) return;
+
+      final ok = await Get.find<SystemTrayService>().showTray();
+      if (ok) {
+        await windowManager.setPreventClose(true);
+        return;
+      }
+
+      await Future.delayed(retryDelay);
+    }
+
+    printInfo(info: 'system tray init failed, allow window close.');
   }
 
   WindowOptions buildWindowOptions(WindowStateModel? lastState) {
+    final minimumSize = PlatformUtils.isWindows
+        ? _minimumWindowsWindowSize
+        : null;
+    final initialSize = _resolveInitialWindowSize(
+      lastState,
+      minimumSize: minimumSize,
+    );
     return WindowOptions(
-      size: (lastState != null)
-          ? Size(lastState.width, lastState.height)
-          : const Size(1200, 800),
+      size: initialSize,
       center: lastState == null,
+      minimumSize: minimumSize,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
+    );
+  }
+
+  Size _resolveInitialWindowSize(
+    WindowStateModel? lastState, {
+    Size? minimumSize,
+  }) {
+    if (lastState == null) {
+      return _defaultDesktopWindowSize;
+    }
+    if (minimumSize == null) {
+      return Size(lastState.width, lastState.height);
+    }
+    return Size(
+      lastState.width < minimumSize.width ? minimumSize.width : lastState.width,
+      lastState.height < minimumSize.height
+          ? minimumSize.height
+          : lastState.height,
     );
   }
 
@@ -62,14 +137,17 @@ class WindowService extends GetxService with WindowListener {
     if (!enableWindowState.value) return null;
     final jsonStr = _storage.read(StorageKey.windowState.name);
     if (jsonStr == null) return null;
-    WindowStateModel? lastState =
-        WindowStateModel.fromJson(json.decode(jsonStr) as Map<String, dynamic>);
-    await windowManager.setBounds(Rect.fromLTWH(
-      lastState.x,
-      lastState.y,
-      lastState.width,
-      lastState.height,
-    ));
+    WindowStateModel? lastState = WindowStateModel.fromJson(
+      json.decode(jsonStr) as Map<String, dynamic>,
+    );
+    await windowManager.setBounds(
+      Rect.fromLTWH(
+        lastState.x,
+        lastState.y,
+        lastState.width,
+        lastState.height,
+      ),
+    );
     return lastState;
   }
 
@@ -136,11 +214,22 @@ class WindowService extends GetxService with WindowListener {
     _storage.write(StorageKey.enableWindowState.name, newVal);
   }
 
-  void updateSystemTrayEnable(bool newVal) {
+  Future<void> updateSystemTrayEnable(bool newVal) async {
     enableSystemTray.value = newVal;
     _storage.write(StorageKey.enableSystemTray.name, newVal);
-    // 开启托盘就阻止系统关闭事件,关闭托盘则允许系统关闭事件
-    windowManager.setPreventClose(newVal);
+
+    if (!PlatformUtils.isDesktop) return;
+
+    if (newVal) {
+      _kickoffSystemTrayInit();
+      return;
+    }
+
+    _trayInitToken++;
+    await windowManager.setPreventClose(false);
+    if (!Get.isRegistered<SystemTrayService>()) {
+      return;
+    }
+    await Get.find<SystemTrayService>().hideTray();
   }
 }
-

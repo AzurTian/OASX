@@ -1,6 +1,8 @@
 import 'dart:io';
-
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'package:oasx/utils/logger.dart';
 
 enum PlatformType {
   android,
@@ -36,6 +38,48 @@ class PlatformUtils {
       return PlatformType.windows;
     } else {
       return PlatformType.web;
+    }
+  }
+
+  Future<bool> isInstalledFromMicrosoftStore() async {
+    if (!isWindows) {
+      return false;
+    }
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final String executablePath = Platform.resolvedExecutable;
+      final String executableDirectory = File(executablePath).parent.path;
+      final packageName = packageInfo.packageName;
+      final String currentPath = Directory.current.path;
+      logger.i('Package Name: ${packageInfo.packageName}');
+      logger.i('App Name: ${packageInfo.appName}');
+      logger.i('Version: ${packageInfo.version}');
+      logger.i('Build Number: ${packageInfo.buildNumber}');
+      logger.i('Installer Store: ${packageInfo.installerStore}');
+      logger.i('Build Signature: ${packageInfo.buildSignature}');
+      logger.i('Current Directory: $currentPath');
+      logger.i('Executable Path: $executablePath');
+      logger.i('Executable Directory: $executableDirectory');
+
+      if (packageInfo.installerStore != null &&
+          packageInfo.installerStore!.toLowerCase().contains('microsoft')) {
+        return true;
+      }
+      if (packageInfo.buildSignature.contains('Microsoft')) {
+        return true;
+      }
+      if (packageName.contains('MicrosoftStore') ||
+          packageName.contains('MSIX')) {
+        return true;
+      }
+      final normalizedExecutablePath = executablePath.toLowerCase();
+      if (normalizedExecutablePath.contains('\\windowsapps\\') ||
+          normalizedExecutablePath.endsWith('.msix')) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -80,4 +124,6 @@ class PlatformUtils {
   static bool get isMobile => isAndroid || isIOS || isFuchsia;
 
   static bool get isDesktop => isWindows || isMacOS || isLinux;
+
+  static bool get usesDesktopLayout => isDesktop || isWeb;
 }

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_trifles_config = {
@@ -11,5 +11,3 @@ final Map<String, String> _cn_trifles_config = {
   'share_secret_help': '建议在秘闻结束后再来执行这个任务',
   'trifles_broken_amulet_help': '建议设置较大的数值以每周清空',
 };
-
-

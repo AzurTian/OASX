@@ -18,15 +18,14 @@ class UpdateInfoModel extends BaseNetModel {
     branch = json['branch'];
     currentCommit = json['current_commit']!.cast<String>();
     latestCommit = json['latest_commit']!.cast<String>();
-    // commit = 
+    // commit =
     //      json['commit']!.map<List<String>>((dynamic e) => e.cast<String>() ).toList();
 
     commit = [];
-    json['commit']!.forEach((e){
+    json['commit']!.forEach((e) {
       commit!.add(e.cast<String>());
     });
-
-  }                                                                          
+  }
 
   bool? isUpdate;
   String? branch;

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_general_climb_config = {
@@ -14,5 +14,3 @@ final Map<String, String> _cn_general_climb_config = {
   'active_souls_clean': '结束爬塔后启动御魂整理',
   'active_souls_clean_help': '防止御魂溢出',
 };
-
-

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_goryou_config = {
@@ -6,5 +6,3 @@ final Map<String, String> _cn_goryou_config = {
   'goryou_class': '挑战类型',
   'goryou_class_help': '',
 };
-
-

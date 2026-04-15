@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_memory_scrolls_config = {
@@ -12,5 +12,3 @@ final Map<String, String> _cn_memory_scrolls_config = {
   'auto_finish_exploration': '自动结束探索',
   'next_exploration_time': '下次探索时间'
 };
-
-

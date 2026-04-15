@@ -8,11 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pickers/pickers.dart';
 import 'package:flutter_pickers/style/default_style.dart';
+import 'package:flutter_pickers/time_picker/model/date_mode.dart';
+import 'package:flutter_pickers/time_picker/model/pduration.dart';
+import 'package:flutter_pickers/time_picker/model/suffix.dart';
 import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
-import 'package:oasx/service/theme_service.dart';
+import 'package:oasx/modules/common/models/config_drag_payload.dart';
+import 'package:oasx/modules/common/widgets/drag_copy_feedback.dart';
 import 'package:oasx/service/websocket_service.dart';
-import 'package:oasx/modules/overview/index.dart';
+import 'package:oasx/utils/platform_utils.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../../translation/i18n_content.dart';
@@ -34,81 +38,138 @@ typedef SetArgumentCallback = void Function(
   dynamic value,
 );
 
+typedef SaveArgumentCallback = Future<bool> Function(
+  String config,
+  String task,
+  String group,
+  String argument,
+  String type,
+  dynamic value,
+);
+
 class Args extends StatelessWidget {
   const Args({
     Key? key,
     this.scriptName,
     this.taskName,
     this.groupDraggable = true,
+    this.stagingMode = false,
+    this.lockImmediateScheduling = false,
+    this.activeDragPayload,
+    this.groupDragPayloadBuilder,
+    this.onGroupDragStarted,
+    this.onGroupDragEnded,
     this.setArgumentOverride,
+    this.onCancel,
   }) : super(key: key);
 
   final String? scriptName;
   final String? taskName;
   final bool groupDraggable;
+  final bool stagingMode;
+  final bool lockImmediateScheduling;
+  final ConfigDragPayload? activeDragPayload;
+  final ConfigDragPayload Function(String groupName)? groupDragPayloadBuilder;
+  final ValueChanged<ConfigDragPayload>? onGroupDragStarted;
+  final VoidCallback? onGroupDragEnded;
   final SetArgumentCallback? setArgumentOverride;
+  final Future<void> Function()? onCancel;
 
   @override
   Widget build(BuildContext context) {
     return GetX<ArgsController>(builder: (controller) {
-      final selectedScript = (scriptName ?? Get.parameters['script'] ?? '').trim();
+      final selectedScript =
+          (scriptName ?? Get.parameters['script'] ?? '').trim();
       final selectedTask = (taskName ?? Get.parameters['task'] ?? '').trim();
-      return SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-        child: ExpansionTileGroup(
-          spaceBetweenItem: 10,
-          children: controller.groupsName.value
-              .map(
-                (name) => ExpansionTileItem(
-                  initiallyExpanded: true,
-                  isHasTopBorder: false,
-                  isHasBottomBorder: false,
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withValues(alpha: 0.24),
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  title: <Widget>[
-                    if (groupDraggable)
-                      Draggable<Map<String, dynamic>>(
-                        data: {
-                          'model': TaskItemModel(
-                            scriptName ?? selectedScript,
-                            taskName ?? selectedTask,
-                            '',
-                            groupName: name,
-                          ),
-                          'source': 'argsViewGroup',
-                        },
-                        feedback: _buildFeedback(context, name),
-                        child: const Icon(Icons.drag_indicator_outlined),
+      final groupNames = controller.groupsName.value;
+      final content = LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: ExpansionTileGroup(
+                spaceBetweenItem: 10,
+                children: groupNames
+                    .map(
+                      (name) => ExpansionTileItem(
+                        key: ValueKey<String>(
+                          'args-group-$selectedScript-$selectedTask-$name',
+                        ),
+                        initiallyExpanded: true,
+                        isHasTopBorder: false,
+                        isHasBottomBorder: false,
+                        backgroundColor: _groupBackgroundColor(
+                          context,
+                          selectedScript,
+                          selectedTask,
+                          name,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
+                        title: <Widget>[
+                          if (groupDraggable)
+                            _buildGroupDragHandle(
+                              context,
+                              selectedScript,
+                              selectedTask,
+                              name,
+                            ),
+                          Text(name.tr),
+                        ].toRow(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                        ),
+                        children: _children(
+                          groupName: name,
+                          selectedScript: selectedScript,
+                          selectedTask: selectedTask,
+                        ),
                       ),
-                    Text(name.tr),
-                  ].toRow(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                  ),
-                  children: _children(name),
-                ),
-              )
-              .toList(),
-        ).constrained(maxWidth: 700, minWidth: 100),
-      ).alignment(Alignment.topCenter);
+                    )
+                    .toList(),
+              ),
+            ),
+          );
+        },
+      );
+      if (!stagingMode) {
+        return content;
+      }
+      return Column(
+        children: [
+          Expanded(child: content),
+          ArgsDraftBar(
+            scriptName: selectedScript,
+            taskName: selectedTask,
+            onCancel: onCancel,
+          ),
+        ],
+      );
     });
   }
 
-  List<Widget> _children(String groupName) {
+  List<Widget> _children({
+    required String groupName,
+    required String selectedScript,
+    required String selectedTask,
+  }) {
     final controller = Get.find<ArgsController>();
     final setArgument = setArgumentOverride ?? controller.setArgument;
     final groupsModel = controller.groupsData.value[groupName]!;
     final result = <Widget>[const Divider()];
     for (int i = 0; i < groupsModel.members.length; i++) {
+      final member = groupsModel.members[i] as ArgumentModel;
       result.add(
         ArgumentView(
+          key: ValueKey<String>(
+            'args-$selectedScript-$selectedTask-$groupName-${member.title}',
+          ),
           scriptName: scriptName,
           taskName: taskName,
           setArgument: setArgument,
           getGroupName: groupsModel.getGroupName,
+          lockImmediateScheduling: lockImmediateScheduling,
           index: i,
         ),
       );
@@ -116,32 +177,118 @@ class Args extends StatelessWidget {
     return result;
   }
 
-  Widget _buildFeedback(BuildContext context, String title) {
-    final themeService = Get.find<ThemeService>();
-    return Material(
-      color: Colors.transparent,
-      child: Text(title.tr, style: Theme.of(context).textTheme.titleMedium)
-          .decorated(
-            color: themeService.isDarkMode
-                ? Colors.blueGrey.shade700
-                : Colors.blueGrey.shade100,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 6,
-                offset: Offset(2, 2),
-              ),
-            ],
-          )
-          .width(150)
-          .height(30)
-          .paddingAll(8)
-          .opacity(0.8),
+  Color _groupBackgroundColor(
+    BuildContext context,
+    String selectedScript,
+    String selectedTask,
+    String groupName,
+  ) {
+    return Theme.of(context)
+        .colorScheme
+        .secondaryContainer
+        .withValues(alpha: 0.24);
+  }
+
+  Widget _buildGroupDragHandle(
+    BuildContext context,
+    String selectedScript,
+    String selectedTask,
+    String groupName,
+  ) {
+    final payload = groupDragPayloadBuilder?.call(groupName);
+    if (payload == null) {
+      return const Icon(Icons.drag_indicator_outlined);
+    }
+    return Draggable<ConfigDragPayload>(
+      data: payload,
+      feedback: DragCopyFeedback(label: payload.displayLabel),
+      onDragStarted: () => onGroupDragStarted?.call(payload),
+      onDragCompleted: () => onGroupDragEnded?.call(),
+      onDraggableCanceled: (_, __) => onGroupDragEnded?.call(),
+      onDragEnd: (_) => onGroupDragEnded?.call(),
+      child: const Icon(Icons.drag_indicator_outlined),
     );
   }
 }
 
+class ArgsDraftBar extends StatelessWidget {
+  const ArgsDraftBar({
+    super.key,
+    required this.scriptName,
+    required this.taskName,
+    this.onCancel,
+  });
 
+  final String scriptName;
+  final String taskName;
+  final Future<void> Function()? onCancel;
 
-
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final controller = Get.find<ArgsController>();
+      final dirtyCount = controller.dirtyFieldKeys.length;
+      final scopeCount = controller.scopeScriptCount.value;
+      final pendingCount = dirtyCount * scopeCount;
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${I18n.argsDraftDirty.tr}: $pendingCount',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await controller.discardDraftChanges();
+                await onCancel?.call();
+              },
+              child: Text(I18n.cancel.tr),
+            ),
+            const SizedBox(width: 8),
+            FilledButton.icon(
+              onPressed: controller.isSavingDraft.value || dirtyCount == 0
+                  ? null
+                  : () async {
+                      final ret = await controller.saveDraftChanges();
+                      if (ret) {
+                        final localizedTaskName = taskName.tr;
+                        final contextText = scriptName.isEmpty
+                            ? localizedTaskName
+                            : '$scriptName / $localizedTaskName';
+                        Get.snackbar(
+                          I18n.settingSaved.tr,
+                          contextText,
+                        );
+                        return;
+                      }
+                      Get.snackbar(
+                        I18n.error.tr,
+                        I18n.argsValidationFailed.tr,
+                      );
+                    },
+              icon: controller.isSavingDraft.value
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_rounded),
+              label: Text(I18n.argsSaveChanges.tr),
+            ),
+          ],
+        ).paddingAll(12),
+      );
+    });
+  }
+}

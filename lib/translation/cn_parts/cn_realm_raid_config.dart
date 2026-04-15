@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_realm_raid_config = {
@@ -17,5 +17,3 @@ final Map<String, String> _cn_realm_raid_config = {
 Continue：挑战其他的直至没有可挑战的才刷新
 Refresh：直接刷新，如果刷新操作进入CD，将标记为失败并退出''',
 };
-
-

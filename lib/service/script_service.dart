@@ -6,34 +6,36 @@ import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/common/controllers/progress_snackbar_controller.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
-import 'package:oasx/modules/home/models/script_model.dart';
+import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/models/taskitem_model.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/extension_utils.dart';
+import 'package:oasx/utils/platform_utils.dart';
 import 'package:oasx/utils/time_utils.dart';
-import 'package:oasx/modules/overview/index.dart';
+import 'package:oasx/modules/log/script_log_controller.dart';
 
 part 'script_service_ws.dart';
 part 'script_service_auto.dart';
+part 'script_service_config.dart';
 
 class ScriptService extends GetxService {
+  // ignore: unused_field
   final _storage = GetStorage();
   final wsService = Get.find<WebSocketService>();
   final scriptModelMap = <String, ScriptModel>{}.obs;
   final scriptOrderList = <String>[].obs;
   final autoScriptList = <String>[].obs;
 
-  @override
-  Future<void> onInit() async {
-    await reloadFromServer();
-    _loadAutoScriptListFromStorage();
-    super.onInit();
+  bool get _shouldSkipBackendReload {
+    return PlatformUtils.isWeb && !ApiClient().hasConfiguredBackendAddress;
   }
 
   @override
-  Future<void> onReady() async {
-    await autoRunScript();
-    super.onReady();
+  Future<void> onInit() async {
+    _loadAutoScriptListFromStorage();
+    await reloadFromServer();
+    super.onInit();
   }
 
   @override
@@ -42,7 +44,7 @@ class ScriptService extends GetxService {
       ...scriptModelMap.keys.map((e) => Future.wait([
             stopScript(e),
             wsService.close(e),
-            Get.delete<OverviewController>(tag: e, force: true),
+            Get.delete<ScriptLogController>(tag: e, force: true),
           ])),
     ]);
     scriptModelMap.clear();
@@ -82,10 +84,8 @@ class ScriptService extends GetxService {
   }
 
   void syncScriptOrder(Iterable<String> scripts) {
-    final normalized = scripts
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
+    final normalized =
+        scripts.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
     scriptOrderList.value = normalized;
     for (final name in normalized) {
       if (!scriptModelMap.containsKey(name)) {
@@ -93,7 +93,8 @@ class ScriptService extends GetxService {
       }
     }
     final validSet = normalized.toSet();
-    final stale = scriptModelMap.keys.where((e) => !validSet.contains(e)).toList();
+    final stale =
+        scriptModelMap.keys.where((e) => !validSet.contains(e)).toList();
     for (final name in stale) {
       deleteScriptModel(name);
     }
@@ -111,7 +112,8 @@ class ScriptService extends GetxService {
   Future<bool> tryCloseScriptWithReason(String scriptName) async {
     try {
       final scriptModel = findScriptModel(scriptName);
-      if (scriptModel != null && scriptModel.state.value == ScriptState.running) {
+      if (scriptModel != null &&
+          scriptModel.state.value == ScriptState.running) {
         Get.snackbar(
           I18n.tip.tr,
           I18n.configUpdateTip.tr,
@@ -130,11 +132,19 @@ class ScriptService extends GetxService {
   }
 
   Future<void> refreshScriptsFromServer() async {
+    if (_shouldSkipBackendReload) {
+      await resetDashboardState();
+      return;
+    }
     final latest = await ApiClient().getScriptList();
     syncScriptOrder(latest);
   }
 
   Future<void> reloadFromServer() async {
+    if (_shouldSkipBackendReload) {
+      await resetDashboardState();
+      return;
+    }
     final scriptList = await ApiClient().getScriptList();
     syncScriptOrder(scriptList);
     if (scriptList.isEmpty) {
@@ -147,44 +157,13 @@ class ScriptService extends GetxService {
     await wsService.closeAll();
     final names = scriptModelMap.keys.toList();
     for (final name in names) {
-      if (Get.isRegistered<OverviewController>(tag: name)) {
+      if (Get.isRegistered<ScriptLogController>(tag: name)) {
         try {
-          Get.delete<OverviewController>(tag: name, force: true);
+          Get.delete<ScriptLogController>(tag: name, force: true);
         } catch (_) {}
       }
     }
     scriptModelMap.clear();
     scriptOrderList.clear();
   }
-
-  Future<bool> renameConfig(String oldName, String newName) async {
-    final ret = await ApiClient().renameConfig(oldName, newName);
-    if (!ret) {
-      return false;
-    }
-    if (Get.isRegistered<OverviewController>(tag: oldName)) {
-      try {
-        Get.delete<OverviewController>(tag: oldName, force: true);
-      } catch (_) {}
-    }
-    await refreshScriptsFromServer();
-    return true;
-  }
-
-  Future<bool> deleteConfig(String name) async {
-    final ret = await ApiClient().deleteConfig(name);
-    if (!ret) {
-      return false;
-    }
-    if (Get.isRegistered<OverviewController>(tag: name)) {
-      try {
-        Get.delete<OverviewController>(tag: name, force: true);
-      } catch (_) {}
-    }
-    deleteScriptModel(name);
-    await refreshScriptsFromServer();
-    return true;
-  }
 }
-
-

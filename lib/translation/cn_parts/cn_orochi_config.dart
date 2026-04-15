@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_orochi_config = {
@@ -23,5 +23,3 @@ final Map<String, String> _cn_orochi_config = {
   'twelve_switch': '十二层御魂配置',
   'twelve_switch_help': '基于数字索引，神罚',
 };
-
-

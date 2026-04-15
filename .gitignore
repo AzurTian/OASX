@@ -31,6 +31,11 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/coverage/
+pubspec_overrides.yaml
+
+# IDE/build cache
+.vs/
 
 # Symbolication related
 app.*.symbols
@@ -50,3 +55,4 @@ AGENTS.md
 CLAUDE.md
 .codex/
 .claude/
+openspec/

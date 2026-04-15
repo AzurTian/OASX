@@ -1,4 +1,4 @@
-﻿import 'package:flutter_nb_net/flutter_net.dart';
+import 'package:flutter_nb_net/flutter_net.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:oasx/translation/i18n_content.dart';
 
@@ -53,7 +53,18 @@ class ApiInterceptor extends Interceptor {
       return;
     }
     int code = err.response!.statusCode!;
-    String msg = err.response!.data!['message'];
+    final data = err.response!.data;
+    String msg = I18n.networkUnknownError.tr;
+    if (data is Map) {
+      final message = data['message'];
+      final detail = data['detail'];
+      final value = message ?? detail;
+      if (value != null && value.toString().trim().isNotEmpty) {
+        msg = value.toString();
+      }
+    } else if (data != null && data.toString().trim().isNotEmpty) {
+      msg = data.toString();
+    }
     switch (code) {
       case 403:
         break;
@@ -61,6 +72,7 @@ class ApiInterceptor extends Interceptor {
         showNetErrCodeSnackBar(I18n.networkNotFound.tr, code);
         break;
       case 500:
+      case 400:
         showErrSnackBar(I18n.networkServerError.tr, code, msg);
         break;
       default:
@@ -86,4 +98,3 @@ class ApiInterceptor extends Interceptor {
     Get.snackbar('$title | $code', msg, duration: const Duration(seconds: 5));
   }
 }
-

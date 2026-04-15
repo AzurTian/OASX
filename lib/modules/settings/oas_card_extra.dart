@@ -1,80 +1,14 @@
-﻿part of settings;
+import 'dart:async';
+import 'dart:math';
 
-enum _LoginFieldType { address, username, password }
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:styled_widget/styled_widget.dart';
 
-class _LoginInputField extends StatefulWidget {
-  const _LoginInputField({required this.type});
-
-  final _LoginFieldType type;
-
-  @override
-  State<_LoginInputField> createState() => _LoginInputFieldState();
-}
-
-class _LoginInputFieldState extends State<_LoginInputField> {
-  late final TextEditingController _controller;
-  late final SettingsController _settingsController;
-
-  @override
-  void initState() {
-    super.initState();
-    _settingsController = Get.find<SettingsController>();
-    _controller = TextEditingController(text: _currentValue);
-  }
-
-  @override
-  void didUpdateWidget(covariant _LoginInputField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final current = _currentValue;
-    if (_controller.text != current) {
-      _controller.text = current;
-    }
-  }
-
-  String get _currentValue {
-    return switch (widget.type) {
-      _LoginFieldType.address => _settingsController.address.value,
-      _LoginFieldType.username => _settingsController.username.value,
-      _LoginFieldType.password => _settingsController.password.value,
-    };
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final value = _currentValue;
-      if (_controller.text != value) {
-        _controller.text = value;
-      }
-      return SizedBox(
-        width: 220,
-        child: TextField(
-          controller: _controller,
-          obscureText: widget.type == _LoginFieldType.password,
-          onChanged: (text) {
-            switch (widget.type) {
-              case _LoginFieldType.address:
-                _settingsController.updateAddress(text);
-                break;
-              case _LoginFieldType.username:
-                _settingsController.updateUsername(text);
-                break;
-              case _LoginFieldType.password:
-                _settingsController.updatePassword(text);
-                break;
-            }
-          },
-        ),
-      );
-    });
-  }
-}
+import 'package:oasx/modules/home/updater_view.dart';
+import 'package:oasx/modules/settings/controllers/settings_controller.dart';
+import 'package:oasx/service/script_service.dart';
+import 'package:oasx/translation/i18n_content.dart';
 
 class AutoScriptButton extends StatelessWidget {
   const AutoScriptButton({super.key});
@@ -137,7 +71,8 @@ void killServer() {
                 : () async {
                     isKilling.value = true;
                     var closedByTimeout = false;
-                    final autoCloseTimer = Timer(const Duration(seconds: 5), () {
+                    final autoCloseTimer =
+                        Timer(const Duration(seconds: 5), () {
                       closedByTimeout = true;
                       if (Get.isDialogOpen ?? false) {
                         Get.back();

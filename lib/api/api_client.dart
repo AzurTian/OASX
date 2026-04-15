@@ -7,9 +7,10 @@ import 'package:get_storage/get_storage.dart';
 import 'package:oasx/api/api_interceptor.dart';
 import 'package:oasx/config/constants.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
+import 'package:oasx/modules/home/models/script_statistics_models.dart';
 import 'package:oasx/translation/i18n.dart';
 import 'package:oasx/translation/i18n_content.dart';
-import 'package:oasx/utils/check_version.dart';
+import 'package:oasx/api/github_release_model.dart';
 
 import './home_model.dart';
 import './update_info_model.dart';
@@ -18,6 +19,7 @@ import 'dio_http_cache/dio_http_cache.dart';
 part 'api_client_menu_config.dart';
 part 'api_client_script.dart';
 part 'api_client_feedback.dart';
+part 'api_client_statistics.dart';
 
 class ApiResult<T> {
   ApiResult({this.data, this.error, this.code});
@@ -42,6 +44,16 @@ class ApiResult<T> {
     );
   }
 
+  factory ApiResult.fromResponse(dynamic value) {
+    if (value is Map<String, dynamic> &&
+        (value.containsKey('data') ||
+            value.containsKey('error') ||
+            value.containsKey('code'))) {
+      return ApiResult.fromJson(value);
+    }
+    return ApiResult.success(value as T?);
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'data': data,
@@ -52,41 +64,59 @@ class ApiResult<T> {
 }
 
 class ApiClient {
+  static const String _defaultAddress = 'http://127.0.0.1:22288';
   static final ApiClient _instance = ApiClient._internal();
 
   factory ApiClient() => _instance;
+
+  late final CacheOptions _cacheOptions;
 
   ApiClient._internal() {
     final temporaryDirectory =
         GetStorage().read(StorageKey.temporaryDirectory.name) ?? '';
     final cacheStore =
         kIsWeb ? MemCacheStore() : FileCacheStore(temporaryDirectory);
+    _cacheOptions = CacheOptions(
+      store: cacheStore,
+      policy: CachePolicy.request,
+      hitCacheOnErrorExcept: [401, 403],
+      maxStale: const Duration(days: 7),
+      priority: CachePriority.normal,
+      cipher: null,
+      keyBuilder: CacheOptions.defaultCacheKeyBuilder,
+      allowPostMethod: false,
+    );
     NetOptions.instance
         .setConnectTimeout(const Duration(seconds: 3))
         .enableLogger(false)
         .addInterceptor(
           DioCacheInterceptor(
-            options: CacheOptions(
-              store: cacheStore,
-              policy: CachePolicy.request,
-              hitCacheOnErrorExcept: [401, 403],
-              maxStale: const Duration(days: 7),
-              priority: CachePriority.normal,
-              cipher: null,
-              keyBuilder: CacheOptions.defaultCacheKeyBuilder,
-              allowPostMethod: false,
-            ),
+            options: _cacheOptions,
           ),
         )
         .addInterceptor(ApiInterceptor())
         .create();
+    setAddress(_defaultAddress);
   }
 
-  String address = '127.0.0.1:22288';
+  String address = _defaultAddress;
+
+  bool get hasConfiguredBackendAddress => address.trim().isNotEmpty;
 
   void setAddress(String address) {
-    this.address = address;
-    NetOptions.instance.dio.options.baseUrl = address;
+    final normalized = address.trim();
+    this.address = normalized;
+    NetOptions.instance.dio.options.baseUrl =
+        normalized.isEmpty ? _defaultAddress : normalized;
+  }
+
+  void resetAddress() {
+    setAddress(_defaultAddress);
+  }
+
+  void clearAddress() {
+    address = '';
+    NetOptions.instance.dio.options.baseUrl = _defaultAddress;
   }
 
   Future<ApiResult<T>> request<T>(
@@ -96,7 +126,7 @@ class ApiClient {
     try {
       final res = await apiFn();
       return res.when(
-        success: (data) => ApiResult.fromJson(data),
+        success: (data) => ApiResult.fromResponse(data),
         failure: (msg, code) {
           onError?.call(msg, code);
           return ApiResult.failure(msg, code);
@@ -138,15 +168,19 @@ class ApiClient {
     return false;
   }
 
-  Future<GithubVersionModel> getGithubVersion() async {
-    final res = await request(
+  Future<GithubReleaseModel> getGithubRelease() async {
+    final res = await getGithubReleaseResult();
+    return res.isSuccess && res.data != null ? res.data! : GithubReleaseModel();
+  }
+
+  Future<ApiResult<GithubReleaseModel>> getGithubReleaseResult() async {
+    final res = await request<GithubReleaseModel>(
       () => get(
         updateUrlGithub,
-        options: buildCacheOptions(const Duration(days: 7)),
-        decodeType: GithubVersionModel(),
+        decodeType: GithubReleaseModel(),
       ),
     );
-    return res.isSuccess ? res.data : GithubVersionModel();
+    return res;
   }
 
   Future<ReadmeGithubModel> getGithubReadme() async {
@@ -165,7 +199,9 @@ class ApiClient {
 
   Future<UpdateInfoModel> getUpdateInfo() async {
     final res = await request(() => get('/home/update_info'));
-    return res.isSuccess ? UpdateInfoModel.fromJson(res.data) : UpdateInfoModel();
+    return res.isSuccess
+        ? UpdateInfoModel.fromJson(res.data)
+        : UpdateInfoModel();
   }
 
   Future<String?> getExecuteUpdate() async {
@@ -197,5 +233,3 @@ class ApiClient {
     return result;
   }
 }
-
-

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/services.dart';
@@ -6,45 +6,61 @@ import 'package:get/get.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
 mixin LogMixin on GetxController {
-  /// max lines to store in log
   int get maxLines => 200;
 
-  /// max logs+pending
   int get maxBuffer => 1000;
 
-  /// max burst line when refreshing
+  int get maxArchivedLines => 5000;
+
   int get maxBurst => 50;
 
-  /// min burst line when refreshing
   int get minBurst => 1;
 
-  /// ui log
+  /// Controls the maximum UI refresh rate for log updates.
+  Duration get uiRefreshInterval => const Duration(milliseconds: 120);
+
   final logs = <String>[].obs;
 
-  /// auto scroll to bottom
+  final archivedLogs = <String>[].obs;
+
   final autoScroll = true.obs;
 
-  /// collapse log content
   final collapseLog = false.obs;
 
-  /// logs buffer, used to limit speeded log refresh
   final _pendingLogs = <String>[];
 
-  /// refresh timer for log
+  final Map<String, double> _savedScrollOffsets = <String, double>{};
+
   Timer? _refreshTimer;
 
   double _savedScrollOffset = 0.0;
+
+  /// Monotonic stopwatch for UI refresh throttling.
+  final Stopwatch _uiRefreshWatch = Stopwatch();
+
+  /// Tracks the last refresh tick in milliseconds.
+  int _lastUiRefreshTick = 0;
 
   void Function({bool isJump, bool force, int scrollOffset})? scrollLogs;
 
   @override
   void onInit() {
+    _uiRefreshWatch.start();
     _refreshTimer ??= Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (_pendingLogs.isEmpty) {
         return;
       }
+      final nowTick = _uiRefreshWatch.elapsedMilliseconds;
+      if (nowTick - _lastUiRefreshTick < uiRefreshInterval.inMilliseconds) {
+        _clearOverflowLogs();
+        return;
+      }
+      _lastUiRefreshTick = nowTick;
       _clearOverflowLogs();
-      _updateUILogs();
+      final appended = _updateUILogs();
+      if (appended == 0) {
+        return;
+      }
       _removeUIOldLogs();
       scrollLogs?.call();
     });
@@ -59,39 +75,67 @@ mixin LogMixin on GetxController {
   }
 
   void _removeUIOldLogs() {
-    // 闈炶嚜鍔ㄦ粴鍔ㄧ姸鎬佷笅,涓旀湭婧㈠嚭(宸插垹闄ゆ孩鍑洪儴鍒?,鍒欎笉鍒犻櫎鏃ф棩蹇?浣跨敤鎴峰彲浠ュ仠鐣?
-    if (!autoScroll.value) return;
-    // UI 闄愬埗锛氬彧淇濈暀鏈€鏂?maxLines 琛?
+    if (!autoScroll.value) {
+      return;
+    }
     if (logs.length > maxLines) {
       logs.removeRange(0, logs.length - maxLines);
     }
-  }
-
-  void _updateUILogs() {
-    // 鏍规嵁 backlog 鍔ㄦ€佽皟鏁存湰娆¤澶勭悊澶氬皯鏉?
-    int backlog = _pendingLogs.length;
-    int burst = backlog.clamp(minBurst, maxBurst);
-    for (int i = 0; i < burst && _pendingLogs.isNotEmpty; i++) {
-      logs.add(_pendingLogs.removeAt(0));
+    if (archivedLogs.length > maxArchivedLines) {
+      archivedLogs.removeRange(0, archivedLogs.length - maxArchivedLines);
     }
   }
 
+  /// Moves a batch of pending logs into the UI-facing collections.
+  int _updateUILogs() {
+    final backlog = _pendingLogs.length;
+    final burst = backlog.clamp(minBurst, maxBurst);
+    if (burst <= 0) {
+      return 0;
+    }
+    final batch = _pendingLogs.take(burst).toList();
+    if (batch.isEmpty) {
+      return 0;
+    }
+    _pendingLogs.removeRange(0, batch.length);
+    logs.addAll(batch);
+    archivedLogs.addAll(batch);
+    return batch.length;
+  }
+
+  /// Forces pending logs into the UI list to avoid empty views on switch.
+  int flushPendingLogs({int? maxBatch}) {
+    if (_pendingLogs.isEmpty) {
+      return 0;
+    }
+    _clearOverflowLogs();
+    final limit = maxBatch ?? _pendingLogs.length;
+    final count = min(limit, _pendingLogs.length);
+    if (count <= 0) {
+      return 0;
+    }
+    final batch = _pendingLogs.take(count).toList();
+    _pendingLogs.removeRange(0, count);
+    logs.addAll(batch);
+    archivedLogs.addAll(batch);
+    _removeUIOldLogs();
+    _lastUiRefreshTick = _uiRefreshWatch.elapsedMilliseconds;
+    return count;
+  }
+
   void _clearOverflowLogs() {
-    // 璁＄畻鎬诲ぇ灏?
-    int totalSize = logs.length + _pendingLogs.length;
+    var totalSize = logs.length + _pendingLogs.length;
     if (totalSize > maxBuffer) {
-      int overflow = totalSize - maxBuffer;
-      // 浼樺厛鍒犻櫎 logs 閲屾渶鑰佺殑
+      var overflow = totalSize - maxBuffer;
       if (overflow > 0) {
-        int removeFromLogs = min(overflow, logs.length);
+        final removeFromLogs = min(overflow, logs.length);
         if (removeFromLogs > 0) {
           logs.removeRange(0, removeFromLogs);
           overflow -= removeFromLogs;
         }
       }
-      // 濡傛灉杩樹笉澶燂紝灏变粠 pending 閲屽垹闄ゆ渶鑰佺殑
       if (overflow > 0 && _pendingLogs.isNotEmpty) {
-        int removeFromPending = min(overflow, _pendingLogs.length);
+        final removeFromPending = min(overflow, _pendingLogs.length);
         _pendingLogs.removeRange(0, removeFromPending);
       }
     }
@@ -103,14 +147,18 @@ mixin LogMixin on GetxController {
 
   void clearLog() {
     logs.clear();
+    archivedLogs.clear();
     _pendingLogs.clear();
   }
 
   void copyLogs() {
-    final allLogs = logs.join("");
+    final allLogs = logs.join('');
     Clipboard.setData(ClipboardData(text: allLogs));
-    Get.snackbar(I18n.tip.tr, I18n.copySuccess.tr,
-        duration: const Duration(seconds: 1));
+    Get.snackbar(
+      I18n.tip.tr,
+      I18n.copySuccess.tr,
+      duration: const Duration(seconds: 1),
+    );
   }
 
   void toggleAutoScroll() {
@@ -123,8 +171,16 @@ mixin LogMixin on GetxController {
   void toggleCollapse() => collapseLog.value = !collapseLog.value;
 
   double get savedScrollOffsetVal => _savedScrollOffset;
+
+  double savedScrollOffsetFor(String slot) {
+    return _savedScrollOffsets[slot] ?? 0.0;
+  }
+
   void saveScrollOffset(double offset) {
     _savedScrollOffset = offset;
   }
-}
 
+  void saveScrollOffsetFor(String slot, double offset) {
+    _savedScrollOffsets[slot] = offset;
+  }
+}

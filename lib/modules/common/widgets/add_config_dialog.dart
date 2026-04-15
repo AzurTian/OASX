@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/api/api_client.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
-Future<bool> showAddConfigDialog(
+Future<String?> showAddConfigDialog(
   BuildContext context, {
   VoidCallback? onSubmitting,
   VoidCallback? onSubmitDone,
@@ -19,10 +19,10 @@ Future<bool> showAddConfigDialog(
   final selectedTemplate = defaultTemplate.obs;
   final isSubmitting = false.obs;
   if (!context.mounted) {
-    return false;
+    return null;
   }
 
-  final result = await showDialog<bool>(
+  final result = await showDialog<String>(
     context: context,
     builder: (dialogContext) {
       return AlertDialog(
@@ -80,7 +80,7 @@ Future<bool> showAddConfigDialog(
           TextButton(
             onPressed: () {
               if (isSubmitting.value) return;
-              Navigator.of(dialogContext).pop(false);
+              Navigator.of(dialogContext).pop();
             },
             child: Text(I18n.cancel.tr),
           ),
@@ -92,12 +92,18 @@ Future<bool> showAddConfigDialog(
                       isSubmitting.value = true;
                       onSubmitting?.call();
                       try {
-                        final navList = await ApiClient()
-                            .configCopy(newName, selectedTemplate.value);
+                        final normalizedName = newName.trim();
+                        final navList = await ApiClient().configCopy(
+                          normalizedName,
+                          selectedTemplate.value,
+                        );
                         final scripts = navList.where((e) => e != 'Home');
-                        Get.find<ScriptService>().syncScriptOrder(scripts);
+                        await Get.find<ScriptService>().syncScriptsAndConnect(
+                          scripts: scripts,
+                          configName: normalizedName,
+                        );
                         if (dialogContext.mounted) {
-                          Navigator.of(dialogContext).pop(true);
+                          Navigator.of(dialogContext).pop(normalizedName);
                         }
                       } finally {
                         isSubmitting.value = false;
@@ -118,6 +124,5 @@ Future<bool> showAddConfigDialog(
     },
   );
 
-  return result == true;
+  return result;
 }
-

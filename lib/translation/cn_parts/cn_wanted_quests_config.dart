@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_wanted_quests_config = {
@@ -32,5 +32,3 @@ final Map<String, String> _cn_wanted_quests_config = {
   'unwanted_boss_names': '不想挑战的鬼王名称列表',
   'unwanted_boss_name_help': '英文逗号分隔鬼王名称, 示例: 酒吞童子,阎魔'
 };
-
-

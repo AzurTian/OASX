@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_hunt_config = {
@@ -9,5 +9,3 @@ final Map<String, String> _cn_hunt_config = {
   'kirin_group_team': '麒麟御魂切换',
   'netherworld_group_team': '阴界之门御魂切换',
 };
-
-

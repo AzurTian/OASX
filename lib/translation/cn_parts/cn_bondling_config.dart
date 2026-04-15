@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_bondling_config = {
@@ -24,5 +24,3 @@ mode_3策略是刷到五个契灵后开始结契，选择高级、中级盘来�
   'azure_basan_switch_help': '',
   'battle_config': '战斗设置',
 };
-
-

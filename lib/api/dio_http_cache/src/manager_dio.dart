@@ -1,4 +1,4 @@
-﻿// ignore_for_file: depend_on_referenced_packages, constant_identifier_names, no_leading_underscores_for_local_identifiers, prefer_conditional_assignment, deprecated_member_use, avoid_print, prefer_is_empty
+// ignore_for_file: depend_on_referenced_packages, constant_identifier_names, no_leading_underscores_for_local_identifiers, prefer_conditional_assignment, deprecated_member_use, avoid_print, prefer_is_empty
 
 import 'dart:convert';
 import 'dart:io';
@@ -80,6 +80,9 @@ class DioCacheManager {
 
   _onError(DioError e, ErrorInterceptorHandler handler) async {
     if ((e.requestOptions.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) == true) {
+      if (true == e.requestOptions.extra[DIO_CACHE_KEY_FORCE_REFRESH]) {
+        return handler.next(e);
+      }
       var responseDataFromCache =
           await _pullFromCacheBeforeMaxStale(e.requestOptions);
       if (null != responseDataFromCache) {
@@ -150,7 +153,8 @@ class DioCacheManager {
   ) =>
       _managerTryParseHead(this, response, maxStale, callback);
 
-  Duration? _tryGetDurationFromMap(Map<String, String?> parameters, String key) {
+  Duration? _tryGetDurationFromMap(
+      Map<String, String?> parameters, String key) {
     if (parameters.containsKey(key)) {
       var value = int.tryParse(parameters[key]!);
       if (null != value && value >= 0) {

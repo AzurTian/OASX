@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_delegation_config = {
@@ -16,5 +16,3 @@ final Map<String, String> _cn_delegation_config = {
   'strange_trace': '奇怪的痕迹',
   'strange_trace_help': '100体力->金币九万八',
 };
-
-

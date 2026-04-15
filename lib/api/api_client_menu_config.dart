@@ -1,28 +1,24 @@
-﻿part of 'api_client.dart';
+part of 'api_client.dart';
 
 extension ApiClientMenuConfigX on ApiClient {
   Future<Map<String, List<String>>> getScriptMenu() async {
     final res = await request(() => get('/script_menu'));
-    return ((res.data ?? {}) as Map).map(
-      (k, v) => MapEntry(k.toString(), (v as List).map((e) => e.toString()).toList()),
-    );
+    return _asMenuMap(res.data);
   }
 
   Future<Map<String, List<String>>> getHomeMenu() async {
     final res = await request(() => get('/home/home_menu'));
-    return ((res.data ?? {}) as Map).map(
-      (k, v) => MapEntry(k.toString(), (v as List).map((e) => e.toString()).toList()),
-    );
+    return _asMenuMap(res.data);
   }
 
   Future<List<String>> getConfigList() async {
     final res = await request(() => get('/config_list'));
-    return ['Home', ...(res.data?.cast<String>() ?? [])];
+    return ['Home', ..._asStringList(res.data)];
   }
 
   Future<List<String>> getScriptList() async {
     final res = await request(() => get('/config_list'));
-    return [...(res.data?.cast<String>() ?? [])];
+    return _asStringList(res.data);
   }
 
   Future<String> getNewConfigName() async {
@@ -42,7 +38,8 @@ extension ApiClientMenuConfigX on ApiClient {
 
   Future<List<String>> getConfigAll() async {
     final res = await request(() => get('/config_all'));
-    return res.data?.cast<String>() ?? ['template'];
+    final result = _asStringList(res.data);
+    return result.isEmpty ? ['template'] : result;
   }
 
   Future<bool> deleteConfig(String name) async {
@@ -99,4 +96,25 @@ extension ApiClientMenuConfigX on ApiClient {
     );
     return res.isSuccess && res.data;
   }
+}
+
+Map<String, List<String>> _asMenuMap(dynamic value) {
+  if (value is! Map) {
+    return const <String, List<String>>{};
+  }
+  return value.map(
+    (key, item) => MapEntry(
+      key.toString(),
+      item is List
+          ? item.map((entry) => entry.toString()).toList()
+          : <String>[],
+    ),
+  );
+}
+
+List<String> _asStringList(dynamic value) {
+  if (value is! List) {
+    return const <String>[];
+  }
+  return value.map((entry) => entry.toString()).toList();
 }

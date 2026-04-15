@@ -1,4 +1,4 @@
-﻿// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names
 part of i18n;
 
 final Map<String, String> _cn_area_boss_config = {
@@ -13,5 +13,3 @@ final Map<String, String> _cn_area_boss_config = {
   'boss_reward_help': '',
   'use_collect_help': '',
 };
-
-
