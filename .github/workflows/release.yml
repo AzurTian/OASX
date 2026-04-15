@@ -104,13 +104,13 @@ jobs:
       - name: Verify SDK versions
         shell: pwsh
         run: |
-          $flutterOutput = flutter --version
+          $flutterOutput = ((flutter --version) | Out-String).Trim()
           $flutterOutput
           if ($flutterOutput -notmatch "Flutter $env:FLUTTER_VERSION") {
             throw "Expected Flutter $env:FLUTTER_VERSION"
           }
 
-          $dartOutput = dart --version 2>&1
+          $dartOutput = ((dart --version 2>&1) | Out-String).Trim()
           $dartOutput
           if ($dartOutput -notmatch "Dart SDK version: $env:DART_VERSION") {
             throw "Expected Dart $env:DART_VERSION"
