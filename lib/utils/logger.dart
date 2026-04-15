@@ -1,13 +1,22 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 import 'package:logger/logger.dart';
 
 late Logger logger;
 
 Future<void> initLogger() async {
+  if (kIsWeb) {
+    logger = _getWebLogger();
+    logger.i('---------------------------------------------------------------');
+    logger.i('Logger initialized');
+    logger.i('log path: web console');
+    return;
+  }
+
   final logDir = await _resolveLogDirectory();
   if (!logDir.existsSync()) {
     logDir.createSync(recursive: true);
@@ -24,6 +33,9 @@ Future<void> initLogger() async {
 }
 
 Future<Directory> _resolveLogDirectory() async {
+  if (kIsWeb) {
+    throw UnsupportedError('Web does not support file-based logging.');
+  }
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     final installDir = File(Platform.resolvedExecutable).parent.path;
     return Directory('$installDir${Platform.pathSeparator}logs');
@@ -39,6 +51,14 @@ class CustomConsoleOutput extends LogOutput {
       stdout.write('$line\n');
     }
   }
+}
+
+Logger _getWebLogger() {
+  return Logger(
+    filter: ProductionFilter(),
+    printer: SimplePrinter(printTime: true),
+    output: ConsoleOutput(),
+  );
 }
 
 Logger _getLogger(String logPath, String dateTime) {

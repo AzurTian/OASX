@@ -10,6 +10,9 @@ import 'package:oasx/service/system_tray_service.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:window_manager/window_manager.dart';
 
+const Size _defaultDesktopWindowSize = Size(1200, 800);
+const Size _minimumWindowsWindowSize = Size(260, 420);
+
 class WindowService extends GetxService with WindowListener {
   // ignore: unused_field
   final _storage = GetStorage();
@@ -80,6 +83,7 @@ class WindowService extends GetxService with WindowListener {
       if (!PlatformUtils.isDesktop) return;
       if (!enableSystemTray.value) return;
       if (token != _trayInitToken) return;
+      if (!Get.isRegistered<SystemTrayService>()) return;
 
       final ok = await Get.find<SystemTrayService>().showTray();
       if (ok) {
@@ -94,14 +98,38 @@ class WindowService extends GetxService with WindowListener {
   }
 
   WindowOptions buildWindowOptions(WindowStateModel? lastState) {
+    final minimumSize = PlatformUtils.isWindows
+        ? _minimumWindowsWindowSize
+        : null;
+    final initialSize = _resolveInitialWindowSize(
+      lastState,
+      minimumSize: minimumSize,
+    );
     return WindowOptions(
-      size: (lastState != null)
-          ? Size(lastState.width, lastState.height)
-          : const Size(1200, 800),
+      size: initialSize,
       center: lastState == null,
+      minimumSize: minimumSize,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
+    );
+  }
+
+  Size _resolveInitialWindowSize(
+    WindowStateModel? lastState, {
+    Size? minimumSize,
+  }) {
+    if (lastState == null) {
+      return _defaultDesktopWindowSize;
+    }
+    if (minimumSize == null) {
+      return Size(lastState.width, lastState.height);
+    }
+    return Size(
+      lastState.width < minimumSize.width ? minimumSize.width : lastState.width,
+      lastState.height < minimumSize.height
+          ? minimumSize.height
+          : lastState.height,
     );
   }
 
@@ -109,14 +137,17 @@ class WindowService extends GetxService with WindowListener {
     if (!enableWindowState.value) return null;
     final jsonStr = _storage.read(StorageKey.windowState.name);
     if (jsonStr == null) return null;
-    WindowStateModel? lastState =
-        WindowStateModel.fromJson(json.decode(jsonStr) as Map<String, dynamic>);
-    await windowManager.setBounds(Rect.fromLTWH(
-      lastState.x,
-      lastState.y,
-      lastState.width,
-      lastState.height,
-    ));
+    WindowStateModel? lastState = WindowStateModel.fromJson(
+      json.decode(jsonStr) as Map<String, dynamic>,
+    );
+    await windowManager.setBounds(
+      Rect.fromLTWH(
+        lastState.x,
+        lastState.y,
+        lastState.width,
+        lastState.height,
+      ),
+    );
     return lastState;
   }
 
@@ -196,6 +227,9 @@ class WindowService extends GetxService with WindowListener {
 
     _trayInitToken++;
     await windowManager.setPreventClose(false);
+    if (!Get.isRegistered<SystemTrayService>()) {
+      return;
+    }
     await Get.find<SystemTrayService>().hideTray();
   }
 }

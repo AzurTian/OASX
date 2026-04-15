@@ -60,8 +60,12 @@ extension HomeDashboardStartupX on HomeDashboardController {
     }
     isStartupChecking.value = true;
     isStartupConnectionFailed.value = false;
-    startupLoadingMessage.value = I18n.homeLoadingAutoLogin;
     try {
+      if (PlatformUtils.isWeb && !ApiClient().hasConfiguredBackendAddress) {
+        isStartupConnectionFailed.value = true;
+        return;
+      }
+      startupLoadingMessage.value = I18n.homeLoadingAutoLogin;
       final connected = await ApiClient().testAddress();
       if (connected) {
         await _refreshScriptsAfterConnected(triggerAutoRun: triggerAutoRun);

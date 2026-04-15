@@ -10,6 +10,7 @@ import 'package:oasx/modules/settings/settings_leave_handler.dart';
 import 'package:oasx/modules/settings/system_card.dart';
 import 'package:oasx/modules/settings/user_card.dart';
 import 'package:oasx/translation/i18n_content.dart';
+import 'package:oasx/utils/platform_utils.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({
@@ -76,11 +77,12 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final body = SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= _wideLayoutBreakpoint;
-          final settingList = _buildSettingList();
+          final settingList = _buildSettingList(keyboardInset);
 
           if (!isWide) {
             return settingList.paddingOnly(left: 8, right: 8, top: 8);
@@ -197,7 +199,7 @@ class _SettingsViewState extends State<SettingsView> {
     _isAutoScrolling = false;
   }
 
-  Widget _buildSettingList() {
+  Widget _buildSettingList(double keyboardInset) {
     return Scrollbar(
       controller: _scrollController,
       child: NotificationListener<UserScrollNotification>(
@@ -214,7 +216,12 @@ class _SettingsViewState extends State<SettingsView> {
         child: SingleChildScrollView(
           key: _scrollViewKey,
           controller: _scrollController,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          keyboardDismissBehavior: PlatformUtils.isWeb
+              ? ScrollViewKeyboardDismissBehavior.manual
+              : ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.only(
+            bottom: keyboardInset > 0 ? keyboardInset + 24 : 0,
+          ),
           child: Column(
             children: _sections
                 .map(

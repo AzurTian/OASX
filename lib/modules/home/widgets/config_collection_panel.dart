@@ -9,7 +9,6 @@ import 'package:oasx/modules/home/widgets/config_collection_tile.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
 class ConfigCollectionPanel extends StatefulWidget {
-  static const _compactHeaderActionWidth = 108.0;
   static const _compactHeaderThreshold = 220.0;
   static const _compactFilterThreshold = 150.0;
   static const _visibleStateFilters = [
@@ -110,10 +109,8 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
                   height: 1,
                   color: Theme.of(context).colorScheme.outlineVariant,
                 ),
-                itemBuilder: (context, index) => _buildDropTargetTile(
-                  context,
-                  scripts[index],
-                ),
+                itemBuilder: (context, index) =>
+                    _buildDropTargetTile(context, scripts[index]),
               ),
             ),
           );
@@ -167,10 +164,9 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
           margin: const EdgeInsets.symmetric(vertical: 2),
           decoration: BoxDecoration(
             color: isHighlighted
-                ? Theme.of(context)
-                    .colorScheme
-                    .primaryContainer
-                    .withValues(alpha: 0.28)
+                ? Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.28)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -267,7 +263,8 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
     );
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compactHeader = constraints.maxWidth <
+        final compactHeader =
+            constraints.maxWidth <
             ConfigCollectionPanel._compactHeaderThreshold;
         final title = _HeaderTitle(
           controller: widget.controller,
@@ -275,16 +272,13 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
           separatorStyle: separatorStyle,
           centered: compactHeader,
         );
-        final actions = SizedBox(
-          width: ConfigCollectionPanel._compactHeaderActionWidth,
-          child: _HeaderActions(
-            controller: widget.controller,
-            refreshingScripts: widget.refreshingScripts,
-            loadingAddScript: widget.loadingAddScript,
-            onRefreshScriptsTap: widget.onRefreshScriptsTap,
-            onAddScriptTap: widget.onAddScriptTap,
-            centered: compactHeader,
-          ),
+        final actions = _HeaderActions(
+          controller: widget.controller,
+          refreshingScripts: widget.refreshingScripts,
+          loadingAddScript: widget.loadingAddScript,
+          onRefreshScriptsTap: widget.onRefreshScriptsTap,
+          onAddScriptTap: widget.onAddScriptTap,
+          centered: compactHeader,
         );
         if (!compactHeader) {
           return Row(
@@ -312,7 +306,8 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
     final isFiltered = filter != HomeScriptStateFilter.all;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compactFilters = constraints.maxWidth <
+        final compactFilters =
+            constraints.maxWidth <
             ConfigCollectionPanel._compactFilterThreshold;
         final filterButton = _FilterButton(
           filter: filter,
@@ -359,8 +354,10 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
                     IconButton(
                       tooltip: I18n.homeScriptSearchHint.tr,
                       onPressed: _toggleCompactSearch,
-                      constraints:
-                          const BoxConstraints.tightFor(width: 40, height: 40),
+                      constraints: const BoxConstraints.tightFor(
+                        width: 40,
+                        height: 40,
+                      ),
                       icon: Icon(
                         _showCompactSearch
                             ? Icons.search_off_rounded
@@ -420,10 +417,7 @@ class _HeaderTitle extends StatelessWidget {
       spacing: 8,
       runSpacing: 4,
       children: [
-        Text(
-          I18n.scriptList.tr,
-          style: style,
-        ),
+        Text(I18n.scriptList.tr, style: style),
         Text.rich(
           TextSpan(
             children: [
@@ -481,8 +475,10 @@ class _HeaderActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment:
-          centered ? MainAxisAlignment.center : MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: centered
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.end,
       children: [
         IconButton(
           tooltip: I18n.homeConnectionRetryAction.tr,
@@ -533,10 +529,7 @@ class _HeaderActions extends StatelessWidget {
 }
 
 class _SearchField extends StatelessWidget {
-  const _SearchField({
-    required this.controller,
-    required this.onChanged,
-  });
+  const _SearchField({required this.controller, required this.onChanged});
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;

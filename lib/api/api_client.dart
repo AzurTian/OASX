@@ -64,6 +64,7 @@ class ApiResult<T> {
 }
 
 class ApiClient {
+  static const String _defaultAddress = 'http://127.0.0.1:22288';
   static final ApiClient _instance = ApiClient._internal();
 
   factory ApiClient() => _instance;
@@ -95,13 +96,27 @@ class ApiClient {
         )
         .addInterceptor(ApiInterceptor())
         .create();
+    setAddress(_defaultAddress);
   }
 
-  String address = '127.0.0.1:22288';
+  String address = _defaultAddress;
+
+  bool get hasConfiguredBackendAddress => address.trim().isNotEmpty;
 
   void setAddress(String address) {
-    this.address = address;
-    NetOptions.instance.dio.options.baseUrl = address;
+    final normalized = address.trim();
+    this.address = normalized;
+    NetOptions.instance.dio.options.baseUrl =
+        normalized.isEmpty ? _defaultAddress : normalized;
+  }
+
+  void resetAddress() {
+    setAddress(_defaultAddress);
+  }
+
+  void clearAddress() {
+    address = '';
+    NetOptions.instance.dio.options.baseUrl = _defaultAddress;
   }
 
   Future<ApiResult<T>> request<T>(

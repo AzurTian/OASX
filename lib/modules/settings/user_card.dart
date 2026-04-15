@@ -5,6 +5,7 @@ import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/modules/settings/widgets/setting_card.dart';
 import 'package:oasx/modules/settings/widgets/setting_item.dart';
 import 'package:oasx/translation/i18n_content.dart';
+import 'package:oasx/utils/platform_utils.dart';
 
 class UserSettingsCard extends StatelessWidget {
   const UserSettingsCard({super.key});
@@ -58,10 +59,7 @@ class _LoginInputFieldState extends State<_LoginInputField> {
   @override
   void didUpdateWidget(covariant _LoginInputField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final current = _currentValue;
-    if (_controller.text != current) {
-      _controller.text = current;
-    }
+    _syncTextController();
   }
 
   String get _currentValue {
@@ -82,16 +80,16 @@ class _LoginInputFieldState extends State<_LoginInputField> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final value = _currentValue;
-      if (_controller.text != value) {
-        _controller.text = value;
-      }
+      _syncTextController();
       return SizedBox(
         width: 220,
         child: TextField(
           controller: _controller,
           focusNode: _focusNode,
           obscureText: widget.type == _LoginFieldType.password,
+          keyboardType: widget.type == _LoginFieldType.address
+              ? TextInputType.url
+              : TextInputType.text,
           scrollPadding: EdgeInsets.only(
             left: 12,
             top: 12,
@@ -99,8 +97,10 @@ class _LoginInputFieldState extends State<_LoginInputField> {
             bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
           ),
           textInputAction: TextInputAction.done,
-          onTapOutside: (_) => _focusNode.unfocus(),
-          onEditingComplete: _focusNode.unfocus,
+          onTapOutside:
+              PlatformUtils.isWeb ? null : (_) => _focusNode.unfocus(),
+          onEditingComplete:
+              PlatformUtils.isWeb ? null : _focusNode.unfocus,
           onChanged: (text) {
             switch (widget.type) {
               case _LoginFieldType.address:
@@ -117,5 +117,19 @@ class _LoginInputFieldState extends State<_LoginInputField> {
         ),
       );
     });
+  }
+
+  void _syncTextController() {
+    if (_focusNode.hasFocus) {
+      return;
+    }
+    final current = _currentValue;
+    if (_controller.text == current) {
+      return;
+    }
+    _controller.value = TextEditingValue(
+      text: current,
+      selection: TextSelection.collapsed(offset: current.length),
+    );
   }
 }

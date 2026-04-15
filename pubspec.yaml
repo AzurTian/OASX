@@ -19,7 +19,8 @@ version: 0.3.1+10
 # of the product and file versions while build-number is used as the build suffix.
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: ">=3.35.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -38,7 +39,7 @@ dependencies:
   device_preview: ^1.2.0 # 模拟设备进行响应式调试
   responsive_builder: ^0.7.0 # 响应式布局
   styled_widget: ^0.4.1 # 优雅的写UI,扔掉嵌套地狱吧
-  flutter_form_builder: ^9.1.0 # 表单
+  flutter_form_builder: ^10.2.0 # 表单
   form_builder_validators: ^11.0.0 # 表单验证
   get_storage: ^2.1.1 # 本地存储
   expansion_tile_group: ^1.2.3 # 多级列表
@@ -71,7 +72,7 @@ dependencies:
   flutter_slidable: ^4.0.3 # 元素滑动
   logger: ^2.6.2 # 日志
   fl_chart: ^0.71.0 # 图表
-  intl: ^0.19.0
+  intl: ^0.20.2
   crypto: ^3.0.6
 
 flutter_launcher_icons:

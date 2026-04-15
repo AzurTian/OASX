@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:chinese_font_library/chinese_font_library.dart';
+
+const List<String> _webChineseFontFallback = <String>[
+  'PingFang SC',
+  'Hiragino Sans GB',
+  'Microsoft YaHei',
+  'Noto Sans SC',
+  'Noto Sans CJK SC',
+  'Source Han Sans SC',
+  'WenQuanYi Micro Hei',
+  'sans-serif',
+];
 
 /// 用枚举太麻烦了
 enum ColorSeed {
@@ -34,18 +46,7 @@ ThemeData lightTheme = ThemeData(
   colorSchemeSeed: ColorSeed.baseColor.color,
   useMaterial3: true,
   brightness: Brightness.light,
-  textTheme: const TextTheme(
-    bodyLarge: TextStyle(),
-    bodyMedium: TextStyle(),
-    bodySmall: TextStyle(),
-    labelLarge: TextStyle(),
-    labelMedium: TextStyle(),
-    labelSmall: TextStyle(),
-    titleLarge: TextStyle(),
-    titleMedium: TextStyle(),
-    // titleMedium: TextStyle(fontWeight: FontWeight.w600),
-    titleSmall: TextStyle(),
-  ).apply(fontFamily: 'LatoLato').useSystemChineseFont(Brightness.light),
+  textTheme: _buildTextTheme(Brightness.light),
   scaffoldBackgroundColor: const Color.fromRGBO(255, 251, 255, 1),
   navigationRailTheme: const NavigationRailThemeData(
       backgroundColor: Color.fromRGBO(255, 251, 255, 1)),
@@ -55,7 +56,14 @@ ThemeData darkTheme = ThemeData(
   useMaterial3: true,
   colorSchemeSeed: ColorSeed.baseColor.color,
   brightness: Brightness.dark,
-  textTheme: const TextTheme(
+  textTheme: _buildTextTheme(Brightness.dark),
+  scaffoldBackgroundColor: const Color.fromRGBO(49, 48, 51, 1),
+  navigationRailTheme: const NavigationRailThemeData(
+      backgroundColor: Color.fromRGBO(49, 48, 51, 1)),
+);
+
+TextTheme _buildTextTheme(Brightness brightness) {
+  const baseTheme = TextTheme(
     bodyLarge: TextStyle(),
     bodyMedium: TextStyle(),
     bodySmall: TextStyle(),
@@ -65,8 +73,29 @@ ThemeData darkTheme = ThemeData(
     titleLarge: TextStyle(),
     titleMedium: TextStyle(),
     titleSmall: TextStyle(),
-  ).apply(fontFamily: 'LatoLato').useSystemChineseFont(Brightness.dark),
-  scaffoldBackgroundColor: const Color.fromRGBO(49, 48, 51, 1),
-  navigationRailTheme: const NavigationRailThemeData(
-      backgroundColor: Color.fromRGBO(49, 48, 51, 1)),
-);
+  );
+  if (kIsWeb) {
+    return _applyFontFallback(baseTheme, _webChineseFontFallback);
+  }
+  return baseTheme.apply(fontFamily: 'LatoLato').useSystemChineseFont(
+        brightness,
+      );
+}
+
+TextTheme _applyFontFallback(TextTheme textTheme, List<String> fallback) {
+  return textTheme.copyWith(
+    bodyLarge: _applyTextStyleFallback(textTheme.bodyLarge, fallback),
+    bodyMedium: _applyTextStyleFallback(textTheme.bodyMedium, fallback),
+    bodySmall: _applyTextStyleFallback(textTheme.bodySmall, fallback),
+    labelLarge: _applyTextStyleFallback(textTheme.labelLarge, fallback),
+    labelMedium: _applyTextStyleFallback(textTheme.labelMedium, fallback),
+    labelSmall: _applyTextStyleFallback(textTheme.labelSmall, fallback),
+    titleLarge: _applyTextStyleFallback(textTheme.titleLarge, fallback),
+    titleMedium: _applyTextStyleFallback(textTheme.titleMedium, fallback),
+    titleSmall: _applyTextStyleFallback(textTheme.titleSmall, fallback),
+  );
+}
+
+TextStyle? _applyTextStyleFallback(TextStyle? style, List<String> fallback) {
+  return style?.copyWith(fontFamilyFallback: fallback);
+}

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:styled_widget/styled_widget.dart';
 
 import 'package:oasx/modules/server/index.dart';
 import 'package:oasx/translation/i18n_content.dart';
-import 'package:oasx/utils/platform_utils.dart';
 
 Widget getTitle(BuildContext context, {String? routePath}) {
   final resolvedRoutePath = _resolveRoutePath(context, routePath: routePath);
@@ -34,35 +32,26 @@ String _resolveRoutePath(BuildContext context, {String? routePath}) {
 }
 
 class HomeTitleBar extends StatelessWidget {
-  const HomeTitleBar({
-    super.key,
-  });
+  const HomeTitleBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return <Widget>[
-      Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
-      const SizedBox(width: 6),
-      Text(
-        'OASX / ${I18n.home.tr}',
-        style: Theme.of(context).textTheme.titleMedium,
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
+          const SizedBox(width: 14),
+          Flexible(child: _TitleLabel(text: 'OASX / ${I18n.home.tr}')),
+        ],
       ),
-      PlatformUtils.isWindows
-          ? const SizedBox()
-          : const Flexible(child: SizedBox()),
-    ]
-        .toRow(
-          separator: const SizedBox(width: 8),
-          mainAxisAlignment: MainAxisAlignment.start,
-        )
-        .padding(left: 5);
+    );
   }
 }
 
 class SettingTitle extends StatelessWidget {
-  const SettingTitle({
-    super.key,
-  });
+  const SettingTitle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -71,23 +60,21 @@ class SettingTitle extends StatelessWidget {
       TargetPlatform.iOS => false,
       _ => true,
     };
-    return <Widget>[
-      if (backButton) BackButton(onPressed: _backHomeOrPop),
-      Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
-      const SizedBox(width: 6),
-      Text(
-        'OASX / ${I18n.setting.tr}',
-        style: Theme.of(context).textTheme.titleMedium,
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (backButton) ...[
+            BackButton(onPressed: _backHomeOrPop),
+            const SizedBox(width: 8),
+          ],
+          Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
+          const SizedBox(width: 14),
+          Flexible(child: _TitleLabel(text: 'OASX / ${I18n.setting.tr}')),
+        ],
       ),
-      PlatformUtils.isWindows
-          ? const SizedBox()
-          : const Flexible(child: SizedBox()),
-    ]
-        .toRow(
-          separator: const SizedBox(width: 8),
-          mainAxisAlignment: MainAxisAlignment.start,
-        )
-        .padding(left: 5);
+    );
   }
 
   void _backHomeOrPop() {
@@ -101,9 +88,7 @@ class SettingTitle extends StatelessWidget {
 }
 
 class ServerTitle extends StatelessWidget {
-  const ServerTitle({
-    super.key,
-  });
+  const ServerTitle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -112,24 +97,43 @@ class ServerTitle extends StatelessWidget {
       TargetPlatform.iOS => false,
       _ => true,
     };
-    return <Widget>[
-      Obx(() {
-        if (backButton && !Get.find<ServerController>().isDeployLoading.value) {
-          return const BackButton();
-        }
-        return const SizedBox();
-      }),
-      Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
-      const SizedBox(width: 6),
-      Text('OASX / Server', style: Theme.of(context).textTheme.titleMedium),
-      PlatformUtils.isWindows
-          ? const SizedBox()
-          : const Flexible(child: SizedBox()),
-    ]
-        .toRow(
-          separator: const SizedBox(width: 8),
-          mainAxisAlignment: MainAxisAlignment.start,
-        )
-        .padding(left: 5);
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Obx(() {
+            if (backButton &&
+                !Get.find<ServerController>().isDeployLoading.value) {
+              return const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [BackButton(), SizedBox(width: 8)],
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+          Image.asset('assets/images/Icon-app.png', height: 30, width: 30),
+          const SizedBox(width: 14),
+          const Flexible(child: _TitleLabel(text: 'OASX / Server')),
+        ],
+      ),
+    );
+  }
+}
+
+class _TitleLabel extends StatelessWidget {
+  const _TitleLabel({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      softWrap: false,
+      style: Theme.of(context).textTheme.titleMedium,
+    );
   }
 }

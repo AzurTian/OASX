@@ -134,7 +134,7 @@ class _ArgumentViewState extends State<ArgumentView> {
           enabled: !isLocked,
         ),
       'enum' => DropdownButtonFormField<String>(
-          value: model.value.toString(),
+          initialValue: model.value.toString(),
           isExpanded: true,
           menuMaxHeight: Get.height * 0.5,
           decoration: InputDecoration(errorText: errorText),
@@ -215,8 +215,11 @@ class _ArgumentViewState extends State<ArgumentView> {
       textInputAction:
           isSingleLine ? TextInputAction.done : TextInputAction.newline,
       decoration: InputDecoration(errorText: errorText),
-      onTapOutside: (_) => _focusNode.unfocus(),
-      onEditingComplete: isSingleLine ? _focusNode.unfocus : null,
+      onTapOutside:
+          PlatformUtils.isWeb ? null : (_) => _focusNode.unfocus(),
+      onEditingComplete: PlatformUtils.isWeb
+          ? null
+          : (isSingleLine ? _focusNode.unfocus : null),
       onChanged: onChanged ?? _scheduleStringChange,
     );
   }

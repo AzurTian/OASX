@@ -49,9 +49,11 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      checkUpdate();
-    });
+    if (!PlatformUtils.isWeb) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        checkUpdate();
+      });
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.checkStartupConnection();
     });
@@ -104,7 +106,7 @@ class _HomeViewState extends State<HomeView> {
       appBar: buildPlatformAppBar(
         context,
         routePath: '/home',
-        trailingActions: PlatformUtils.isDesktop
+        trailingActions: PlatformUtils.usesDesktopLayout
             ? [
                 IconButton(
                   tooltip: I18n.setting.tr,

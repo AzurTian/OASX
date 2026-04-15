@@ -71,7 +71,9 @@ Future<void> initService() async {
   await GetStorage.init();
 
   Get.put(SettingsController(), permanent: true);
-  Get.put(SystemTrayService(), permanent: true);
+  if (PlatformUtils.isDesktop) {
+    Get.put(SystemTrayService(), permanent: true);
+  }
   Get.lazyPut<WebSocketService>(() => WebSocketService(), fenix: true);
   final windowService = Get.put(WindowService());
 

@@ -5,6 +5,7 @@ import 'package:oasx/api/api_client.dart';
 import 'package:oasx/api/sse_client.dart';
 import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/script_statistics_models.dart';
+import 'package:oasx/utils/platform_utils.dart';
 
 /// Drives statistics state for the active script workbench.
 class HomeStatisticsController extends GetxController {
@@ -295,11 +296,13 @@ class HomeStatisticsController extends GetxController {
         !availableDateKeys.contains(dateKey)) {
       return;
     }
+    final shouldUseLiveStream =
+        isStatisticsDateToday(dateKey) && !PlatformUtils.isWeb;
     final statsRevision = ++_statsRevision;
     await _stopStream();
     _resetSelectedDateState();
     lastErrorMessage.value = '';
-    if (isStatisticsDateToday(dateKey)) {
+    if (shouldUseLiveStream) {
       statisticsLoading.value = false;
       await _startTodayStream(scriptName, dateKey, statsRevision);
       return;
@@ -313,6 +316,10 @@ class HomeStatisticsController extends GetxController {
       }
       statisticsLoading.value = false;
       statistics.value = day;
+      connectionState.value =
+          isStatisticsDateToday(dateKey) && PlatformUtils.isWeb
+              ? ScriptStatisticsConnectionState.connected
+              : ScriptStatisticsConnectionState.idle;
       _syncSelections();
     } catch (error) {
       if (!_isStatsRequestActive(statsRevision, scriptName, dateKey)) {
@@ -320,6 +327,10 @@ class HomeStatisticsController extends GetxController {
       }
       statisticsLoading.value = false;
       statistics.value = null;
+      connectionState.value =
+          isStatisticsDateToday(dateKey) && PlatformUtils.isWeb
+              ? ScriptStatisticsConnectionState.error
+              : ScriptStatisticsConnectionState.idle;
       lastErrorMessage.value = error.toString();
     }
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// Stream connection states used by the statistics panel.
@@ -412,7 +413,7 @@ Future<ScriptStatisticsDay> parseScriptStatisticsDayAsync(
   Map<String, dynamic> json, {
   required String dateKey,
 }) {
-  return Isolate.run(
+  return _runStatisticsParser(
     () => ScriptStatisticsDay.fromSnapshotJson(
       Map<String, dynamic>.from(json),
       dateKey: dateKey,
@@ -425,7 +426,7 @@ Future<ScriptStatisticsDay> parseScriptStatisticsSnapshotPayloadAsync(
   String payloadText, {
   required String dateKey,
 }) {
-  return Isolate.run(() {
+  return _runStatisticsParser(() {
     return ScriptStatisticsDay.fromSnapshotJson(
       _decodeStatisticsPayload(payloadText),
       dateKey: dateKey,
@@ -437,7 +438,7 @@ Future<ScriptStatisticsDay> parseScriptStatisticsSnapshotPayloadAsync(
 Future<ScriptStatisticsUpdate> parseScriptStatisticsUpdatePayloadAsync(
   String payloadText,
 ) {
-  return Isolate.run(() {
+  return _runStatisticsParser(() {
     return ScriptStatisticsUpdate.fromJson(
       _decodeStatisticsPayload(payloadText),
     );
@@ -561,4 +562,12 @@ DateTime? _readLatestRunStartTime(List<ScriptTaskRunRecord> runs) {
     }
   }
   return null;
+}
+
+/// Runs statistics parsing off the UI isolate when supported.
+Future<T> _runStatisticsParser<T>(T Function() parser) {
+  if (kIsWeb) {
+    return Future<T>.value(parser());
+  }
+  return Isolate.run(parser);
 }

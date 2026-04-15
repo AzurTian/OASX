@@ -32,7 +32,7 @@ class Routes {
   ];
 
   static Widget _buildPrimaryPage(String routePath) {
-    if (PlatformUtils.isDesktop) {
+    if (PlatformUtils.usesDesktopLayout) {
       return switch (routePath) {
         '/settings' => const SettingsView(),
         _ => const HomeView(),

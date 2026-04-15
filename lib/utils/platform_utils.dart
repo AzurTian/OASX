@@ -124,4 +124,6 @@ class PlatformUtils {
   static bool get isMobile => isAndroid || isIOS || isFuchsia;
 
   static bool get isDesktop => isWindows || isMacOS || isLinux;
+
+  static bool get usesDesktopLayout => isDesktop || isWeb;
 }

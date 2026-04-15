@@ -62,21 +62,24 @@ class SystemSettingsCard extends StatelessWidget {
             ),
             right: const LaunchAtStartupSwitch(),
           ),
-        SettingItem(
-          left: Row(
-            children: [
-              Text(I18n.updateProxyUrl.tr),
-              Tooltip(
-                message: I18n.updateProxyUrlHelp.tr,
-                child: const Icon(Icons.help_outline, size: 16),
-              ).paddingOnly(left: 5),
-            ],
+        if (!PlatformUtils.isWeb)
+          SettingItem(
+            left: Row(
+              children: [
+                Text(I18n.updateProxyUrl.tr),
+                Tooltip(
+                  message: I18n.updateProxyUrlHelp.tr,
+                  child: const Icon(Icons.help_outline, size: 16),
+                ).paddingOnly(left: 5),
+              ],
+            ),
+            right: const UpdateProxyUrlField(),
           ),
-          right: const UpdateProxyUrlField(),
-        ),
         SettingItem(
           left: Text('${I18n.currentVersion.tr}: ${GlobalVar.version}'),
-          right: const CheckUpdateButton(),
+          right: PlatformUtils.isWeb
+              ? const SizedBox.shrink()
+              : const CheckUpdateButton(),
         ),
       ],
     );
@@ -199,10 +202,7 @@ class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final current = _settingsController.updateProxyUrl.value;
-      if (_controller.text != current) {
-        _controller.text = current;
-      }
+      _syncTextController();
       return SizedBox(
         width: 220,
         child: TextField(
@@ -219,12 +219,28 @@ class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
           decoration: const InputDecoration(
             hintText: 'http://127.0.0.1:7897',
           ),
-          onTapOutside: (_) => _focusNode.unfocus(),
-          onEditingComplete: _focusNode.unfocus,
+          onTapOutside:
+              PlatformUtils.isWeb ? null : (_) => _focusNode.unfocus(),
+          onEditingComplete:
+              PlatformUtils.isWeb ? null : _focusNode.unfocus,
           onChanged: _settingsController.updateUpdateProxyUrl,
         ),
       );
     });
+  }
+
+  void _syncTextController() {
+    if (_focusNode.hasFocus) {
+      return;
+    }
+    final current = _settingsController.updateProxyUrl.value;
+    if (_controller.text == current) {
+      return;
+    }
+    _controller.value = TextEditingValue(
+      text: current,
+      selection: TextSelection.collapsed(offset: current.length),
+    );
   }
 }
 

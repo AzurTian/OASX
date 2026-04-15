@@ -113,6 +113,11 @@ class SettingsController extends GetxController {
 
   void _syncApiAddress() {
     if (address.value.isEmpty) {
+      if (PlatformUtils.isWeb) {
+        ApiClient().clearAddress();
+        return;
+      }
+      ApiClient().resetAddress();
       return;
     }
     final normalized = address.value.startsWith('http://') ||

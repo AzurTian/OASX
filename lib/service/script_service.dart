@@ -11,6 +11,7 @@ import 'package:oasx/modules/home/models/taskitem_model.dart';
 import 'package:oasx/service/websocket_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/extension_utils.dart';
+import 'package:oasx/utils/platform_utils.dart';
 import 'package:oasx/utils/time_utils.dart';
 import 'package:oasx/modules/log/script_log_controller.dart';
 
@@ -25,6 +26,10 @@ class ScriptService extends GetxService {
   final scriptModelMap = <String, ScriptModel>{}.obs;
   final scriptOrderList = <String>[].obs;
   final autoScriptList = <String>[].obs;
+
+  bool get _shouldSkipBackendReload {
+    return PlatformUtils.isWeb && !ApiClient().hasConfiguredBackendAddress;
+  }
 
   @override
   Future<void> onInit() async {
@@ -127,11 +132,19 @@ class ScriptService extends GetxService {
   }
 
   Future<void> refreshScriptsFromServer() async {
+    if (_shouldSkipBackendReload) {
+      await resetDashboardState();
+      return;
+    }
     final latest = await ApiClient().getScriptList();
     syncScriptOrder(latest);
   }
 
   Future<void> reloadFromServer() async {
+    if (_shouldSkipBackendReload) {
+      await resetDashboardState();
+      return;
+    }
     final scriptList = await ApiClient().getScriptList();
     syncScriptOrder(scriptList);
     if (scriptList.isEmpty) {
