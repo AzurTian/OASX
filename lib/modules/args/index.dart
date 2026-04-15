@@ -92,6 +92,9 @@ class Args extends StatelessWidget {
                 children: groupNames
                     .map(
                       (name) => ExpansionTileItem(
+                        key: ValueKey<String>(
+                          'args-group-$selectedScript-$selectedTask-$name',
+                        ),
                         initiallyExpanded: true,
                         isHasTopBorder: false,
                         isHasBottomBorder: false,
@@ -116,7 +119,11 @@ class Args extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                         ),
-                        children: _children(name),
+                        children: _children(
+                          groupName: name,
+                          selectedScript: selectedScript,
+                          selectedTask: selectedTask,
+                        ),
                       ),
                     )
                     .toList(),
@@ -141,14 +148,22 @@ class Args extends StatelessWidget {
     });
   }
 
-  List<Widget> _children(String groupName) {
+  List<Widget> _children({
+    required String groupName,
+    required String selectedScript,
+    required String selectedTask,
+  }) {
     final controller = Get.find<ArgsController>();
     final setArgument = setArgumentOverride ?? controller.setArgument;
     final groupsModel = controller.groupsData.value[groupName]!;
     final result = <Widget>[const Divider()];
     for (int i = 0; i < groupsModel.members.length; i++) {
+      final member = groupsModel.members[i] as ArgumentModel;
       result.add(
         ArgumentView(
+          key: ValueKey<String>(
+            'args-$selectedScript-$selectedTask-$groupName-${member.title}',
+          ),
           scriptName: scriptName,
           taskName: taskName,
           setArgument: setArgument,
