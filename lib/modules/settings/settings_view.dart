@@ -5,9 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 
 import 'package:oasx/modules/common/widgets/appbar.dart';
-import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
-import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/modules/settings/oas_card.dart';
+import 'package:oasx/modules/settings/settings_leave_handler.dart';
 import 'package:oasx/modules/settings/system_card.dart';
 import 'package:oasx/modules/settings/user_card.dart';
 import 'package:oasx/translation/i18n_content.dart';
@@ -77,25 +76,31 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final body = SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= _wideLayoutBreakpoint;
-          final settingList = _buildSettingList();
+      child: AnimatedPadding(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(bottom: keyboardInset),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= _wideLayoutBreakpoint;
+            final settingList = _buildSettingList();
 
-          if (!isWide) {
-            return settingList.paddingOnly(left: 8, right: 8, top: 8);
-          }
+            if (!isWide) {
+              return settingList.paddingOnly(left: 8, right: 8, top: 8);
+            }
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildPrimaryNav(),
-              const SizedBox(width: _layoutSpacing),
-              Expanded(child: settingList),
-            ],
-          ).paddingOnly(left: 8, right: 8, top: 8);
-        },
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPrimaryNav(),
+                const SizedBox(width: _layoutSpacing),
+                Expanded(child: settingList),
+              ],
+            ).paddingOnly(left: 8, right: 8, top: 8);
+          },
+        ),
       ),
     );
     if (!widget.standalone) {
@@ -112,19 +117,7 @@ class _SettingsViewState extends State<SettingsView> {
       return;
     }
     _hasHandledLeave = true;
-    if (!Get.isRegistered<SettingsController>()) {
-      return;
-    }
-    final settingsController = Get.find<SettingsController>();
-    if (!settingsController.consumeLoginConfigChanged()) {
-      return;
-    }
-    if (!Get.isRegistered<HomeDashboardController>()) {
-      return;
-    }
-    unawaited(
-      Get.find<HomeDashboardController>().refreshAfterSettingsChanged(),
-    );
+    unawaited(handleSettingsLeaveEffect());
   }
 
   void _handleScroll() {
