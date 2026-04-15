@@ -44,6 +44,7 @@ class _LoginInputField extends StatefulWidget {
 
 class _LoginInputFieldState extends State<_LoginInputField> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
   late final SettingsController _settingsController;
 
   @override
@@ -51,6 +52,7 @@ class _LoginInputFieldState extends State<_LoginInputField> {
     super.initState();
     _settingsController = Get.find<SettingsController>();
     _controller = TextEditingController(text: _currentValue);
+    _focusNode = FocusNode();
   }
 
   @override
@@ -73,6 +75,7 @@ class _LoginInputFieldState extends State<_LoginInputField> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -87,7 +90,17 @@ class _LoginInputFieldState extends State<_LoginInputField> {
         width: 220,
         child: TextField(
           controller: _controller,
+          focusNode: _focusNode,
           obscureText: widget.type == _LoginFieldType.password,
+          scrollPadding: EdgeInsets.only(
+            left: 12,
+            top: 12,
+            right: 12,
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
+          ),
+          textInputAction: TextInputAction.done,
+          onTapOutside: (_) => _focusNode.unfocus(),
+          onEditingComplete: _focusNode.unfocus,
           onChanged: (text) {
             switch (widget.type) {
               case _LoginFieldType.address:

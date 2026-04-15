@@ -177,6 +177,7 @@ class UpdateProxyUrlField extends StatefulWidget {
 
 class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
   late final SettingsController _settingsController;
 
   @override
@@ -185,11 +186,13 @@ class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
     _settingsController = Get.find<SettingsController>();
     _controller =
         TextEditingController(text: _settingsController.updateProxyUrl.value);
+    _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -204,10 +207,20 @@ class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
         width: 220,
         child: TextField(
           controller: _controller,
+          focusNode: _focusNode,
           keyboardType: TextInputType.url,
+          scrollPadding: EdgeInsets.only(
+            left: 12,
+            top: 12,
+            right: 12,
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
+          ),
+          textInputAction: TextInputAction.done,
           decoration: const InputDecoration(
             hintText: 'http://127.0.0.1:7897',
           ),
+          onTapOutside: (_) => _focusNode.unfocus(),
+          onEditingComplete: _focusNode.unfocus,
           onChanged: _settingsController.updateUpdateProxyUrl,
         ),
       );

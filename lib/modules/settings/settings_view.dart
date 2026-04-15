@@ -76,31 +76,25 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final body = SafeArea(
-      child: AnimatedPadding(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        padding: EdgeInsets.only(bottom: keyboardInset),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= _wideLayoutBreakpoint;
-            final settingList = _buildSettingList();
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= _wideLayoutBreakpoint;
+          final settingList = _buildSettingList();
 
-            if (!isWide) {
-              return settingList.paddingOnly(left: 8, right: 8, top: 8);
-            }
+          if (!isWide) {
+            return settingList.paddingOnly(left: 8, right: 8, top: 8);
+          }
 
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildPrimaryNav(),
-                const SizedBox(width: _layoutSpacing),
-                Expanded(child: settingList),
-              ],
-            ).paddingOnly(left: 8, right: 8, top: 8);
-          },
-        ),
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPrimaryNav(),
+              const SizedBox(width: _layoutSpacing),
+              Expanded(child: settingList),
+            ],
+          ).paddingOnly(left: 8, right: 8, top: 8);
+        },
       ),
     );
     if (!widget.standalone) {
@@ -220,6 +214,7 @@ class _SettingsViewState extends State<SettingsView> {
         child: SingleChildScrollView(
           key: _scrollViewKey,
           controller: _scrollController,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             children: _sections
                 .map(
