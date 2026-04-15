@@ -117,12 +117,20 @@ jobs:
           }
 
       - name: Restore Windows release file
-        if: ${{ secrets.WINDOWS_PATH_KEY != '' && secrets.WINDOWS_PATH_VALUES != '' }}
         env:
+          WINDOWS_RELEASE_PATH: ${{ secrets.WINDOWS_PATH_KEY }}
           WINDOWS_RELEASE_CONTENT: ${{ secrets.WINDOWS_PATH_VALUES }}
         shell: pwsh
         run: |
-          $path = "${{ secrets.WINDOWS_PATH_KEY }}"
+          if (
+            [string]::IsNullOrWhiteSpace($env:WINDOWS_RELEASE_PATH) -or
+            [string]::IsNullOrWhiteSpace($env:WINDOWS_RELEASE_CONTENT)
+          ) {
+            Write-Host 'Skip restoring Windows release file because required secrets are empty.'
+            exit 0
+          }
+
+          $path = $env:WINDOWS_RELEASE_PATH
           $directory = Split-Path -Path $path -Parent
           if (![string]::IsNullOrWhiteSpace($directory)) {
             New-Item -ItemType Directory -Force -Path $directory | Out-Null
