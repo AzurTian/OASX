@@ -43,7 +43,6 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
   Widget build(BuildContext context) {
     return Obx(() {
       _ensureLoad();
-      final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
       final dragPayload = widget.controller.activeDragPayload.value;
       final canDragGroups = widget.controller.canUseDesktopDragCopy;
       if (_taskName.isEmpty) {
@@ -75,47 +74,39 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: AnimatedPadding(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
-              padding: EdgeInsets.only(
-                bottom: keyboardInset > 0 ? keyboardInset + 12 : 0,
-              ),
-              child: FutureBuilder<void>(
-                key: ValueKey(_loadKey),
-                future: future,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text('${I18n.error.tr}: ${snapshot.error}'),
-                    );
-                  }
-                  return Args(
-                    key: ValueKey<String>('args-$_loadKey'),
-                    scriptName: _scriptName,
-                    taskName: _taskName,
-                    groupDraggable: canDragGroups,
-                    stagingMode: true,
-                    activeDragPayload: dragPayload,
-                    groupDragPayloadBuilder: canDragGroups
-                        ? (groupName) =>
-                            widget.controller.buildGroupDragPayload(
-                              sourceConfig: _scriptName,
-                              taskName: _taskName,
-                              groupName: groupName,
-                            )
-                        : null,
-                    onGroupDragStarted: widget.controller.startConfigDrag,
-                    onGroupDragEnded: widget.controller.clearConfigDrag,
-                    onCancel: () async {
-                      await widget.controller.closeTaskParameters();
-                    },
+            child: FutureBuilder<void>(
+              key: ValueKey(_loadKey),
+              future: future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('${I18n.error.tr}: ${snapshot.error}'),
                   );
-                },
-              ),
+                }
+                return Args(
+                  key: ValueKey<String>('args-$_loadKey'),
+                  scriptName: _scriptName,
+                  taskName: _taskName,
+                  groupDraggable: canDragGroups,
+                  stagingMode: true,
+                  activeDragPayload: dragPayload,
+                  groupDragPayloadBuilder: canDragGroups
+                      ? (groupName) => widget.controller.buildGroupDragPayload(
+                            sourceConfig: _scriptName,
+                            taskName: _taskName,
+                            groupName: groupName,
+                          )
+                      : null,
+                  onGroupDragStarted: widget.controller.startConfigDrag,
+                  onGroupDragEnded: widget.controller.clearConfigDrag,
+                  onCancel: () async {
+                    await widget.controller.closeTaskParameters();
+                  },
+                );
+              },
             ),
           ),
         ],

@@ -197,6 +197,8 @@ class _ArgumentViewState extends State<ArgumentView> {
     List<TextInputFormatter>? inputFormatters,
     ValueChanged<String>? onChanged,
   }) {
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final isSingleLine = maxLines == 1;
     return TextFormField(
       controller: _textController,
       focusNode: _focusNode,
@@ -204,7 +206,17 @@ class _ArgumentViewState extends State<ArgumentView> {
       maxLines: maxLines,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
+      scrollPadding: EdgeInsets.only(
+        left: 12,
+        top: 12,
+        right: 12,
+        bottom: keyboardInset > 0 ? keyboardInset + 24 : 24,
+      ),
+      textInputAction:
+          isSingleLine ? TextInputAction.done : TextInputAction.newline,
       decoration: InputDecoration(errorText: errorText),
+      onTapOutside: (_) => _focusNode.unfocus(),
+      onEditingComplete: isSingleLine ? _focusNode.unfocus : null,
       onChanged: onChanged ?? _scheduleStringChange,
     );
   }
