@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/common/widgets/appbar.dart';
@@ -8,39 +10,72 @@ import 'package:oasx/translation/i18n_content.dart';
 
 const double kPrimaryNavigationRailWidth = 80;
 
-class PrimaryNavigationShell extends StatelessWidget {
+class PrimaryNavigationShell extends StatefulWidget {
   const PrimaryNavigationShell({
     super.key,
-    required this.routePath,
+    required this.initialRoutePath,
   });
 
-  final String routePath;
+  final String initialRoutePath;
+
+  @override
+  State<PrimaryNavigationShell> createState() => _PrimaryNavigationShellState();
+}
+
+class _PrimaryNavigationShellState extends State<PrimaryNavigationShell> {
+  late String _routePath;
+  late final Set<int> _builtIndexes;
+
+  @override
+  void initState() {
+    super.initState();
+    _routePath = _normalizeRoutePath(widget.initialRoutePath);
+    _builtIndexes = <int>{_selectedIndexForRoute(_routePath)};
+  }
+
+  @override
+  void didUpdateWidget(covariant PrimaryNavigationShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextRoutePath = _normalizeRoutePath(widget.initialRoutePath);
+    if (nextRoutePath == _routePath) {
+      return;
+    }
+    final previousRoutePath = _routePath;
+    _routePath = nextRoutePath;
+    _builtIndexes.add(_selectedIndexForRoute(nextRoutePath));
+    _handleRouteExit(previousRoutePath, nextRoutePath);
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final selectedIndex = _selectedIndexForRoute(routePath);
+        final selectedIndex = _selectedIndexForRoute(_routePath);
         final showRail = _shouldShowRail(constraints.maxWidth);
+        final content = _PrimaryNavigationContent(
+          selectedIndex: selectedIndex,
+          builtIndexes: _builtIndexes,
+        );
         return Scaffold(
-          appBar: buildPlatformAppBar(context, routePath: routePath),
+          appBar: buildPlatformAppBar(context, routePath: _routePath),
+          resizeToAvoidBottomInset: false,
           body: showRail
               ? Row(
                   children: [
                     _PrimaryNavigationRail(
                       selectedIndex: selectedIndex,
-                      onSelected: _navigateToIndex,
+                      onSelected: _handleDestinationSelected,
                     ),
                     const VerticalDivider(width: 1),
-                    Expanded(child: _buildContent()),
+                    Expanded(child: content),
                   ],
                 )
-              : _buildContent(),
+              : content,
           bottomNavigationBar: showRail
               ? null
               : NavigationBar(
                   selectedIndex: selectedIndex,
-                  onDestinationSelected: _navigateToIndex,
+                  onDestinationSelected: _handleDestinationSelected,
                   destinations: _destinations(),
                 ),
         );
@@ -56,23 +91,35 @@ class PrimaryNavigationShell extends StatelessWidget {
     return maxWidth >= twoPaneShellWidth;
   }
 
-  Widget _buildContent() {
-    return switch (routePath) {
-      '/settings' => const SettingsView(standalone: false),
-      _ => const HomeView(standalone: false),
-    };
+  String _normalizeRoutePath(String value) {
+    return value == '/settings' ? '/settings' : '/home';
   }
 
   int _selectedIndexForRoute(String value) {
     return value == '/settings' ? 1 : 0;
   }
 
-  void _navigateToIndex(int index) {
-    final nextRoute = index == 1 ? '/settings' : '/home';
-    if (Get.currentRoute == nextRoute) {
+  String _routePathForIndex(int index) {
+    return index == 1 ? '/settings' : '/home';
+  }
+
+  void _handleDestinationSelected(int index) {
+    final nextRoutePath = _routePathForIndex(index);
+    if (nextRoutePath == _routePath) {
       return;
     }
-    Get.offNamed(nextRoute);
+    final previousRoutePath = _routePath;
+    setState(() {
+      _routePath = nextRoutePath;
+      _builtIndexes.add(index);
+    });
+    _handleRouteExit(previousRoutePath, nextRoutePath);
+  }
+
+  void _handleRouteExit(String previousRoutePath, String nextRoutePath) {
+    if (previousRoutePath == '/settings' && nextRoutePath != '/settings') {
+      unawaited(handleSettingsLeaveEffect());
+    }
   }
 
   List<Widget> _destinations() {
@@ -86,6 +133,31 @@ class PrimaryNavigationShell extends StatelessWidget {
         label: I18n.setting.tr,
       ),
     ];
+  }
+}
+
+class _PrimaryNavigationContent extends StatelessWidget {
+  const _PrimaryNavigationContent({
+    required this.selectedIndex,
+    required this.builtIndexes,
+  });
+
+  final int selectedIndex;
+  final Set<int> builtIndexes;
+
+  @override
+  Widget build(BuildContext context) {
+    return IndexedStack(
+      index: selectedIndex,
+      children: [
+        builtIndexes.contains(0)
+            ? const HomeView(standalone: false)
+            : const SizedBox.shrink(),
+        builtIndexes.contains(1)
+            ? const SettingsView(standalone: false)
+            : const SizedBox.shrink(),
+      ],
+    );
   }
 }
 

@@ -38,6 +38,6 @@ class Routes {
         _ => const HomeView(),
       };
     }
-    return PrimaryNavigationShell(routePath: routePath);
+    return PrimaryNavigationShell(initialRoutePath: routePath);
   }
 }
