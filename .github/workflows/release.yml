@@ -38,7 +38,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-          pub-cache: false
+          pub-cache: true
 
       - name: Report Flutter cache status
         shell: bash
@@ -132,7 +132,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-          pub-cache: false
+          pub-cache: true
 
       - name: Verify SDK versions
         shell: pwsh
