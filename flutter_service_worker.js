@@ -35,7 +35,7 @@ const RESOURCES = {"assets/assets/images/Icon-app.png": "9a5865c546cee2f52bf6d8a
 "canvaskit/skwasm_heavy.wasm": "8034ad26ba2485dab2fd49bdd786837b",
 "canvaskit/skwasm.js": "1ef3ea3a0fec4569e5d531da25f34095",
 "flutter.js": "888483df48293866f9f41d3d9274a779",
-"flutter_bootstrap.js": "d58d6b85f9c1e190abad688ad9079472",
+"flutter_bootstrap.js": "35f5b50e4819be192eb252825be8354d",
 "main.dart.js": "5d2678d20523f7a4c79e9acb9af10d2c",
 "version.json": "0fed0af4ac620b8dda41ffc74907d241",
 "icons/Icon-maskable-512.png": "63ebea3c254c221c4856d4b37a222423",
