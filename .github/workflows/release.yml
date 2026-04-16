@@ -278,12 +278,12 @@ jobs:
         shell: bash
         run: flutter pub get
 
-      - name: Build universal APK
-        shell: bash
-        run: |
-          flutter build apk --release \
-            --build-name "${{ needs.create_release.outputs.build_name }}" \
-            --build-number "${{ needs.create_release.outputs.build_number }}"
+#      - name: Build universal APK
+#        shell: bash
+#        run: |
+#          flutter build apk --release \
+#            --build-name "${{ needs.create_release.outputs.build_name }}" \
+#            --build-number "${{ needs.create_release.outputs.build_number }}"
 
       - name: Build split-per-abi APKs
         shell: bash
