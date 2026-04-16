@@ -241,6 +241,7 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -248,7 +249,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-          pub-cache: false
+          pub-cache: true
 
       - name: Verify SDK versions
         shell: bash
@@ -278,17 +279,11 @@ jobs:
         shell: bash
         run: flutter pub get
 
-#      - name: Build universal APK
-#        shell: bash
-#        run: |
-#          flutter build apk --release \
-#            --build-name "${{ needs.create_release.outputs.build_name }}" \
-#            --build-number "${{ needs.create_release.outputs.build_number }}"
-
       - name: Build split-per-abi APKs
         shell: bash
         run: |
-          flutter build apk --release --split-per-abi \
+          flutter build apk --release --split-per-abi --no-pub \
+            --target-platform android-arm,android-arm64 \
             --build-name "${{ needs.create_release.outputs.build_name }}" \
             --build-number "${{ needs.create_release.outputs.build_number }}"
 
@@ -301,14 +296,10 @@ jobs:
           release_dir="build/app/outputs/github-release"
           mkdir -p "$release_dir"
 
-          cp "build/app/outputs/flutter-apk/app-release.apk" \
-            "${release_dir}/oasx_${TAG_NAME}_universal.apk"
           cp "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" \
             "${release_dir}/oasx_${TAG_NAME}_armeabi-v7a.apk"
           cp "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" \
             "${release_dir}/oasx_${TAG_NAME}_arm64-v8a.apk"
-          cp "build/app/outputs/flutter-apk/app-x86_64-release.apk" \
-            "${release_dir}/oasx_${TAG_NAME}_x86_64.apk"
 
           echo "release_dir=$release_dir" >> "$GITHUB_OUTPUT"
 
@@ -319,10 +310,8 @@ jobs:
         shell: bash
         run: |
           assets=(
-            "${{ steps.prepare_android_assets.outputs.release_dir }}/oasx_${TAG_NAME}_universal.apk"
             "${{ steps.prepare_android_assets.outputs.release_dir }}/oasx_${TAG_NAME}_armeabi-v7a.apk"
             "${{ steps.prepare_android_assets.outputs.release_dir }}/oasx_${TAG_NAME}_arm64-v8a.apk"
-            "${{ steps.prepare_android_assets.outputs.release_dir }}/oasx_${TAG_NAME}_x86_64.apk"
           )
 
           for asset in "${assets[@]}"; do
