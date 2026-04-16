@@ -31,6 +31,9 @@ jobs:
           - label: Windows
             os: windows-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Setup Flutter
         id: flutter-action
         uses: subosito/flutter-action@v2
@@ -40,11 +43,18 @@ jobs:
           cache: true
           pub-cache: true
 
+      - name: Warm pub cache
+        if: steps.flutter-action.outputs.PUB-CACHE-HIT != 'true'
+        shell: bash
+        run: flutter pub get
+
       - name: Report Flutter cache status
         shell: bash
         run: |
           echo "Flutter cache key: ${{ steps.flutter-action.outputs.CACHE-KEY }}"
           echo "Flutter cache hit: ${{ steps.flutter-action.outputs.CACHE-HIT }}"
+          echo "Pub cache key: ${{ steps.flutter-action.outputs.PUB-CACHE-KEY }}"
+          echo "Pub cache hit: ${{ steps.flutter-action.outputs.PUB-CACHE-HIT }}"
 
   create_release:
     name: Create Release
@@ -58,10 +68,10 @@ jobs:
       prerelease: ${{ steps.meta.outputs.prerelease }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -124,7 +134,7 @@ jobs:
     needs: create_release
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -234,10 +244,10 @@ jobs:
     needs: create_release
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -325,7 +335,7 @@ jobs:
     needs: create_release
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
