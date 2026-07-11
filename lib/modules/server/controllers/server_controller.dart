@@ -298,20 +298,14 @@ class ServerController extends GetxController with LogMixin {
         'taskkill /f /t /im pythonw.exe',
         ignorePythonwNotRunning: true,
       );
-      final prefetched = await prefetchRepository();
-      if (!prefetched) {
-        return;
-      }
+      await prefetchRepository();
       final pythonConfig = DeployPythonConfig.read(rootPathServer.value);
-      final installed = await runShell(
+      await runShell(
         shellExecutableArguments(
           pythonConfig.getPythonPath(rootPathServer.value),
           ['-m', 'deploy.installer'],
         ),
       );
-      if (!installed) {
-        return;
-      }
       await runShell('echo Start OAS');
       unawaited(
         runShell(
