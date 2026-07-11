@@ -57,6 +57,7 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
   Widget build(BuildContext context) {
     return Obx(() {
       final dragPayload = widget.controller.activeDragPayload.value;
+      final quickScheduleLocked = widget.controller.isBulkQuickScheduling;
       final rawTasks = _collectTasks(widget.scriptModel);
       _pruneHiddenTaskIds(rawTasks);
       final visibleTasks = rawTasks
@@ -83,8 +84,10 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
                         controller: widget.controller,
                         sourceScriptName: widget.scriptModel.name,
                         task: task,
-                        canQuickSchedule:
-                            widget.canQuickScheduleTask(task.name),
+                        canQuickSchedule: widget.canQuickScheduleTask(
+                          task.name,
+                        ),
+                        quickScheduleLocked: quickScheduleLocked,
                         onSetNextRun: widget.onSetNextRun,
                         onQuickRun: widget.onQuickRun,
                         onQuickWait: widget.onQuickWait,
@@ -129,11 +132,13 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
     final tasks = <TaskStatusViewData>[];
     final runningName = model.runningTask.value.taskName.value.trim();
     if (runningName.isNotEmpty) {
-      tasks.add(TaskStatusViewData(
-        rowId: 'running::$runningName',
-        name: runningName,
-        type: TaskStatusType.running,
-      ));
+      tasks.add(
+        TaskStatusViewData(
+          rowId: 'running::$runningName',
+          name: runningName,
+          type: TaskStatusType.running,
+        ),
+      );
     }
     for (final entry in model.pendingTaskList.indexed) {
       final name = entry.$2.taskName.value.trim();
@@ -141,12 +146,14 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
         continue;
       }
       final timeText = entry.$2.nextRun.value.trim();
-      tasks.add(TaskStatusViewData(
-        rowId: 'pending::${entry.$1}::$name::$timeText',
-        name: name,
-        type: TaskStatusType.pending,
-        timeText: timeText,
-      ));
+      tasks.add(
+        TaskStatusViewData(
+          rowId: 'pending::${entry.$1}::$name::$timeText',
+          name: name,
+          type: TaskStatusType.pending,
+          timeText: timeText,
+        ),
+      );
     }
     for (final entry in model.waitingTaskList.indexed) {
       final name = entry.$2.taskName.value.trim();
@@ -154,12 +161,14 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
         continue;
       }
       final timeText = entry.$2.nextRun.value.trim();
-      tasks.add(TaskStatusViewData(
-        rowId: 'waiting::${entry.$1}::$name::$timeText',
-        name: name,
-        type: TaskStatusType.waiting,
-        timeText: timeText,
-      ));
+      tasks.add(
+        TaskStatusViewData(
+          rowId: 'waiting::${entry.$1}::$name::$timeText',
+          name: name,
+          type: TaskStatusType.waiting,
+          timeText: timeText,
+        ),
+      );
     }
     return tasks;
   }

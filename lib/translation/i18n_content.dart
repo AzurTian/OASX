@@ -231,6 +231,9 @@ class I18n {
       homeTaskDisabled = 'home_task_disabled',
       homeQuickRun = 'home_quick_run';
   static const String homeQuickWait = 'home_quick_wait',
+      homeQuickRunAll = 'home_quick_run_all',
+      homeQuickWaitAll = 'home_quick_wait_all',
+      homeBulkQuickScheduleTimedOut = 'home_bulk_quick_schedule_timed_out',
       homeOpenTaskParams = 'home_open_task_params',
       homeTaskConfigureAndEnable = 'home_task_configure_and_enable';
   static const String homeTaskSelectPrompt = 'home_task_select_prompt',

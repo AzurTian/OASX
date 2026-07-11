@@ -67,6 +67,8 @@ class ConfigWorkbench extends StatelessWidget {
         onSetNextRun: _setTaskNextRun,
         onQuickRun: (taskName) => _quickSchedule(taskName, true),
         onQuickWait: (taskName) => _quickSchedule(taskName, false),
+        onBulkQuickRun: () => _bulkQuickSchedule(true),
+        onBulkQuickWait: () => _bulkQuickSchedule(false),
         onExpandRightSidebar: onExpandRightSidebar,
         onBackToScripts: layoutMode == HomeWorkbenchLayoutMode.singlePane
             ? () => _showScriptListPage(context)
@@ -144,6 +146,35 @@ class ConfigWorkbench extends StatelessWidget {
     if (ret) {
       Get.snackbar(I18n.success.tr, taskName.tr);
     }
+  }
+
+  Future<void> _bulkQuickSchedule(bool runNow) async {
+    final scriptName = controller.activeScriptName.value.trim();
+    if (scriptName.isEmpty) {
+      return;
+    }
+    final result = await controller.bulkQuickScheduleTasks(
+      scriptName: scriptName,
+      runNow: runNow,
+    );
+    final label = _bulkQuickScheduleLabel(runNow);
+    switch (result) {
+      case HomeBulkQuickScheduleResult.completed:
+        Get.snackbar(I18n.success.tr, label);
+        break;
+      case HomeBulkQuickScheduleResult.failed:
+        Get.snackbar(I18n.error.tr, label);
+        break;
+      case HomeBulkQuickScheduleResult.timedOut:
+        Get.snackbar(I18n.tip.tr, I18n.homeBulkQuickScheduleTimedOut.tr);
+        break;
+      case HomeBulkQuickScheduleResult.skipped:
+        break;
+    }
+  }
+
+  String _bulkQuickScheduleLabel(bool runNow) {
+    return runNow ? I18n.homeQuickRunAll.tr : I18n.homeQuickWaitAll.tr;
   }
 
   Future<void> _setTaskNextRun(String taskName, String nextRun) async {

@@ -28,11 +28,7 @@ class TaskStatusViewData {
 }
 
 /// Defines the three task states rendered in the overview tab.
-enum TaskStatusType {
-  running,
-  pending,
-  waiting,
-}
+enum TaskStatusType { running, pending, waiting }
 
 /// Renders one swipe-to-disable task row for the overview tab.
 class TaskStatusRow extends StatelessWidget {
@@ -42,6 +38,7 @@ class TaskStatusRow extends StatelessWidget {
     required this.sourceScriptName,
     required this.task,
     required this.canQuickSchedule,
+    required this.quickScheduleLocked,
     required this.onSetNextRun,
     required this.onQuickRun,
     required this.onQuickWait,
@@ -57,6 +54,7 @@ class TaskStatusRow extends StatelessWidget {
   final String sourceScriptName;
   final TaskStatusViewData task;
   final bool canQuickSchedule;
+  final bool quickScheduleLocked;
   final Future<void> Function(String taskName, String nextRun) onSetNextRun;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
@@ -88,9 +86,12 @@ class TaskStatusRow extends StatelessWidget {
             trailingExtent: _actionExtent,
             trailingBackgroundColor: rowBackground,
             trailing: _TaskActionBar(
-              onQuickRun: canQuickSchedule ? () => onQuickRun(task.name) : null,
-              onQuickWait:
-                  canQuickSchedule ? () => onQuickWait(task.name) : null,
+              onQuickRun: !quickScheduleLocked && canQuickSchedule
+                  ? () => onQuickRun(task.name)
+                  : null,
+              onQuickWait: !quickScheduleLocked && canQuickSchedule
+                  ? () => onQuickWait(task.name)
+                  : null,
               onEditTask: () => onEditTask(task.name),
             ),
             leading: Row(
@@ -117,28 +118,26 @@ class TaskStatusRow extends StatelessWidget {
   Color _rowBackground(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return switch (task.type) {
-      TaskStatusType.running =>
-        scheme.tertiaryContainer.withValues(alpha: 0.24),
-      TaskStatusType.pending =>
-        scheme.secondaryContainer.withValues(alpha: 0.2),
+      TaskStatusType.running => scheme.tertiaryContainer.withValues(
+        alpha: 0.24,
+      ),
+      TaskStatusType.pending => scheme.secondaryContainer.withValues(
+        alpha: 0.2,
+      ),
       TaskStatusType.waiting => scheme.surfaceContainerHigh,
     };
   }
 
   /// Resolves the highlighted foreground color during drag-copy sessions.
   Color _foregroundColor(BuildContext context, Color fallback) {
-    final isDraggingTask = activeDragPayload?.matchesTask(
-          sourceScriptName,
-          task.name,
-        ) ??
-        false;
+    final isDraggingTask =
+        activeDragPayload?.matchesTask(sourceScriptName, task.name) ?? false;
     if (!isDraggingTask) {
       return fallback;
     }
-    return Theme.of(context)
-        .colorScheme
-        .primaryContainer
-        .withValues(alpha: 0.42);
+    return Theme.of(
+      context,
+    ).colorScheme.primaryContainer.withValues(alpha: 0.42);
   }
 
   /// Resolves the row border tint by task bucket.

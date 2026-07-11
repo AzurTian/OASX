@@ -52,27 +52,13 @@ class GetStorageHomeDashboardStorage implements HomeDashboardStorage {
 }
 
 /// Defines the visible dashboard health state for a script.
-enum HomeScriptStateFilter {
-  all,
-  running,
-  abnormal,
-  stopped,
-  offline,
-}
+enum HomeScriptStateFilter { all, running, abnormal, stopped, offline }
 
 /// Defines the visible page when the workbench collapses to a single pane.
-enum HomeWorkbenchPage {
-  scripts,
-  workspace,
-}
+enum HomeWorkbenchPage { scripts, workspace }
 
 /// Defines the visible home workbench tab for the active script.
-enum HomeWorkbenchTab {
-  status,
-  tasks,
-  stats,
-  logs,
-}
+enum HomeWorkbenchTab { status, tasks, stats, logs }
 
 /// Returns whether the tab belongs to the right desktop sidebar.
 bool isHomeWorkbenchSidebarTab(HomeWorkbenchTab value) {
@@ -80,27 +66,21 @@ bool isHomeWorkbenchSidebarTab(HomeWorkbenchTab value) {
 }
 
 /// Records which workbench tab opened the task parameter editor.
-enum HomeTaskParameterEntrySource {
-  overview,
-  tasks,
-}
+enum HomeTaskParameterEntrySource { overview, tasks }
 
 /// Defines the task catalog filter shown in the active script workspace.
-enum HomeTaskCatalogFilter {
-  all,
-  enabled,
-  disabled,
-}
+enum HomeTaskCatalogFilter { all, enabled, disabled }
+
+/// Defines the active bulk quick schedule operation, if any.
+enum HomeBulkQuickScheduleMode { none, runNow, waitNow }
+
+/// Describes how a bulk quick schedule request finished.
+enum HomeBulkQuickScheduleResult { completed, failed, skipped, timedOut }
 
 /// Returns the visible workbench tabs for the active layout mode.
-List<HomeWorkbenchTab> resolveHomeWorkbenchTabs(
-  HomeWorkbenchLayoutMode mode,
-) {
+List<HomeWorkbenchTab> resolveHomeWorkbenchTabs(HomeWorkbenchLayoutMode mode) {
   if (mode == HomeWorkbenchLayoutMode.threePane) {
-    return const [
-      HomeWorkbenchTab.status,
-      HomeWorkbenchTab.tasks,
-    ];
+    return const [HomeWorkbenchTab.status, HomeWorkbenchTab.tasks];
   }
   return const [
     HomeWorkbenchTab.status,
@@ -117,22 +97,21 @@ List<HomeWorkbenchTab> resolveHomeWorkbenchSidebarTabs(
   if (mode != HomeWorkbenchLayoutMode.threePane) {
     return const [];
   }
-  return const [
-    HomeWorkbenchTab.logs,
-    HomeWorkbenchTab.stats,
-  ];
+  return const [HomeWorkbenchTab.logs, HomeWorkbenchTab.stats];
 }
 
 class HomeDashboardController extends GetxController {
-  HomeDashboardController({
-    HomeDashboardStorage? storage,
-  }) : _storage = storage ?? GetStorageHomeDashboardStorage();
+  HomeDashboardController({HomeDashboardStorage? storage})
+    : _storage = storage ?? GetStorageHomeDashboardStorage();
 
   final HomeDashboardStorage _storage;
   static bool _hasCheckedStartupConnection = false;
   Worker? _workspaceSyncWorker;
   final controlScriptList = <String>[].obs;
   final isBatchSwitching = false.obs;
+
+  /// Current bulk quick schedule state for the active config workbench.
+  final bulkQuickScheduleMode = HomeBulkQuickScheduleMode.none.obs;
   final isStartupChecking = false.obs;
   final isStartupConnectionFailed = false.obs;
   final isStartupAutoDeploying = false.obs;
@@ -165,12 +144,12 @@ class HomeDashboardController extends GetxController {
     _loadWorkbenchCollectionWidth();
     _loadWorkbenchSplitRatio();
     syncWorkspaceState();
-    _workspaceSyncWorker = everAll([
-      _scriptService.scriptOrderList,
-      _scriptService.scriptModelMap,
-    ], (_) {
-      syncWorkspaceState();
-    });
+    _workspaceSyncWorker = everAll(
+      [_scriptService.scriptOrderList, _scriptService.scriptModelMap],
+      (_) {
+        syncWorkspaceState();
+      },
+    );
     super.onInit();
   }
 
@@ -182,12 +161,9 @@ class HomeDashboardController extends GetxController {
   }
 
   void setControlScripts(Iterable<String> scripts) {
-    final normalized = scripts
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
+    final normalized =
+        scripts.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet().toList()
+          ..sort();
     controlScriptList.value = normalized;
     _storage.write(
       StorageKey.homeControlScriptList.name,

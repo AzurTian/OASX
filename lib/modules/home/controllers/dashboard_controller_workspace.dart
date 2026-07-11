@@ -1,5 +1,8 @@
 part of 'dashboard_controller.dart';
 
+/// Maximum time the UI stays locked for one bulk quick schedule request.
+const _bulkQuickScheduleTimeout = Duration(seconds: 5);
+
 extension HomeDashboardWorkspaceX on HomeDashboardController {
   /// Records the latest resolved workbench layout mode.
   void setWorkbenchLayoutMode(HomeWorkbenchLayoutMode value) {
@@ -19,13 +22,70 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     return !isConfigRunning || runningTaskName != normalized;
   }
 
+  /// Returns whether a bulk quick schedule operation is currently active.
+  bool get isBulkQuickScheduling {
+    return bulkQuickScheduleMode.value != HomeBulkQuickScheduleMode.none;
+  }
+
+  /// Collects enabled task names in overview order for bulk quick scheduling.
+  List<String> quickSchedulableTaskNamesFor(ScriptModel model) {
+    final names = <String>[];
+    final seen = <String>{};
+    _addQuickScheduleTaskName(
+      model,
+      names,
+      seen,
+      model.runningTask.value.taskName.value,
+    );
+    for (final task in model.pendingTaskList) {
+      _addQuickScheduleTaskName(model, names, seen, task.taskName.value);
+    }
+    for (final task in model.waitingTaskList) {
+      _addQuickScheduleTaskName(model, names, seen, task.taskName.value);
+    }
+    return names;
+  }
+
+  /// Runs all eligible tasks through the existing quick schedule flow.
+  Future<HomeBulkQuickScheduleResult> bulkQuickScheduleTasks({
+    required String scriptName,
+    required bool runNow,
+  }) async {
+    if (isBulkQuickScheduling) {
+      return HomeBulkQuickScheduleResult.skipped;
+    }
+    final source = scriptName.trim();
+    final model = _scriptService.findScriptModel(source);
+    final taskNames = model == null
+        ? const <String>[]
+        : quickSchedulableTaskNamesFor(model);
+    if (source.isEmpty || taskNames.isEmpty) {
+      return HomeBulkQuickScheduleResult.skipped;
+    }
+    bulkQuickScheduleMode.value = runNow
+        ? HomeBulkQuickScheduleMode.runNow
+        : HomeBulkQuickScheduleMode.waitNow;
+    try {
+      final result = await Future.any<bool?>([
+        _runBulkQuickScheduleTasks(source, taskNames, runNow),
+        Future<bool?>.delayed(_bulkQuickScheduleTimeout, () => null),
+      ]);
+      if (result == null) {
+        return HomeBulkQuickScheduleResult.timedOut;
+      }
+      return result
+          ? HomeBulkQuickScheduleResult.completed
+          : HomeBulkQuickScheduleResult.failed;
+    } finally {
+      bulkQuickScheduleMode.value = HomeBulkQuickScheduleMode.none;
+    }
+  }
+
   List<HomeWorkbenchTab> workbenchTabsFor(HomeWorkbenchLayoutMode mode) {
     return resolveHomeWorkbenchTabs(mode);
   }
 
-  List<HomeWorkbenchTab> workbenchSidebarTabsFor(
-    HomeWorkbenchLayoutMode mode,
-  ) {
+  List<HomeWorkbenchTab> workbenchSidebarTabsFor(HomeWorkbenchLayoutMode mode) {
     return resolveHomeWorkbenchSidebarTabs(mode);
   }
 
@@ -298,10 +358,7 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     required bool runNow,
   }) async {
     if (!runNow) {
-      return syncTaskNextRun(
-        scriptName: scriptName,
-        taskName: taskName,
-      );
+      return syncTaskNextRun(scriptName: scriptName, taskName: taskName);
     }
     final targetDt = formatDateTime(
       DateTime.now().add(const Duration(days: -1)),
@@ -374,6 +431,46 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
     );
   }
 
+  /// Adds one task name to the bulk snapshot when it can be scheduled.
+  void _addQuickScheduleTaskName(
+    ScriptModel model,
+    List<String> names,
+    Set<String> seen,
+    String value,
+  ) {
+    final taskName = value.trim();
+    if (taskName.isEmpty || seen.contains(taskName)) {
+      return;
+    }
+    if (!canQuickScheduleTask(model, taskName)) {
+      return;
+    }
+    seen.add(taskName);
+    names.add(taskName);
+  }
+
+  /// Serially invokes quick scheduling for a fixed task snapshot.
+  Future<bool> _runBulkQuickScheduleTasks(
+    String scriptName,
+    List<String> taskNames,
+    bool runNow,
+  ) async {
+    var allSuccess = true;
+    for (final taskName in taskNames) {
+      try {
+        final ret = await quickScheduleTask(
+          scriptName: scriptName,
+          taskName: taskName,
+          runNow: runNow,
+        );
+        allSuccess = ret && allSuccess;
+      } catch (_) {
+        allSuccess = false;
+      }
+    }
+    return allSuccess;
+  }
+
   /// Toggles one task enable flag, optionally across the linked scope.
   Future<bool> toggleTaskEnabled({
     required String scriptName,
@@ -401,7 +498,8 @@ extension HomeDashboardWorkspaceX on HomeDashboardController {
 
   bool _matchesVisibleFilter(ScriptModel model) {
     final query = searchQuery.value.trim();
-    final stateMatched = stateFilter.value == HomeScriptStateFilter.all ||
+    final stateMatched =
+        stateFilter.value == HomeScriptStateFilter.all ||
         scriptCollectionStateFor(model) == stateFilter.value;
     if (!stateMatched) {
       return false;
