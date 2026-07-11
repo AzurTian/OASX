@@ -53,7 +53,8 @@ class _ExitConfirmDialogState extends State<ExitConfirmDialog> {
   @override
   void initState() {
     super.initState();
-    _minimizeToTray = widget.initialMinimizeToTray;
+    _minimizeToTray =
+        widget.initialMinimizeToTray && !widget.initialShutdownOas;
     _shutdownOas = widget.initialShutdownOas;
   }
 
@@ -69,12 +70,8 @@ class _ExitConfirmDialogState extends State<ExitConfirmDialog> {
             _ExitPrimaryOptions(
               minimizeToTray: _minimizeToTray,
               shutdownOas: _shutdownOas,
-              onMinimizeToTrayChanged: (value) {
-                setState(() => _minimizeToTray = value);
-              },
-              onShutdownOasChanged: (value) {
-                setState(() => _shutdownOas = value);
-              },
+              onMinimizeToTrayChanged: _updateMinimizeToTray,
+              onShutdownOasChanged: _updateShutdownOas,
             ),
             const SizedBox(height: 16),
             _ExitDialogFooter(
@@ -99,6 +96,22 @@ class _ExitConfirmDialogState extends State<ExitConfirmDialog> {
         skipConfirm: _skipConfirm,
       ),
     );
+  }
+
+  /// Updates the tray choice and clears OAS shutdown when selected.
+  void _updateMinimizeToTray(bool value) {
+    setState(() {
+      _minimizeToTray = value;
+      if (value) _shutdownOas = false;
+    });
+  }
+
+  /// Updates the OAS shutdown choice and clears tray minimize when selected.
+  void _updateShutdownOas(bool value) {
+    setState(() {
+      _shutdownOas = value;
+      if (value) _minimizeToTray = false;
+    });
   }
 }
 
