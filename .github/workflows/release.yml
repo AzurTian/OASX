@@ -29,7 +29,7 @@ jobs:
           - label: Linux
             os: ubuntu-latest
           - label: Windows
-            os: windows-latest
+            os: windows-2022
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -130,7 +130,7 @@ jobs:
   build_windows:
     name: Build Windows
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    runs-on: windows-latest
+    runs-on: windows-2022
     needs: create_release
     steps:
       - name: Checkout code
